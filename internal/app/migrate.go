@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"bw-erp/config"
+	initializers "bw-erp/config"
+	"bw-erp/internal/model"
 )
 
 func RunMigration() {
@@ -17,6 +18,6 @@ func RunMigration() {
 	initializers.ConnectDB(&config)
 
 	initializers.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-	// config.DB.AutoMigrate(&model.User{}, &model.Company{}, &model.Employee{})
+	initializers.DB.AutoMigrate(model.BotUser{}, model.Order{})
 	fmt.Println("👍 Migration complete")
 }

@@ -12,6 +12,5 @@ func NewRouter() *gin.Engine {
 	router.GET("", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "welcome home")
 	})
-
 	return router
 }

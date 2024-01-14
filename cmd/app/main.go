@@ -4,6 +4,7 @@ import (
 	"bw-erp/helper"
 	"bw-erp/internal/app"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -11,9 +12,10 @@ func main() {
 	app.RunMigration()
 
 	routes := app.NewRouter()
+	port := os.Getenv("PORT")
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: routes,
 	}
 
