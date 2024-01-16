@@ -1,4 +1,4 @@
-package initializers
+package config
 
 import (
 	"os"
@@ -13,6 +13,8 @@ type Config struct {
 	DBName         string
 	DBPort         string
 	ServerPort     string
+	DefaultOffset  string
+	DefaultLimit   string
 }
 
 func LoadConfig() (config Config, err error) {
@@ -29,6 +31,8 @@ func LoadConfig() (config Config, err error) {
 		DBName:         os.Getenv("DB_NAME"),
 		DBPort:         os.Getenv("DB_PORT"),
 		ServerPort:     os.Getenv("PORT"),
+		DefaultOffset:  os.Getenv(""),
+		DefaultLimit: os.Getenv(""),
 	}
 
 	return

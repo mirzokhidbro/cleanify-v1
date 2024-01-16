@@ -1,51 +1,49 @@
 package helper
 
 import (
-	"net/http"
-
-	response "bw-erp/internal/data/responses"
-
-	"github.com/gin-gonic/gin"
+	"sort"
+	"strconv"
+	"strings"
 )
 
-func ErrorResponse(ctx *gin.Context, err error) {
-	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Message: "Error",
-			Data:    err.Error(),
-		}
-		ctx.JSON(http.StatusBadRequest, webResponse)
-	}
+type queryParams struct {
+	Key string
+	Val interface{}
 }
 
-func ErrorPanic(err error) {
-	if err != nil {
-		panic(err)
+func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (string, []interface{}) {
+	var (
+		i    int = 1
+		args []interface{}
+		arr  []queryParams
+	)
+
+	for k, v := range params {
+		arr = append(arr, queryParams{
+			Key: k,
+			Val: v,
+		})
 	}
-}
 
-func SuccessResponse(payload interface{}) response.Response {
-	Response := response.Response{
-		Code:    http.StatusOK,
-		Message: "Ok",
-		Data:    payload,
-	}
+	sort.Slice(arr, func(i, j int) bool {
+		return len(arr[i].Key) > len(arr[j].Key)
+	})
 
-	return Response
-}
-
-func InArray(val string, array []string) (exists bool, index int) {
-	exists = false
-	index = -1
-
-	for i, v := range array {
-		if val == v {
-			index = i
-			exists = true
-			return
+	for _, v := range arr {
+		if v.Key != "" && strings.Contains(namedQuery, ":"+v.Key) {
+			namedQuery = strings.ReplaceAll(namedQuery, ":"+v.Key, "$"+strconv.Itoa(i))
+			args = append(args, v.Val)
+			i++
 		}
 	}
 
-	return
+	return namedQuery, args
+}
+
+func ReplaceSQL(old, searchPattern string) string {
+	tmpCount := strings.Count(old, searchPattern)
+	for m := 1; m <= tmpCount; m++ {
+		old = strings.Replace(old, searchPattern, "$"+strconv.Itoa(m), 1)
+	}
+	return old
 }

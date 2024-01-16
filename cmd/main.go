@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bw-erp/helper"
 	"bw-erp/internal/app"
 	"net/http"
 	"os"
@@ -19,7 +18,6 @@ func main() {
 		Handler: routes,
 	}
 
-	err := server.ListenAndServe()
-	helper.ErrorPanic(err)
+	server.ListenAndServe()
 
 }
