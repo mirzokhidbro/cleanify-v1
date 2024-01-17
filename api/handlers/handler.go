@@ -1,67 +1,19 @@
 package handlers
 
 import (
-	"bw-erp/api/http"
 	"bw-erp/config"
-	"bw-erp/logger"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"bw-erp/storage"
 )
 
 type Handler struct {
-	cfg config.Config
-	log logger.LoggerI
+	Stg storage.StorageI
+	Cfg config.Config
 }
 
-func NewHandler(cfg config.Config, log logger.LoggerI) Handler {
+
+func NewHandler(stg storage.StorageI, cfg config.Config) Handler {
 	return Handler{
-		cfg: cfg,
-		log: log,
+		Stg: stg,
+		Cfg: cfg,
 	}
-}
-
-func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interface{}) {
-	switch code := status.Code; {
-	case code < 300:
-		h.log.Info(
-			"---Response--->",
-			logger.Int("code", status.Code),
-			logger.String("status", status.Status),
-			logger.Any("description", status.Description),
-			logger.Any("data", data),
-		)
-	case code < 400:
-		h.log.Warn(
-			"!!!Response--->",
-			logger.Int("code", status.Code),
-			logger.String("status", status.Status),
-			logger.Any("description", status.Description),
-			logger.Any("data", data),
-		)
-	default:
-		h.log.Error(
-			"!!!Response--->",
-			logger.Int("code", status.Code),
-			logger.String("status", status.Status),
-			logger.Any("description", status.Description),
-			logger.Any("data", data),
-		)
-	}
-
-	c.JSON(status.Code, http.Response{
-		Status:      status.Status,
-		Description: status.Description,
-		Data:        data,
-	})
-}
-
-func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("offset", h.cfg.DefaultOffset)
-	return strconv.Atoi(offsetStr)
-}
-
-func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
-	offsetStr := c.DefaultQuery("limit", h.cfg.DefaultLimit)
-	return strconv.Atoi(offsetStr)
 }

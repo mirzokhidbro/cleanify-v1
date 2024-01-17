@@ -1,23 +1,9 @@
 package handlers
 
-// func (h *Handler) CreateUser(c *gin.Context) {
-// 	var user auth_service.CreateUserRequest
+import (
+	"github.com/gin-gonic/gin"
+)
 
-// 	err := c.ShouldBindJSON(&user)
-// 	if err != nil {
-// 		h.handleResponse(c, http.BadRequest, err.Error())
-// 		return
-// 	}
+func (h *Handler) CreateUser(c *gin.Context) {
 
-// 	resp, err := h.services.UserService().CreateUser(
-// 		c.Request.Context(),
-// 		&user,
-// 	)
-
-// 	if err != nil {
-// 		h.handleResponse(c, http.GRPCError, err.Error())
-// 		return
-// 	}
-
-// 	h.handleResponse(c, http.Created, resp)
-// }
+}

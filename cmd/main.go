@@ -1,23 +1,21 @@
 package main
 
-import (
-	"bw-erp/internal/app"
-	"net/http"
-	"os"
-)
+// import (
+// 	"bw-erp/internal/app"
+// 	"net/http"
+// 	"os"
+// )
 
-func main() {
+// func main() {
 
-	app.RunMigration()
+// 	routes := app.NewRouter()
+// 	port := os.Getenv("PORT")
 
-	routes := app.NewRouter()
-	port := os.Getenv("PORT")
+// 	server := &http.Server{
+// 		Addr:    ":" + port,
+// 		Handler: routes,
+// 	}
 
-	server := &http.Server{
-		Addr:    ":" + port,
-		Handler: routes,
-	}
+// 	server.ListenAndServe()
 
-	server.ListenAndServe()
-
-}
+// }

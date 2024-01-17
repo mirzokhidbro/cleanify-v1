@@ -32,7 +32,7 @@ func LoadConfig() (config Config, err error) {
 		DBPort:         os.Getenv("DB_PORT"),
 		ServerPort:     os.Getenv("PORT"),
 		DefaultOffset:  os.Getenv(""),
-		DefaultLimit: os.Getenv(""),
+		DefaultLimit:   os.Getenv(""),
 	}
 
 	return
