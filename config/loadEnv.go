@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/spf13/cast"
 )
 
 type Config struct {
@@ -11,7 +12,7 @@ type Config struct {
 	DBUserName     string
 	DBUserPassword string
 	DBName         string
-	DBPort         string
+	DBPort         int
 	ServerPort     string
 	DefaultOffset  string
 	DefaultLimit   string
@@ -19,20 +20,19 @@ type Config struct {
 
 func LoadConfig() (config Config, err error) {
 	err = godotenv.Load(".env")
-
 	if err != nil {
 		return
 	}
 
 	config = Config{
-		DBHost:         os.Getenv("DB_HOST"),
-		DBUserName:     os.Getenv("DB_USER"),
-		DBUserPassword: os.Getenv("DB_PASSWORD"),
-		DBName:         os.Getenv("DB_NAME"),
-		DBPort:         os.Getenv("DB_PORT"),
-		ServerPort:     os.Getenv("PORT"),
-		DefaultOffset:  os.Getenv(""),
-		DefaultLimit:   os.Getenv(""),
+		DBHost:         cast.ToString(os.Getenv("DB_HOST")),
+		DBUserName:     cast.ToString(os.Getenv("DB_USER")),
+		DBUserPassword: cast.ToString(os.Getenv("DB_PASSWORD")),
+		DBName:         cast.ToString(os.Getenv("DB_NAME")),
+		DBPort:         cast.ToInt(os.Getenv("DB_PORT")),
+		ServerPort:     cast.ToString(os.Getenv("PORT")),
+		DefaultOffset:  cast.ToString(os.Getenv("")),
+		DefaultLimit:   cast.ToString(os.Getenv("")),
 	}
 
 	return

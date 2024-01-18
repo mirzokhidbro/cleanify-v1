@@ -1,9 +1,9 @@
 package storage
 
-type StorageI interface {
-	User() UserRepoI
-}
+import (
+	"bw-erp/models"
+)
 
-type UserRepoI interface {
-	// Create(ctx context.Context, entity *pb.CreateUserRequest) (pKey *pb.UserPrimaryKey, err error)
+type StorageI interface {
+	CreateUserModel(id string, entity models.CreateUserModel) error
 }

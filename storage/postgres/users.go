@@ -1,17 +1,35 @@
 package postgres
 
 import (
-	"bw-erp/storage"
-
-	"github.com/jackc/pgx/v4/pgxpool"
+	"bw-erp/models"
+	"bw-erp/utils"
 )
 
-type userRepo struct {
-	db *pgxpool.Pool
-}
+func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) error {
+	password, _ := utils.HashPassword(entity.Password)
+	_, err := stg.db.Exec(`INSERT INTO users(
+		id,
+		phone,
+		firstname,
+		lastname,
+		password
+	) VALUES (
+		$1,
+		$2,
+		$3, 
+		$4,
+		$5
+	)`,
+		id,
+		entity.Phone,
+		entity.Firstname,
+		entity.Lastname,
+		password,
+	)
 
-func NewUserRepo(db *pgxpool.Pool) storage.UserRepoI {
-	return &userRepo{
-		db: db,
+	if err != nil {
+		return err
 	}
+
+	return err
 }
