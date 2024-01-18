@@ -6,3 +6,16 @@ type CreateUserModel struct {
 	Phone     string `json:"phone" binding:"required" example:"991234567"`
 	Password  string `json:"password" binding:"required"`
 }
+
+type AuthUserModel struct {
+	ID       string `json:"id"`
+	Phone    string `json:"phone" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type User struct {
+	ID        string `json:"id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Phone     string `json:"phone"`
+}

@@ -33,3 +33,33 @@ func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) er
 
 	return err
 }
+
+func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
+	var user models.AuthUserModel
+	err := stg.db.QueryRow(`SELECT id, phone, password from users where phone = $1`, phone).Scan(
+		&user.ID,
+		&user.Phone,
+		&user.Password,
+	)
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (stg Postgres) GetUserById(id string) (models.User, error) {
+	var user models.User
+	err := stg.db.QueryRow(`select id, firstname, lastname, phone from users where id = $1`, id).Scan(
+		&user.ID,
+		&user.Firstname,
+		&user.Lastname,
+		&user.Phone,
+	)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}

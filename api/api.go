@@ -12,8 +12,21 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.Use(gin.Logger(), gin.Recovery())
 
 	r.Use(customCORSMiddleware())
+
 	r.GET("/ping", h.Ping)
-	r.POST("/user", h.CreateUser)
+
+	baseRouter := r.Group("/api/v1")
+	{
+		usersRouter := baseRouter.Group("/users")
+		usersRouter.POST("/", h.CreateUser)
+	}
+
+	{
+		authRouter := baseRouter.Group("/auth")
+		authRouter.POST("/login", h.AuthUser)
+		authRouter.POST("/me", h.CurrentUser)
+	}
+
 	return
 }
 

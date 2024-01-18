@@ -16,6 +16,7 @@ type Config struct {
 	ServerPort     string
 	DefaultOffset  string
 	DefaultLimit   string
+	API_SECRET      string
 }
 
 func LoadConfig() (config Config, err error) {
@@ -33,6 +34,7 @@ func LoadConfig() (config Config, err error) {
 		ServerPort:     cast.ToString(os.Getenv("PORT")),
 		DefaultOffset:  cast.ToString(os.Getenv("")),
 		DefaultLimit:   cast.ToString(os.Getenv("")),
+		API_SECRET:      cast.ToString(os.Getenv("API_SECRET")),
 	}
 
 	return
