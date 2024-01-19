@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS "companies" (
+    "id" UUID PRIMARY KEY,
+    "name" VARCHAR UNIQUE,
+    "owner_id" UUID REFERENCES "users"("id"),
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
