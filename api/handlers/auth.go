@@ -17,13 +17,13 @@ func (h *Handler) AuthUser(c *gin.Context) {
 
 	user, err := h.Stg.GetUserByPhone(payload.Phone)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, "Foydalanuvchi topilmadi")
 		return
 	}
 
 	err = utils.VerifyPassword(user.Password, payload.Password)
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, "Parol noto'g'ri")
 		return
 	}
 

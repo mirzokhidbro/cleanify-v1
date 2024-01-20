@@ -3,27 +3,34 @@ package postgres
 import (
 	"bw-erp/models"
 	"bw-erp/utils"
+	"errors"
 )
 
 func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) error {
+	if entity.ConfirmationPassword != entity.Password {
+		return errors.New("confirmation password is not the same with password!")
+	}
 	password, _ := utils.HashPassword(entity.Password)
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
 		phone,
 		firstname,
 		lastname,
+		role_id,
 		password
 	) VALUES (
 		$1,
 		$2,
 		$3, 
 		$4,
-		$5
+		$5,
+		$6
 	)`,
 		id,
 		entity.Phone,
 		entity.Firstname,
 		entity.Lastname,
+		entity.RoleID,
 		password,
 	)
 

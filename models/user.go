@@ -1,10 +1,12 @@
 package models
 
 type CreateUserModel struct {
-	Firstname string `json:"firstname" binding:"required" minLength:"2" maxLength:"255" example:"John"`
-	Lastname  string `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
-	Phone     string `json:"phone" binding:"required" example:"991234567"`
-	Password  string `json:"password" binding:"required"`
+	Firstname            string `json:"firstname" binding:"required" minLength:"2" maxLength:"255" example:"John"`
+	Lastname             string `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
+	RoleID               string `json:"role_id" binding:"required"`
+	Phone                string `json:"phone" binding:"required" example:"991234567"`
+	Password             string `json:"password" binding:"required"`
+	ConfirmationPassword string `json:"confirmation_password" binding:"required"`
 }
 
 type AuthUserModel struct {

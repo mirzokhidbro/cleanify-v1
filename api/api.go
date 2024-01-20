@@ -2,6 +2,7 @@ package api
 
 import (
 	"bw-erp/api/handlers"
+	"bw-erp/api/middleware"
 	"bw-erp/config"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 	r.Use(customCORSMiddleware())
 
-	r.GET("/ping", h.Ping)
+	r.GET("api/ping", h.Ping)
 
 	baseRouter := r.Group("/api/v1")
 	{
@@ -31,6 +32,13 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		companyRouter := baseRouter.Group("/company")
 		companyRouter.POST("", h.CreateCompanyModel)
+		companyRouter.Use(middleware.AuthMiddleware()).GET("/get-by-owner", h.GetCompanyByOwnerId)
+	}
+
+	{
+		companyRole := baseRouter.Group("/company-role")
+		companyRole.POST("", h.CreateCompanyRoleModel)
+		companyRole.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
 	}
 
 	return
