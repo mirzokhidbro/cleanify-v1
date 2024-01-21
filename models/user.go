@@ -1,5 +1,10 @@
 package models
 
+import (
+	"database/sql"
+	"encoding/json"
+)
+
 type CreateUserModel struct {
 	Firstname            string `json:"firstname" binding:"required" minLength:"2" maxLength:"255" example:"John"`
 	Lastname             string `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
@@ -16,8 +21,21 @@ type AuthUserModel struct {
 }
 
 type User struct {
-	ID        string `json:"id"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Phone     string `json:"phone"`
+	ID        string     `json:"id"`
+	Firstname string     `json:"firstname"`
+	Lastname  string     `json:"lastname"`
+	Phone     string     `json:"phone"`
+	Role      NullString `json:"role"`
+	Company   NullString `json:"company"`
+}
+
+type NullString struct {
+	sql.NullString
+}
+
+func (ns NullString) MarshalJSON() ([]byte, error) {
+	if ns.Valid {
+		return json.Marshal(ns.String)
+	}
+	return json.Marshal(nil)
 }
