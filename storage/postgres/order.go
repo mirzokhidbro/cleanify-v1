@@ -64,3 +64,22 @@ func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error)
 
 	return orders, nil
 }
+
+func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
+	var order models.Order
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, created_at, updated_at from orders where id = $1`, ID).Scan(
+		&order.ID,
+		&order.CompanyID,
+		&order.Phone,
+		&order.Count,
+		&order.Slug,
+		&order.Description,
+		&order.CreatedAt,
+		&order.UpdatedAt,
+	)
+	if err != nil {
+		return order, err
+	}
+
+	return order, nil
+}

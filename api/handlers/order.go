@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,4 +38,20 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, data)
+}
+
+func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
+	orderID := c.Param("order-id")
+	orderId, err := strconv.Atoi(orderID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	data, err := h.Stg.GetOrderByPrimaryKey(orderId)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	h.handleResponse(c, http.OK, data)
+
 }

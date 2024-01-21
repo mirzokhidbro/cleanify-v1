@@ -22,7 +22,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.Created, id)
+	h.handleResponse(c, http.OK, id)
 }
 
 func (h *Handler) GetUsersList(c *gin.Context) {
