@@ -58,13 +58,14 @@ func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg Postgres) GetUserById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, cr.name  from users u left join company_roles cr on cr.id = u.role_id left join companies c on c.id = cr.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, cr.name, c.id  from users u left join company_roles cr on cr.id = u.role_id left join companies c on c.id = cr.company_id where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Firstname,
 		&user.Lastname,
 		&user.Phone,
 		&user.Company,
 		&user.Role,
+		&user.CompanyID,
 	)
 	if err != nil {
 		return user, err
@@ -74,7 +75,16 @@ func (stg Postgres) GetUserById(id string) (models.User, error) {
 }
 
 func (stg Postgres) GetUsersList() ([]models.User, error) {
-	rows, err := stg.db.Query(`select u.id, u.firstname, u.lastname, u.phone, c.name, cr.name  from users u left join company_roles cr on cr.id = u.role_id left join companies c on c.id = cr.company_id`)
+	rows, err := stg.db.Query(`select 
+									u.id, 
+									u.firstname, 
+									u.lastname, 
+									u.phone, 
+									c.name, 
+									cr.name  
+									from users u 
+									left join company_roles cr on cr.id = u.role_id 
+									left join companies c on c.id = cr.company_id`)
 	if err != nil {
 		return nil, err
 	}

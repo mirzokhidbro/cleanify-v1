@@ -27,6 +27,7 @@ type User struct {
 	Phone     string     `json:"phone"`
 	Role      NullString `json:"role"`
 	Company   NullString `json:"company"`
+	CompanyID NullString `json:"company_id"`
 }
 
 type NullString struct {
