@@ -17,13 +17,13 @@ type OrderList struct {
 }
 
 type Order struct {
-	ID          int       `json:"id"`
-	CompanyID   string    `json:"company_id"`
-	Phone       string    `json:"phone"`
-	Count       int       `json:"count"`
-	Slug        string    `json:"slug"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	OrderItems  []OrderItem
+	ID          int         `json:"id"`
+	CompanyID   string      `json:"company_id"`
+	Phone       string      `json:"phone"`
+	Count       int         `json:"count"`
+	Slug        string      `json:"slug"`
+	Description string      `json:"description"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	OrderItems  []OrderItem `json:"order_items"`
 }

@@ -26,4 +26,8 @@ type StorageI interface {
 
 	//order-items
 	CreateOrderItemModel(entity models.CreateOrderItemModel) error
+
+	//order item type
+	CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error
+	GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error)
 }
