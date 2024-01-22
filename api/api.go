@@ -48,6 +48,10 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 	}
 
+	{
+		orderItemRouter := baseRouter.Group("order-items")
+		orderItemRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemModel)
+	}
 	return
 }
 

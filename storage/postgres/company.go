@@ -2,7 +2,7 @@ package postgres
 
 import "bw-erp/models"
 
-func (stg Postgres) CreateCompanyModel(id string, entity models.CreateCompanyModel) error {
+func (stg *Postgres) CreateCompanyModel(id string, entity models.CreateCompanyModel) error {
 
 	_, err := stg.GetUserById(entity.OwnerId)
 	if err != nil {
@@ -30,7 +30,7 @@ func (stg Postgres) CreateCompanyModel(id string, entity models.CreateCompanyMod
 	return nil
 }
 
-func (stg Postgres) GetCompanyById(id string) (models.Company, error) {
+func (stg *Postgres) GetCompanyById(id string) (models.Company, error) {
 	var company models.Company
 	err := stg.db.QueryRow(`select id, name, owner_id from companies where id = $1`, id).Scan(
 		&company.ID,
@@ -44,7 +44,7 @@ func (stg Postgres) GetCompanyById(id string) (models.Company, error) {
 	return company, nil
 }
 
-func (stg Postgres) GetCompanyByOwnerId(ownerId string) ([]models.Company, error) {
+func (stg *Postgres) GetCompanyByOwnerId(ownerId string) ([]models.Company, error) {
 	rows, err := stg.db.Query(`select id, name, owner_id from companies where owner_id = $1`, ownerId)
 	if err != nil {
 		return nil, err

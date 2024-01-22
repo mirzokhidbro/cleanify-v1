@@ -81,5 +81,19 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 		return order, err
 	}
 
+	rows, err := stg.db.Query(`select order_id, type, price, width, height, description from order_items where order_id = $1`, ID)
+	if err != nil {
+		return order, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item models.OrderItem
+		if err := rows.Scan(&item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.Description); err != nil {
+			return order, err
+		}
+		order.OrderItems = append(order.OrderItems, item)
+	}
+
 	return order, nil
 }
