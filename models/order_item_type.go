@@ -7,6 +7,7 @@ type OrderItemTypeModel struct {
 }
 
 type OrderItemByCompany struct {
+	ID          string  `json:"id"`
 	Name        string  `json:"name"`
 	Price       float32 `json:"price"`
 	CopmanyName string  `json:"company_name"`

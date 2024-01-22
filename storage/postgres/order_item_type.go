@@ -36,6 +36,7 @@ func (stg *Postgres) CreateOrderItemTypeModel(id string, entity models.OrderItem
 
 func (stg *Postgres) GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error) {
 	rows, err := stg.db.Query(`select  
+					o.id,
 					o.name, 
 					o.price,
 					c.name,
@@ -50,6 +51,7 @@ func (stg *Postgres) GetOrderItemTypesByCompany(CompanyID string) ([]models.Orde
 	for rows.Next() {
 		var orderItemType models.OrderItemByCompany
 		err = rows.Scan(
+			&orderItemType.ID,
 			&orderItemType.Name,
 			&orderItemType.Price,
 			&orderItemType.CopmanyName,
@@ -62,4 +64,20 @@ func (stg *Postgres) GetOrderItemTypesByCompany(CompanyID string) ([]models.Orde
 	}
 
 	return orderItemTypes, nil
+}
+
+func (stg *Postgres) GetOrderItemTypeById(orderItemTypeId string) (models.OrderItemByCompany, error) {
+	var orderItemType models.OrderItemByCompany
+	err := stg.db.QueryRow(`select o.id, o.name, o.price, c.name, c.id  from order_item_types o inner join companies c on c.id = o.company_id where o.id = $1`, orderItemTypeId).Scan(
+		&orderItemType.ID,
+		&orderItemType.Name,
+		&orderItemType.Price,
+		&orderItemType.CopmanyName,
+		&orderItemType.CopmanyID,
+	)
+	if err != nil {
+		return orderItemType, err
+	}
+
+	return orderItemType, nil
 }

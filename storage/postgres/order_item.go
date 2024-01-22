@@ -3,6 +3,7 @@ package postgres
 import (
 	"bw-erp/models"
 	"errors"
+	"fmt"
 )
 
 func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) error {
@@ -11,6 +12,15 @@ func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) err
 	if err != nil {
 		return errors.New("order not found")
 	}
+
+	orderItemType, err := stg.GetOrderItemTypeById(entity.OrderItemTypeID)
+	if err != nil {
+		fmt.Print(err.Error())
+		return errors.New("Order item type not found")
+	}
+
+	itemType := orderItemType.Name
+	price := orderItemType.Price
 
 	_, err = stg.db.Exec(`INSERT INTO order_items(
 		order_id,
@@ -28,8 +38,8 @@ func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) err
 		$6
 	)`,
 		entity.OrderID,
-		entity.Type,
-		entity.Price,
+		itemType,
+		price,
 		entity.Width,
 		entity.Height,
 		entity.Description,

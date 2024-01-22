@@ -46,5 +46,5 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.BadRequest, data)
+	h.handleResponse(c, http.OK, data)
 }
