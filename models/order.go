@@ -27,3 +27,9 @@ type Order struct {
 	UpdatedAt   time.Time   `json:"updated_at"`
 	OrderItems  []OrderItem `json:"order_items"`
 }
+
+type UpdateOrderRequest struct {
+	ID     int    `json:"id", binding:"required"`
+	Slug   string `json:"slug"`
+	Status int    `json:"status"`
+}

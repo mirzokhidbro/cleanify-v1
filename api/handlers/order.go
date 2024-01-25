@@ -53,5 +53,21 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 		return
 	}
 	h.handleResponse(c, http.OK, data)
+}
+
+func (h *Handler) UpdateOrderModel(c *gin.Context) {
+	var body models.UpdateOrderRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	rowsAffected, err := h.Stg.UpdateOrder(&body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, rowsAffected)
 
 }

@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
 )
@@ -96,4 +97,32 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 	}
 
 	return order, nil
+}
+
+func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "orders" SET
+		slug = :slug,
+		status = :status,
+		updated_at = now()
+	WHERE
+		id = :id`
+
+	params := map[string]interface{}{
+		"id":     entity.ID,
+		"status": entity.Status,
+		"slug":   entity.Slug,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }
