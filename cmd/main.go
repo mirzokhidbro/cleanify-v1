@@ -22,8 +22,6 @@ func main() {
 		cfg.DBName,
 	)
 
-	fmt.Printf("variable port=%v is of type %T \n", cfg.DBPort, cfg.DBPort)
-
 	var stg storage.StorageI
 	stg, err = postgres.InitDB(psqlConnString)
 	if err != nil {

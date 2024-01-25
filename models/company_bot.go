@@ -1,8 +1,9 @@
 package models
 
 type CreateCompanyBotModel struct {
-	BotId     string `json:"bot_token", binding:"required"`
+	BotToken  string `json:"bot_token", binding:"required"`
 	CompanyID string `json:"company_id", binding:"required"`
+	BotID     int    `json:"bot_id"`
 }
 
 type CompanyTelegramBot struct {

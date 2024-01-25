@@ -15,17 +15,20 @@ func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompan
 		id,
 		company_id,
 		bot_token,
-		type
+		type,
+		bot_id
 	) VALUES (
 		$1,
 		$2,
 		$3,
-		$4
+		$4,
+		$5
 	)`,
 		id,
 		entity.CompanyID,
-		entity.BotId,
+		entity.BotToken,
 		"order",
+		entity.BotID,
 	)
 
 	if err != nil {
