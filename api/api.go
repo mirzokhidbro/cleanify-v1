@@ -58,6 +58,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)
 	}
+
+	{
+		companyBotRouter := baseRouter.Group("company-bot")
+		companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
+	}
 	return
 }
 

@@ -30,4 +30,8 @@ type StorageI interface {
 	//order item type
 	CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error
 	GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error)
+
+	//company bots
+	CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error
+	GetTelegramBotByCompany(CompanyID string) (models.CompanyTelegramBot, error)
 }
