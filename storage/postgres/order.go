@@ -4,6 +4,7 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
+	"math"
 )
 
 func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) error {
@@ -68,13 +69,15 @@ func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error)
 
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 	var order models.Order
-	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, created_at, updated_at from orders where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.Phone,
 		&order.Count,
 		&order.Slug,
 		&order.Description,
+		&order.Latitute,
+		&order.Longitude,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -100,17 +103,31 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 }
 
 func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
-	query := `UPDATE "orders" SET
-		slug = :slug,
-		status = :status,
-		updated_at = now()
-	WHERE
-		id = :id`
+	query := `UPDATE "orders" SET `
+
+	if entity.Slug != "" {
+		query += `slug = :slug,`
+	}
+	if entity.Status == math.MaxInt16 {
+		query += `status = :status,`
+	}
+	if entity.Phone != "" {
+		query += `phone = :phone,`
+	}
+	if entity.Description != "" {
+		query += `description = :description,`
+	}
+
+	query += `updated_at = now()
+			  WHERE
+					id = :id`
 
 	params := map[string]interface{}{
-		"id":     entity.ID,
-		"status": entity.Status,
-		"slug":   entity.Slug,
+		"id":          entity.ID,
+		"status":      entity.Status,
+		"slug":        entity.Slug,
+		"phone":       entity.Phone,
+		"description": entity.Description,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
