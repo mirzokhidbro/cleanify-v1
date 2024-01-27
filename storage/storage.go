@@ -36,4 +36,10 @@ type StorageI interface {
 	CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error
 	GetTelegramBotByCompany(CompanyID string) (models.CompanyTelegramBot, error)
 	GetTelegramOrderBot() ([]models.CompanyTelegramBot, error)
+
+	// bot-users
+	GetBotUserByChatIDModel(ChatID int64) (models.BotUser, error)
+	CreateBotUserModel(entity models.CreateBotUserModel) error
+	GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error)
+	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
 }

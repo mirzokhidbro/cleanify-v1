@@ -3,7 +3,6 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -35,21 +34,42 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 
 func (h *Handler) BotHandler(bot *tgbotapi.BotAPI) {
 	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.ID)
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
+	h.BotUpdatesHandler(updates, bot)
 
+}
+
+func (h *Handler) BotUpdatesHandler(updates tgbotapi.UpdatesChannel, bot *tgbotapi.BotAPI) {
 	for update := range updates {
 		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "salom")
-			msg.ReplyToMessageID = update.Message.MessageID
+			user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID)
+			if err != nil {
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()+"||"+*user.DialogStep)
+				msg.ReplyToMessageID = update.Message.MessageID
+				bot.Send(msg)
+				err = h.Stg.CreateBotUserModel(models.CreateBotUserModel{
+					BotID:      int(bot.Self.ID),
+					ChatID:     int(update.Message.Chat.ID),
+					Page:       "Registration",
+					DialogStep: "AskUsername",
+				})
+				if err != nil {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+					msg.ReplyToMessageID = update.Message.MessageID
+					bot.Send(msg)
+				} else {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Salom "+update.Message.From.FirstName+" Iltimos tizimdagi telefon raqamingizni kiriting")
+					msg.ReplyToMessageID = update.Message.MessageID
+					bot.Send(msg)
+				}
+			}
 
-			bot.Send(msg)
+			if *user.Page == "Registration" {
+				h.RegistrationPage(update, bot)
+			}
 		}
 	}
 }
@@ -71,4 +91,33 @@ func (h *Handler) BotStart(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, "OK!")
+}
+
+func (h *Handler) RegistrationPage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	botID := bot.Self.ID
+	phone := update.Message.Text
+	user, err := h.Stg.GetSelectedUser(botID, phone)
+	if err != nil {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
+	} else {
+		_, err = h.Stg.UpdateBotUserModel(models.BotUser{
+			UserID: user.UserID,
+			BotID:  int(botID),
+		})
+
+		if err != nil {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+			msg.ReplyToMessageID = update.Message.MessageID
+			bot.Send(msg)
+		} else {
+			// text := "bu bot"
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Foydalanuvchi tasdiqlandi!")
+			msg.ReplyToMessageID = update.Message.MessageID
+			bot.Send(msg)
+		}
+
+	}
+
 }

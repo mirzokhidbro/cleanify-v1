@@ -74,3 +74,17 @@ func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) 
 
 	return bots, nil
 }
+
+func (stg *Postgres) GetCompanyIDByBot(botID int64) (models.CompanyTelegramBot, error) {
+	var bot models.CompanyTelegramBot
+	err := stg.db.QueryRow(`select id, bot_token, company_id from company_bots where company_id = $1`, botID).Scan(
+		&bot.ID,
+		&bot.BotToken,
+		&bot.CompanyID,
+	)
+	if err != nil {
+		return bot, err
+	}
+
+	return bot, nil
+}
