@@ -35,4 +35,5 @@ type StorageI interface {
 	//company bots
 	CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error
 	GetTelegramBotByCompany(CompanyID string) (models.CompanyTelegramBot, error)
+	GetTelegramOrderBot() ([]models.CompanyTelegramBot, error)
 }

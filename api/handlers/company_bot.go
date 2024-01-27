@@ -30,10 +30,10 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 		return
 	}
 	h.handleResponse(c, http.Created, id)
-	go handler(bot)
+	go h.BotHandler(bot)
 }
 
-func handler(bot *tgbotapi.BotAPI) {
+func (h *Handler) BotHandler(bot *tgbotapi.BotAPI) {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.ID)
@@ -45,13 +45,30 @@ func handler(bot *tgbotapi.BotAPI) {
 
 	for update := range updates {
 		if update.Message != nil {
-
 			log.Printf("[%s] %s", update.Message.From.UserName)
-			log.Print(bot.Self.ID, bot.Self.FirstName)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "salom")
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(msg)
 		}
 	}
+}
+
+func (h *Handler) BotStart(c *gin.Context) {
+	bots, err := h.Stg.GetTelegramOrderBot()
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	for _, bot := range bots {
+		newBot, err := tgbotapi.NewBotAPI(bot.BotToken)
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+		go h.BotHandler(newBot)
+	}
+
+	h.handleResponse(c, http.OK, "OK!")
 }

@@ -50,3 +50,27 @@ func (stg *Postgres) GetTelegramBotByCompany(companyID string) (models.CompanyTe
 
 	return bot, nil
 }
+
+func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) {
+	rows, err := stg.db.Query(`select id, bot_token from company_bots where type = 'order'`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var bots []models.CompanyTelegramBot
+	for rows.Next() {
+		var bot models.CompanyTelegramBot
+		err = rows.Scan(&bot.ID, &bot.BotToken)
+		if err != nil {
+			return nil, err
+		}
+		bots = append(bots, bot)
+
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return bots, nil
+}
