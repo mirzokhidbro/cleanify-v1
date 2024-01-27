@@ -5,3 +5,6 @@ CREATE TABLE IF NOT EXISTS "company_bots" (
 	"bot_id" BIGINT,
     "type" VARCHAR NOT NULL
 );
+
+ALTER TABLE "company_bots"
+ADD UNIQUE (bot_id);
