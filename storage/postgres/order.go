@@ -4,40 +4,46 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
+	"fmt"
 	"math"
 )
 
-func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) error {
-	_, err := stg.GetCompanyById(entity.CompanyID)
+func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
+	_, err = stg.GetCompanyById(entity.CompanyID)
+	fmt.Print("\n order create page")
 	if err != nil {
-		return errors.New("Company not found")
+		return 0, errors.New("Company not found")
 	}
 
-	_, err = stg.db.Exec(`INSERT INTO orders(
+	err = stg.db.QueryRow(`INSERT INTO orders(
 		company_id,
 		phone,
 		count,
 		slug,
-		description
+		description,
+		chat_id
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
-		$5
-	)`,
+		$5,
+		$6
+	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
 		entity.Count,
 		entity.Slug,
 		entity.Description,
-	)
+		entity.ChatID,
+	).Scan(&id)
 
 	if err != nil {
-		return err
+		fmt.Print("\n order create error ", err)
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error) {
@@ -114,8 +120,17 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	if entity.Phone != "" {
 		query += `phone = :phone,`
 	}
+	if entity.Count != "" {
+		query += `count = :count,`
+	}
 	if entity.Description != "" {
 		query += `description = :description,`
+	}
+	if entity.Longitude != 0 {
+		query += `longitude = :longitude,`
+	}
+	if entity.Latitute != 0 {
+		query += `latitute = :latitute,`
 	}
 
 	query += `updated_at = now()
@@ -128,6 +143,9 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 		"slug":        entity.Slug,
 		"phone":       entity.Phone,
 		"description": entity.Description,
+		"count":       entity.Count,
+		"longitude":   entity.Longitude,
+		"latitute":    entity.Latitute,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

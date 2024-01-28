@@ -12,6 +12,7 @@ type CreateOrderModel struct {
 	Count       int    `json:"count", binding:"required"`
 	Slug        string `json:"slug", binding:"required"`
 	Description string `json:"description"`
+	ChatID      int64  `json:"chat_id"`
 }
 
 type OrderList struct {
@@ -35,11 +36,14 @@ type Order struct {
 }
 
 type UpdateOrderRequest struct {
-	ID          int    `json:"id", binding:"required"`
-	Slug        string `json:"slug, omitempty"`
-	Status      int16  `json:"status, omitempty"`
-	Phone       string `json:"phone, omitempty"`
-	Description string `json:"description"`
+	ID          int     `json:"id", binding:"required"`
+	Slug        string  `json:"slug, omitempty"`
+	Status      int16   `json:"status, omitempty"`
+	Phone       string  `json:"phone, omitempty"`
+	Description string  `json:"description"`
+	Count       string  `json:"count"`
+	Latitute    float64 `json:"latitute"`
+	Longitude   float64 `json:"longitude"`
 }
 
 type NullFloat struct {

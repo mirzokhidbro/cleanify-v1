@@ -50,7 +50,7 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 		query = query[:len(query)-1]
 	}
 
-	query += ` WHERE bot_id = :bot_id`
+	query += ` WHERE bot_id = :bot_id and chat_id = :chat_id`
 
 	params := map[string]interface{}{
 		"bot_id":      entity.BotID,
@@ -58,6 +58,7 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 		"page":        entity.Page,
 		"dialog_step": entity.DialogStep,
 		"user_id":     entity.UserID,
+		"chat_id":     entity.ChatID,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -74,9 +75,9 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 	return rowsAffected, nil
 }
 
-func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64) (models.BotUser, error) {
+func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error) {
 	var botUser models.BotUser
-	err := stg.db.QueryRow(`select bot_id, user_id, status, page, dialog_step from bot_users where chat_id::bigint = $1`, ChatID).Scan(
+	err := stg.db.QueryRow(`select bot_id, user_id, status, page, dialog_step from bot_users where chat_id::bigint = $1 and bot_id = $2`, ChatID, BotID).Scan(
 		&botUser.BotID,
 		&botUser.UserID,
 		&botUser.Status,
@@ -94,21 +95,39 @@ func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.Selected
 	var user models.SelectedUser
 
 	query := `with users as (
-		select c.id as company_id, u.phone, u.id from users u
+		select c.id as company_id, c.name as company_name, u.phone, u.id from users u
 		inner join company_roles cr on cr.id = u.role_id
 		inner join companies c on c.id = cr.company_id
 	)
-	select users.company_id, users.phone, users.id from users
+	select users.company_id, users.company_name, users.phone, users.id from users
 	inner join company_bots cb on cb.company_id = users.company_id
 	where users.phone = $1 and cb.bot_id = $2`
 
 	err := stg.db.QueryRow(query, Phone, BotID).Scan(
 		&user.CompanyID,
+		&user.CompanyName,
 		&user.Phone,
 		&user.UserID,
 	)
 	if err != nil {
 		return user, errors.New("Tizimda bunday foydalanuvchi mavjud emas!")
+	}
+
+	return user, nil
+}
+
+func (stg *Postgres) GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error) {
+	var user models.BotUserByCompany
+
+	query := `select cb.company_id, bu.bot_id, bu.chat_id from bot_users bu inner join company_bots cb on bu.bot_id = cb.bot_id where bu.bot_id = $1 and bu.chat_id = $2`
+
+	err = stg.db.QueryRow(query, BotID, ChatID).Scan(
+		&user.CompanyID,
+		&user.BotID,
+		&user.ChatID,
+	)
+	if err != nil {
+		return user, err
 	}
 
 	return user, nil

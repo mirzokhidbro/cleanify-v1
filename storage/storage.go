@@ -20,7 +20,7 @@ type StorageI interface {
 	GetRolesListByCompany(companyID string) ([]models.CompanyRoleListByCompany, error)
 
 	//orders
-	CreateOrderModel(entity models.CreateOrderModel) error
+	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
 	GetOrdersList(companyID string) ([]models.OrderList, error)
 	GetOrderByPrimaryKey(ID int) (models.Order, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
@@ -38,8 +38,14 @@ type StorageI interface {
 	GetTelegramOrderBot() ([]models.CompanyTelegramBot, error)
 
 	// bot-users
-	GetBotUserByChatIDModel(ChatID int64) (models.BotUser, error)
+	GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error)
 	CreateBotUserModel(entity models.CreateBotUserModel) error
 	GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error)
 	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
+	GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
+
+	// telegram-session
+	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
+	DeleteTelegramSession(ID int) (rowsAffected int64, err error)
+	CreateTelegramSessionModel(entity models.TelegramSessionModel) error
 }

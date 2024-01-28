@@ -16,7 +16,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	err := h.Stg.CreateOrderModel(body)
+	_, err := h.Stg.CreateOrderModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

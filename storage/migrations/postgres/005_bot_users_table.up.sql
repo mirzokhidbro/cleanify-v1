@@ -12,3 +12,6 @@ CREATE TABLE IF NOT EXISTS "bot_users" (
 
 ALTER TABLE "bot_users"
 ADD "bot_id" BIGINT REFERENCES "company_bots"("bot_id") NOT NULL;
+
+ALTER TABLE "bot_users"
+ADD CONSTRAINT unique_chat_bot UNIQUE ("chat_id", "bot_id");
