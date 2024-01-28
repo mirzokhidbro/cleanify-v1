@@ -14,6 +14,7 @@ type BotUser struct {
 	Page       *string `json:"page"`
 	DialogStep *string `json:"dialog_step"`
 	ChatID     int64   `json:"chat_id"`
+	BotToken   string
 }
 
 type SelectedUser struct {

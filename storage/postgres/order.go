@@ -161,3 +161,24 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 
 	return rowsAffected, nil
 }
+
+func (stg *Postgres) GetOrderLocation(ID int) (models.Order, error) {
+	var order models.Order
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where id = $1`, ID).Scan(
+		&order.ID,
+		&order.CompanyID,
+		&order.Phone,
+		&order.Count,
+		&order.Slug,
+		&order.Description,
+		&order.Latitute,
+		&order.Longitude,
+		&order.CreatedAt,
+		&order.UpdatedAt,
+	)
+	if err != nil {
+		return order, err
+	}
+
+	return order, nil
+}

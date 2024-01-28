@@ -91,6 +91,24 @@ func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.
 	return botUser, nil
 }
 
+func (stg *Postgres) GetBotUserByUserID(UserID string) (models.BotUser, error) {
+	var botUser models.BotUser
+	err := stg.db.QueryRow(`select cb.bot_id, user_id, status, page, dialog_step, chat_id, cb.bot_token from bot_users bu inner join company_bots cb on cb.bot_id = bu.bot_id where user_id = $1`, UserID).Scan(
+		&botUser.BotID,
+		&botUser.UserID,
+		&botUser.Status,
+		&botUser.Page,
+		&botUser.DialogStep,
+		&botUser.ChatID,
+		&botUser.BotToken,
+	)
+	if err != nil {
+		return botUser, err
+	}
+
+	return botUser, nil
+}
+
 func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error) {
 	var user models.SelectedUser
 

@@ -5,6 +5,8 @@ import (
 	"bw-erp/models"
 	"fmt"
 
+	utils "bw-erp/utils"
+
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
@@ -115,6 +117,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 func (h *Handler) RegistrationPage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	botID := bot.Self.ID
 	phone := update.Message.Text
+	chatID := update.Message.Chat.ID
 	user, err := h.Stg.GetSelectedUser(botID, phone)
 	if err != nil {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
@@ -126,18 +129,16 @@ func (h *Handler) RegistrationPage(update tgbotapi.Update, bot *tgbotapi.BotAPI)
 		_, err = h.Stg.UpdateBotUserModel(models.BotUser{
 			UserID:     user.UserID,
 			BotID:      int(botID),
-			ChatID:     update.Message.Chat.ID,
+			ChatID:     chatID,
 			Page:       &page,
 			DialogStep: &dialogStep,
 		})
 
 		if err != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+			h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 		} else {
 			text := "Bu bot " + user.CompanyName + " korxonasi uchun buyurtmalarni kiritish maqsadida foydalaniladi"
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+			msg := tgbotapi.NewMessage(chatID, text)
 			msg.ReplyToMessageID = update.Message.MessageID
 			msg.ReplyMarkup = orderKeyboard
 			bot.Send(msg)
@@ -170,19 +171,18 @@ func (h *Handler) OrderPage(update tgbotapi.Update, bot *tgbotapi.BotAPI, user m
 
 func (h *Handler) OrderMainPage(update tgbotapi.Update, bot *tgbotapi.BotAPI, user models.BotUser) {
 	botID := bot.Self.ID
+	chatID := update.Message.Chat.ID
 	dialogStep := "asked order slug"
 	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
 		UserID:     user.UserID,
 		BotID:      int(botID),
-		ChatID:     update.Message.Chat.ID,
+		ChatID:     chatID,
 		DialogStep: &dialogStep,
 	})
 	if err != nil {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 	} else {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Birka nomini kiriting")
+		msg := tgbotapi.NewMessage(chatID, "Birka nomini kiriting")
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
 	}
@@ -199,15 +199,11 @@ func (h *Handler) AskedOrderSlug(update tgbotapi.Update, bot *tgbotapi.BotAPI, u
 		DialogStep: &dialogStep,
 	})
 	if err != nil {
-		msg := tgbotapi.NewMessage(chatID, "user "+ err.Error())
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		h.handleError(bot, chatID, "user "+err.Error(), update.Message.MessageID)
 	} else {
 		user, err := h.Stg.GetBotUserByCompany(botID, chatID)
 		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, "get user " + err.Error())
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+			h.handleError(bot, chatID, "get user "+err.Error(), update.Message.MessageID)
 		} else {
 			id, err := h.Stg.CreateOrderModel(models.CreateOrderModel{
 				Slug:      update.Message.Text,
@@ -215,9 +211,7 @@ func (h *Handler) AskedOrderSlug(update tgbotapi.Update, bot *tgbotapi.BotAPI, u
 				CompanyID: user.CompanyID,
 			})
 			if err != nil {
-				msg := tgbotapi.NewMessage(chatID, "create order" + err.Error())
-				msg.ReplyToMessageID = update.Message.MessageID
-				bot.Send(msg)
+				h.handleError(bot, chatID, "create order"+err.Error(), update.Message.MessageID)
 			} else {
 				err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
 					BotID:   botID,
@@ -225,11 +219,9 @@ func (h *Handler) AskedOrderSlug(update tgbotapi.Update, bot *tgbotapi.BotAPI, u
 					OrderID: id,
 				})
 				if err != nil {
-					msg := tgbotapi.NewMessage(chatID,  "create telegram session " + err.Error())
-					msg.ReplyToMessageID = update.Message.MessageID
-					bot.Send(msg)
+					h.handleError(bot, chatID, "create telegram session "+err.Error(), update.Message.MessageID)
 				} else {
-					msg := tgbotapi.NewMessage(chatID, "Buyurtma qabul qiluvchini telefon raqamini kiriting")
+					msg := tgbotapi.NewMessage(chatID, "Buyurtma qabul qiluvchini telefon raqamini kiriting. \nTelefon raqam shu formatda bo'lishi kerak: +998991234567")
 					msg.ReplyToMessageID = update.Message.MessageID
 					bot.Send(msg)
 				}
@@ -243,35 +235,36 @@ func (h *Handler) AskedOrderPhoneNumber(update tgbotapi.Update, bot *tgbotapi.Bo
 	botID := bot.Self.ID
 	chatID := update.Message.Chat.ID
 	dialogStep := "order count asked"
-	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
-		UserID:     user.UserID,
-		BotID:      int(botID),
-		ChatID:     chatID,
-		DialogStep: &dialogStep,
-	})
+
+	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+
 	if err != nil {
-		msg := tgbotapi.NewMessage(chatID, err.Error())
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 	} else {
-		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
-
-		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, err.Error())
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+		if !utils.IsValidPhone(update.Message.Text) {
+			h.handleError(bot, chatID, "Telefon raqam formati noto'g'ri! Iltimos qaytadan to'g'ri formatda kiriting!", update.Message.MessageID)
 		} else {
-			orderID := session.OrderID
-			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
-				ID:    orderID,
-				Phone: update.Message.Text,
+			_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+				UserID:     user.UserID,
+				BotID:      int(botID),
+				ChatID:     chatID,
+				DialogStep: &dialogStep,
 			})
-			msg := tgbotapi.NewMessage(chatID, "Buyurtma sonini kiriting")
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+			if err != nil {
+				h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
+			} else {
+				orderID := session.OrderID
+				h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+					ID:    orderID,
+					Phone: update.Message.Text,
+				})
+				msg := tgbotapi.NewMessage(chatID, "Buyurtma sonini kiriting")
+				msg.ReplyToMessageID = update.Message.MessageID
+				bot.Send(msg)
+			}
 		}
-
 	}
+
 }
 
 func (h *Handler) AskedOrderCount(update tgbotapi.Update, bot *tgbotapi.BotAPI, user models.BotUser) {
@@ -286,15 +279,11 @@ func (h *Handler) AskedOrderCount(update tgbotapi.Update, bot *tgbotapi.BotAPI, 
 		DialogStep: &dialogStep,
 	})
 	if err != nil {
-		msg := tgbotapi.NewMessage(chatID, err.Error())
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 	} else {
 		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
 		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, "Lokatsiya kiriting!")
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+			h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 		} else {
 			orderID := session.OrderID
 			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
@@ -313,40 +302,81 @@ func (h *Handler) AskedOrderLocation(update tgbotapi.Update, bot *tgbotapi.BotAP
 	botID := bot.Self.ID
 	chatID := update.Message.Chat.ID
 
-	dialogStep := ""
-	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
-		UserID:     user.UserID,
-		BotID:      int(botID),
-		ChatID:     update.Message.Chat.ID,
-		DialogStep: &dialogStep,
-	})
+	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
 	if err != nil {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 	} else {
-		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
-		if err != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
+		if update.Message.Location == nil {
+			h.handleError(bot, chatID, "Iltimos lokatsiya kiriting!", update.Message.MessageID)
 		} else {
 			_, err := h.Stg.UpdateOrder(&models.UpdateOrderRequest{
 				ID:        session.OrderID,
 				Latitute:  update.Message.Location.Latitude,
 				Longitude: update.Message.Location.Longitude,
+				Status:    1,
 			})
 			if err != nil {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-				msg.ReplyToMessageID = update.Message.MessageID
-				bot.Send(msg)
+				h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
 			} else {
-				h.Stg.DeleteTelegramSession(session.ID)
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Buyurtma qabul qilindi")
-				msg.ReplyToMessageID = update.Message.MessageID
-				msg.ReplyMarkup = orderKeyboard
-				bot.Send(msg)
+				dialogStep := ""
+				_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+					UserID:     user.UserID,
+					BotID:      int(botID),
+					ChatID:     update.Message.Chat.ID,
+					DialogStep: &dialogStep,
+				})
+				if err != nil {
+					h.handleError(bot, chatID, err.Error(), update.Message.MessageID)
+				} else {
+					h.Stg.DeleteTelegramSession(session.ID)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Buyurtma qabul qilindi")
+					msg.ReplyToMessageID = update.Message.MessageID
+					msg.ReplyMarkup = orderKeyboard
+					bot.Send(msg)
+				}
 			}
 		}
 	}
+}
+
+func (h *Handler) handleError(bot *tgbotapi.BotAPI, chatID int64, errorMessage string, replyToMessageID int) {
+	msg := tgbotapi.NewMessage(chatID, errorMessage)
+	msg.ReplyToMessageID = replyToMessageID
+	bot.Send(msg)
+}
+
+func (h *Handler) SendLocation(c *gin.Context) {
+	var query models.OrderSendLocationRequest
+	if err := c.ShouldBindQuery(&query); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user_id, _ := utils.ExtractTokenID(c)
+	order, err := h.Stg.GetOrderLocation(query.OrderID)
+	if err != nil {
+		h.handleResponse(c, http.OK, err.Error())
+		return
+	}
+	fmt.Print(user_id + "\n")
+
+	botUser, _ := h.Stg.GetBotUserByUserID(user_id)
+
+	if order.Latitute == nil || order.Longitude == nil {
+		h.handleResponse(c, http.OK, "Bu buyurtma lokatsiyasi mavjud emas!")
+		return
+	}
+
+	bot, err := tgbotapi.NewBotAPI(botUser.BotToken)
+	if err != nil {
+		h.handleResponse(c, http.OK, err.Error())
+		return
+	}
+	msg := tgbotapi.NewLocation(botUser.ChatID, *order.Latitute, *order.Longitude)
+	bot.Send(msg)
+	msg2 := tgbotapi.NewMessage(botUser.ChatID, "Buyurtma birkasi: "+order.Slug+"\nBuyurtmachi telefon raqami: "+order.Phone)
+	msg2.ReplyToMessageID = msg.ReplyToMessageID
+	bot.Send(msg2)
+
+	h.handleResponse(c, http.OK, "Lokatsiya jo'natildi!")
 }

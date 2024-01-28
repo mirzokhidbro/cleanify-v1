@@ -35,6 +35,10 @@ type Order struct {
 	OrderItems  []OrderItem `json:"order_items"`
 }
 
+type OrderSendLocationRequest struct {
+	OrderID int `form:"order_id" binding:"required"`
+}
+
 type UpdateOrderRequest struct {
 	ID          int     `json:"id", binding:"required"`
 	Slug        string  `json:"slug, omitempty"`

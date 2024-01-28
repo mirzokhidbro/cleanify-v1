@@ -22,6 +22,7 @@ type StorageI interface {
 	//orders
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
 	GetOrdersList(companyID string) ([]models.OrderList, error)
+	GetOrderLocation(ID int) (models.Order, error)
 	GetOrderByPrimaryKey(ID int) (models.Order, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
 
@@ -43,6 +44,7 @@ type StorageI interface {
 	GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error)
 	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
 	GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
+	GetBotUserByUserID(UserID string) (models.BotUser, error)
 
 	// telegram-session
 	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
