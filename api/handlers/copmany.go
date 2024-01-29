@@ -33,13 +33,13 @@ func (h *Handler) GetCompanyByOwnerId(c *gin.Context) {
 		return
 	}
 
-	user_id, err := utils.ExtractTokenID(c)
+	jwtData, err := utils.ExtractTokenID(c)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	user, err := h.Stg.GetUserById(user_id)
+	user, err := h.Stg.GetUserById(jwtData.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

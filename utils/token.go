@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bw-erp/models"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func GenerateToken(user_id string) (string, error) {
+func GenerateToken(user_id string, phone string) (string, error) {
 
 	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
@@ -22,6 +23,7 @@ func GenerateToken(user_id string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = user_id
+	claims["phone"] = phone
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(token_lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -55,8 +57,8 @@ func ExtractToken(c *gin.Context) string {
 	return ""
 }
 
-func ExtractTokenID(c *gin.Context) (string, error) {
-
+func ExtractTokenID(c *gin.Context) (models.JWTData, error) {
+	var jwtdata models.JWTData
 	tokenString := ExtractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -65,12 +67,14 @@ func ExtractTokenID(c *gin.Context) (string, error) {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return "", err
+		return jwtdata, err
 	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		uid := fmt.Sprintf("%v", claims["user_id"])
-		return uid, nil
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		jwtdata.Phone, _ = claims["phone"].(string)
+		jwtdata.UserID, _ = claims["user_id"].(string)
+		return jwtdata, nil
 	}
-	return "", nil
+
+	return jwtdata, err
 }

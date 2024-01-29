@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/utils"
 	"errors"
@@ -111,4 +112,29 @@ func (stg Postgres) GetUsersList() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (stg *Postgres) ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error {
+	if entity.NewPassword != entity.NewPasswordConfirmation {
+		return errors.New("confirmation password is not the same with password!")
+	}
+	password, _ := utils.HashPassword(entity.NewPassword)
+
+	query := `UPDATE "users" SET
+	password = :password,
+	updated_at = now()
+	WHERE
+	id = :id`
+
+	params := map[string]interface{}{
+		"id":       userID,
+		"password": password,
+	}
+
+	q, arr := helper.ReplaceQueryParams(query, params)
+	_, err := stg.db.Exec(q, arr...)
+	if err != nil {
+		return err
+	}
+	return err
 }

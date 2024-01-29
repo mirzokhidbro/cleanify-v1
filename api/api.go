@@ -27,6 +27,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		authRouter := baseRouter.Group("/auth")
 		authRouter.POST("/login", h.AuthUser)
 		authRouter.POST("/me", h.CurrentUser)
+		authRouter.Use(middleware.AuthMiddleware()).POST("/change-password", h.ChangePassword)
 	}
 
 	{

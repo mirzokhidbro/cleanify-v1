@@ -352,15 +352,14 @@ func (h *Handler) SendLocation(c *gin.Context) {
 		return
 	}
 
-	user_id, _ := utils.ExtractTokenID(c)
+	jwtData, _ := utils.ExtractTokenID(c)
 	order, err := h.Stg.GetOrderLocation(query.OrderID)
 	if err != nil {
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	}
-	fmt.Print(user_id + "\n")
 
-	botUser, _ := h.Stg.GetBotUserByUserID(user_id)
+	botUser, _ := h.Stg.GetBotUserByUserID(jwtData.UserID)
 
 	if order.Latitute == nil || order.Longitude == nil {
 		h.handleResponse(c, http.OK, "Bu buyurtma lokatsiyasi mavjud emas!")
