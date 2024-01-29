@@ -89,5 +89,5 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.OK, user)
+	h.handleResponse(c, http.OK, "Parol o'zgartirildi!")
 }
