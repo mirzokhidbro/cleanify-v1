@@ -29,6 +29,7 @@ type StorageI interface {
 
 	//order-items
 	CreateOrderItemModel(entity models.CreateOrderItemModel) error
+	UpdateOrderItemModel(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error)
 
 	//order item type
 	CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error

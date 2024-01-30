@@ -9,6 +9,14 @@ type CreateOrderItemModel struct {
 	Description     string  `json:"description"`
 }
 
+type UpdateOrderItemRequest struct {
+	ID          int     `json:"id"`
+	Price       float32 `json:"price"`
+	Width       float32 `json:"width"`
+	Height      float32 `json:"height"`
+	Description string  `json:"description"`
+}
+
 type OrderItem struct {
 	OrderID     int     `json:"order_id"`
 	Type        string  `json:"type"`

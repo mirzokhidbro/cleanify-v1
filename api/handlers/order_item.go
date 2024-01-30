@@ -22,3 +22,19 @@ func (h *Handler) CreateOrderItemModel(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, "Created successfully!")
 }
+
+func (h *Handler) UpdateOrderItemModel(c *gin.Context) {
+	var body models.UpdateOrderItemRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err := h.Stg.UpdateOrderItemModel(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "Update successfully!")
+}

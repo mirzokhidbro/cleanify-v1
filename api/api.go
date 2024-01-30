@@ -54,6 +54,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderItemRouter := baseRouter.Group("order-items")
 		orderItemRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemModel)
+		orderItemRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemModel)
 	}
 
 	{

@@ -47,7 +47,7 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 }
 
 func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error) {
-	rows, err := stg.db.Query(`select id, slug, status from orders where company_id = $1`, companyID)
+	rows, err := stg.db.Query(`select id, slug, status, created_at from orders where company_id = $1`, companyID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,8 @@ func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error)
 		err = rows.Scan(
 			&order.ID,
 			&order.Slug,
-			&order.Status)
+			&order.Status,
+			&order.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
