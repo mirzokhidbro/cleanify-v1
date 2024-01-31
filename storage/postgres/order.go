@@ -49,7 +49,6 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersListRequest) ([]models.OrderList, error) {
 	var arr []interface{}
 	var orders []models.OrderList
-	fmt.Print("storage page")
 	params := make(map[string]interface{})
 	query := `SELECT 
 		id, 

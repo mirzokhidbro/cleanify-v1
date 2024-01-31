@@ -52,4 +52,7 @@ type StorageI interface {
 	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
 	DeleteTelegramSession(ID int) (rowsAffected int64, err error)
 	CreateTelegramSessionModel(entity models.TelegramSessionModel) error
+
+	//work volume
+	GetWorkVolumeList(companyID string) ([]models.WorkVolume, error)
 }

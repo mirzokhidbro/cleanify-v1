@@ -68,6 +68,10 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
 		companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
 	}
+	{
+		statistics := baseRouter.Group("statistics")
+		statistics.Use(middleware.AuthMiddleware()).GET("work-volume/:company-id", h.GetWorkVolumeList)
+	}
 	return
 }
 
