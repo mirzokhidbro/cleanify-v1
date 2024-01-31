@@ -5,7 +5,6 @@ import (
 	"bw-erp/models"
 	"errors"
 	"fmt"
-	"math"
 )
 
 func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
@@ -143,7 +142,7 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	if entity.Slug != "" {
 		query += `slug = :slug,`
 	}
-	if entity.Status == math.MaxInt16 {
+	if entity.Status != 0 {
 		query += `status = :status,`
 	}
 	if entity.Phone != "" {
