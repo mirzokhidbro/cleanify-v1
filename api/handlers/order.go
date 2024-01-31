@@ -31,7 +31,15 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
-	data, err := h.Stg.GetOrdersList(companyID)
+	status, err := h.getStatusParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+	data, err := h.Stg.GetOrdersList(companyID, models.OrdersListRequest{
+		Slug:   c.Query("slug"),
+		Status: status,
+	})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

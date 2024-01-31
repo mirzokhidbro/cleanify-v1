@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/config"
 	"bw-erp/storage"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,4 +27,9 @@ func (h *Handler) handleResponse(c *gin.Context, status http.Status, data interf
 		Description: status.Description,
 		Data:        data,
 	})
+}
+
+func (h *Handler) getStatusParam(c *gin.Context) (offset int, err error) {
+	offsetStr := c.DefaultQuery("status", "0")
+	return strconv.Atoi(offsetStr)
 }

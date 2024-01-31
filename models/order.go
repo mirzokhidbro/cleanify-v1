@@ -16,10 +16,15 @@ type CreateOrderModel struct {
 }
 
 type OrderList struct {
-	ID        int        `json:"id"`
-	Slug      string     `json:"slug"`
-	Status    NullString `json:"status"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        int       `json:"id"`
+	Slug      string    `json:"slug"`
+	Status    int16     `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type OrdersListRequest struct {
+	Status int    `json:"status,omitempty"`
+	Slug   string `json:"slug,omitempty"`
 }
 
 type Order struct {

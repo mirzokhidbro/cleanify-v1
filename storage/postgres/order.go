@@ -46,14 +46,43 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 	return id, nil
 }
 
-func (stg *Postgres) GetOrdersList(companyID string) ([]models.OrderList, error) {
-	rows, err := stg.db.Query(`select id, slug, status, created_at from orders where company_id = $1`, companyID)
+func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersListRequest) ([]models.OrderList, error) {
+	var arr []interface{}
+	var orders []models.OrderList
+	fmt.Print("storage page")
+	params := make(map[string]interface{})
+	query := `SELECT 
+		id, 
+		slug, 
+		status, 
+		created_at 
+		FROM "orders"`
+
+	filter := " WHERE true"
+	order := " ORDER BY created_at"
+	arrangement := " DESC"
+	params["company_id"] = companyID
+	filter += " and (company_id = :company_id)"
+
+	if len(queryParam.Slug) > 0 {
+		params["slug"] = queryParam.Slug
+		filter += " AND ((slug) ILIKE ('%' || :slug || '%'))"
+	}
+
+	if queryParam.Status != 0 {
+		params["status"] = queryParam.Status
+		filter += " AND (status = :status)"
+	}
+
+	q := query + filter + order + arrangement
+
+	q, arr = helper.ReplaceQueryParams(q, params)
+	rows, err := stg.db.Query(q, arr...)
 	if err != nil {
-		return nil, err
+		return orders, err
 	}
 	defer rows.Close()
 
-	var orders []models.OrderList
 	for rows.Next() {
 		var order models.OrderList
 		err = rows.Scan(
