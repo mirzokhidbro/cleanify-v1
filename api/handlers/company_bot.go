@@ -36,7 +36,11 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "bot token is invalid")
 	}
 	body.BotID = int(bot.Self.ID)
+	body.Firstname = bot.Self.FirstName
+	body.Lastname = bot.Self.LastName
+	body.Username = bot.Self.UserName
 
+	
 	id := uuid.New()
 	err = h.Stg.CreateCompanyBotModel(id.String(), body)
 	if err != nil {

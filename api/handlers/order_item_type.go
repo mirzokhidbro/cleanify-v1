@@ -34,13 +34,26 @@ func (h *Handler) CreateOrderItemTypeModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
-	companyID := c.Param("company-id")
-	if !utils.IsValidUUID(companyID) {
-		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	// companyID := c.Param("company-id")
+	// if !utils.IsValidUUID(companyID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	// 	return
+	// }
+
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	data, err := h.Stg.GetOrderItemTypesByCompany(companyID)
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	data, err := h.Stg.GetOrderItemTypesByCompany(*user.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

@@ -39,13 +39,13 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		companyRoleRouter := baseRouter.Group("/company-role")
 		companyRoleRouter.POST("", h.CreateCompanyRoleModel)
-		companyRoleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
+		companyRoleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany) //
 	}
 
 	{
 		orderRouter := baseRouter.Group("orders")
 		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList)
+		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList) //
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
@@ -60,7 +60,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderItemTypeRouter := baseRouter.Group("order-item-type")
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)//
 	}
 
 	{
@@ -70,7 +70,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 	{
 		statistics := baseRouter.Group("statistics")
-		statistics.Use(middleware.AuthMiddleware()).GET("work-volume/:company-id", h.GetWorkVolumeList)
+		statistics.Use(middleware.AuthMiddleware()).GET("work-volume/:company-id", h.GetWorkVolumeList) //
 	}
 	return
 }

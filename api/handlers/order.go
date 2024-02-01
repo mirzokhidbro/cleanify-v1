@@ -26,17 +26,31 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
-	companyID := c.Param("company-id")
-	if !utils.IsValidUUID(companyID) {
-		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	// companyID := c.Param("company-id")
+	// if !utils.IsValidUUID(companyID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	// 	return
+	// }
+
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	status, err := h.getStatusParam(c)
 	if err != nil {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
-	data, err := h.Stg.GetOrdersList(companyID, models.OrdersListRequest{
+	data, err := h.Stg.GetOrdersList(*user.CompanyID, models.OrdersListRequest{
 		Slug:   c.Query("slug"),
 		Status: status,
 	})

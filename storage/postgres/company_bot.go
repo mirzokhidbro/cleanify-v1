@@ -10,26 +10,34 @@ func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompan
 	if err != nil {
 		return errors.New("company not found")
 	}
-	
 
 	_, err = stg.db.Exec(`INSERT INTO company_bots(
 		id,
 		company_id,
 		bot_token,
 		type,
-		bot_id
+		bot_id,
+		username,
+		firstname,
+		lastname
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
-		$5
+		$5,
+		$6,
+		$7,
+		$8
 	)`,
 		id,
 		entity.CompanyID,
 		entity.BotToken,
 		"order",
 		entity.BotID,
+		entity.Username,
+		entity.Firstname,
+		entity.Lastname,
 	)
 
 	if err != nil {
