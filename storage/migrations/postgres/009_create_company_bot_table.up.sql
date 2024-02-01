@@ -8,3 +8,8 @@ CREATE TABLE IF NOT EXISTS "company_bots" (
 
 ALTER TABLE "company_bots"
 ADD UNIQUE (bot_id);
+
+ALTER TABLE "company_bots"
+ADD "firstname" VARCHAR,
+ADD "lastname" VARCHAR,
+ADD "username" VARCHAR;
