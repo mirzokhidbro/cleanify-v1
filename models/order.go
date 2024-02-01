@@ -23,11 +23,8 @@ type OrderList struct {
 }
 
 type OrderListResponse struct {
-	Data        []OrderList `json:"data"`
-	CurrentPage int         `json:"current_page"`
-	PerPage     int         `json:"per_page"`
-	To          int         `json:"to"`
-	Total       int         `json:"total"`
+	Data  []OrderList `json:"data"`
+	Count int         `json:"total"`
 }
 
 type OrdersListRequest struct {

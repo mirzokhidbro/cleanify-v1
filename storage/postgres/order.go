@@ -87,7 +87,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	cQ := `SELECT count(1) FROM "orders"` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
 	err = stg.db.QueryRow(cQ, arr...).Scan(
-		&res.Total,
+		&res.Count,
 	)
 
 	if err != nil {
