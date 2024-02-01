@@ -33,3 +33,13 @@ func (h *Handler) getStatusParam(c *gin.Context) (offset int, err error) {
 	offsetStr := c.DefaultQuery("status", "0")
 	return strconv.Atoi(offsetStr)
 }
+
+func (h *Handler) getOffsetParam(c *gin.Context) (offset int, err error) {
+	offsetStr := c.DefaultQuery("offset", h.Cfg.DefaultOffset)
+	return strconv.Atoi(offsetStr)
+}
+
+func (h *Handler) getLimitParam(c *gin.Context) (offset int, err error) {
+	offsetStr := c.DefaultQuery("limit", h.Cfg.DefaultLimit)
+	return strconv.Atoi(offsetStr)
+}

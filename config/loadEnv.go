@@ -16,7 +16,7 @@ type Config struct {
 	ServerPort     string
 	DefaultOffset  string
 	DefaultLimit   string
-	API_SECRET      string
+	API_SECRET     string
 }
 
 func LoadConfig() (config Config, err error) {
@@ -32,9 +32,9 @@ func LoadConfig() (config Config, err error) {
 		DBName:         cast.ToString(os.Getenv("DB_NAME")),
 		DBPort:         cast.ToInt(os.Getenv("DB_PORT")),
 		ServerPort:     cast.ToString(os.Getenv("PORT")),
-		DefaultOffset:  cast.ToString(os.Getenv("")),
-		DefaultLimit:   cast.ToString(os.Getenv("")),
-		API_SECRET:      cast.ToString(os.Getenv("API_SECRET")),
+		DefaultOffset:  cast.ToString(os.Getenv("DEFAULT_OFFSET")),
+		DefaultLimit:   cast.ToString(os.Getenv("DEFAULT_LIMIT")),
+		API_SECRET:     cast.ToString(os.Getenv("API_SECRET")),
 	}
 
 	return

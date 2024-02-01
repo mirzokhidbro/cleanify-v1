@@ -45,9 +45,9 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 	return id, nil
 }
 
-func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersListRequest) ([]models.OrderList, error) {
+func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error) {
 	var arr []interface{}
-	var orders []models.OrderList
+	res = models.OrderListResponse{}
 	params := make(map[string]interface{})
 	query := `SELECT 
 		id, 
@@ -59,6 +59,9 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	filter := " WHERE true"
 	order := " ORDER BY created_at"
 	arrangement := " DESC"
+	offset := " OFFSET 0"
+	limit := " LIMIT 20"
+
 	params["company_id"] = companyID
 	filter += " and (company_id = :company_id)"
 
@@ -72,12 +75,32 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		filter += " AND (status = :status)"
 	}
 
-	q := query + filter + order + arrangement
+	if queryParam.Offset > 0 {
+		params["offset"] = queryParam.Offset
+		offset = " OFFSET :offset"
+	}
+
+	if queryParam.Limit > 0 {
+		params["limit"] = queryParam.Limit
+		limit = " LIMIT :limit"
+	}
+	cQ := `SELECT count(1) FROM "orders"` + filter
+	cQ, arr = helper.ReplaceQueryParams(cQ, params)
+	err = stg.db.QueryRow(cQ, arr...).Scan(
+		&res.Total,
+	)
+
+	if err != nil {
+		return res, err
+	}
+
+	q := query + filter + order + arrangement + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
 	rows, err := stg.db.Query(q, arr...)
+
 	if err != nil {
-		return orders, err
+		return res, err
 	}
 	defer rows.Close()
 
@@ -89,16 +112,16 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 			&order.Status,
 			&order.CreatedAt)
 		if err != nil {
-			return nil, err
+			return res, err
 		}
-		orders = append(orders, order)
+		res.Data = append(res.Data, order)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return res, err
 	}
 
-	return orders, nil
+	return res, nil
 }
 
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {

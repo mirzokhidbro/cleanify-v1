@@ -31,6 +31,17 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 	// 	return
 	// }
+	limit, err := h.getLimitParam(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 
 	token, err := utils.ExtractTokenID(c)
 
@@ -53,6 +64,8 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 	data, err := h.Stg.GetOrdersList(*user.CompanyID, models.OrdersListRequest{
 		Slug:   c.Query("slug"),
 		Status: status,
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

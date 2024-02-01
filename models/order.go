@@ -22,7 +22,17 @@ type OrderList struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type OrderListResponse struct {
+	Data        []OrderList `json:"data"`
+	CurrentPage int         `json:"current_page"`
+	PerPage     int         `json:"per_page"`
+	To          int         `json:"to"`
+	Total       int         `json:"total"`
+}
+
 type OrdersListRequest struct {
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 	Status int    `json:"status,omitempty"`
 	Slug   string `json:"slug,omitempty"`
 }

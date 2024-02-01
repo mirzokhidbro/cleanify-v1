@@ -22,7 +22,7 @@ type StorageI interface {
 
 	//orders
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
-	GetOrdersList(companyID string, queryParam models.OrdersListRequest) ([]models.OrderList, error)
+	GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error)
 	GetOrderLocation(ID int) (models.Order, error)
 	GetOrderByPrimaryKey(ID int) (models.Order, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
