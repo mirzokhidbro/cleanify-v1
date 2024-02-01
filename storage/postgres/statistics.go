@@ -13,12 +13,15 @@ func (stg *Postgres) GetWorkVolumeList(companyID string) ([]models.WorkVolume, e
 		sum(width*height) meter_square, 
 		washed_at::date, 
 		type 
-		FROM order_items`
+		FROM order_items oi inner join orders o on oi.order_id = o.id`
 
 	filter := " WHERE true"
 	order := " ORDER BY washed_at"
 	arrangement := " DESC"
 	group := " group by washed_at::date, type"
+
+	params["company_id"] = companyID
+	filter += " AND (o.company_id = :company_id)"
 
 	q := query + filter + group + order + arrangement
 
