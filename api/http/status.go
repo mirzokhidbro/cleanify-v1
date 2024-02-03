@@ -38,6 +38,11 @@ var (
 		Status:      "INVALID_ARGUMENT",
 		Description: "Invalid argument value passed",
 	}
+	NOT_FOUND = Status{
+		Code:        404,
+		Status:      "NOT_FOUND",
+		Description: "Not Found!",
+	}
 	Unauthorized = Status{
 		Code:        401,
 		Status:      "UNAUTHORIZED",

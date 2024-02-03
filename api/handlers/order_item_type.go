@@ -62,7 +62,7 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
-func (h *Handler) EditOrderItemType(c *gin.Context) {
+func (h *Handler) UpdateOrderItemType(c *gin.Context) {
 	token, err := utils.ExtractTokenID(c)
 	var body models.EditOrderItemTypeRequest
 
@@ -82,11 +82,16 @@ func (h *Handler) EditOrderItemType(c *gin.Context) {
 	}
 	body.CopmanyID = *user.CompanyID
 
-	_, err = h.Stg.UpdateOrderItemTypeModel(body)
+	rowsAffected, err := h.Stg.UpdateOrderItemTypeModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.BadRequest, "Successfully updated")
+	if rowsAffected == 0 {
+		h.handleResponse(c, http.NOT_FOUND, "Order item type not found!")
+		return
+	}
+
+	h.handleResponse(c, http.OK, rowsAffected)
 }

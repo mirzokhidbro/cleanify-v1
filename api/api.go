@@ -61,7 +61,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderItemTypeRouter := baseRouter.Group("order-item-type")
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemModel)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemType)
 
 	}
 
