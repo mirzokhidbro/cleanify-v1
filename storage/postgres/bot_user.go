@@ -114,7 +114,7 @@ func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.Selected
 
 	query := `with users as (
 		select c.id as company_id, c.name as company_name, u.phone, u.id from users u
-		inner join company_roles cr on cr.id = u.role_id
+		inner join roles cr on cr.id = u.role_id
 		inner join companies c on c.id = cr.company_id
 	)
 	select users.company_id, users.company_name, users.phone, users.id from users

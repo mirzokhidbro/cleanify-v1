@@ -84,7 +84,7 @@ func (stg Postgres) GetUsersList() ([]models.User, error) {
 									c.name, 
 									cr.name  
 									from users u 
-									left join company_roles cr on cr.id = u.role_id 
+									left join roles cr on cr.id = u.role_id 
 									left join companies c on c.id = cr.company_id`)
 	if err != nil {
 		return nil, err
