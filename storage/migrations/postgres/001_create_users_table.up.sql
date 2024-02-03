@@ -1,9 +1,0 @@
-CREATE TABLE IF NOT EXISTS "users" (
-    "id" UUID PRIMARY KEY,
-    "phone" VARCHAR UNIQUE,
-    "firstname" VARCHAR,
-    "lastname" VARCHAR,
-    "password" VARCHAR(1000),
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
