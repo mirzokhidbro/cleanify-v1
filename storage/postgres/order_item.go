@@ -68,6 +68,9 @@ func (stg *Postgres) UpdateOrderItemModel(entity models.UpdateOrderItemRequest) 
 	if entity.Description != "" {
 		query += `description = :description,`
 	}
+	if entity.Type != "" {
+		query += `type = :type,`
+	}
 
 	query += `updated_at = now()
 			  WHERE
@@ -79,6 +82,7 @@ func (stg *Postgres) UpdateOrderItemModel(entity models.UpdateOrderItemRequest) 
 		"width":       entity.Width,
 		"height":      entity.Height,
 		"description": entity.Description,
+		"type":        entity.Type,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

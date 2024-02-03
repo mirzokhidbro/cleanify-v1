@@ -13,3 +13,9 @@ type OrderItemByCompany struct {
 	CopmanyName string  `json:"company_name"`
 	CopmanyID   string  `json:"company_id"`
 }
+
+type EditOrderItemTypeRequest struct {
+	CopmanyID   string  `json:"company_id"`
+	ID          string  `json:"id" binding:"required"`
+	Price       float32 `json:"price" binding:"required"`
+}

@@ -33,19 +33,19 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		companyRouter := baseRouter.Group("/company")
 		companyRouter.POST("", h.CreateCompanyModel)
-		companyRouter.Use(middleware.AuthMiddleware()).GET("/get-by-owner", h.GetCompanyByOwnerId)
+		// companyRouter.Use(middleware.AuthMiddleware()).GET("/get-by-owner", h.GetCompanyByOwnerId)
 	}
 
 	{
 		companyRoleRouter := baseRouter.Group("/company-role")
-		companyRoleRouter.POST("", h.CreateCompanyRoleModel)
-		companyRoleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany) //
+		companyRoleRouter.POST("", h.CreateRoleModel)
+		companyRoleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
 	}
 
 	{
 		orderRouter := baseRouter.Group("orders")
 		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList) //
+		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
@@ -54,13 +54,15 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderItemRouter := baseRouter.Group("order-items")
 		orderItemRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemModel)
-		orderItemRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemModel)
+		orderItemRouter.Use(middleware.AuthMiddleware()).POST("edit", h.UpdateOrderItemModel)
 	}
 
 	{
 		orderItemTypeRouter := baseRouter.Group("order-item-type")
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)//
+		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemModel)
+
 	}
 
 	{

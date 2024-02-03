@@ -59,7 +59,7 @@ func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg Postgres) GetUserById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, cr.name, c.id  from users u left join company_roles cr on cr.id = u.role_id left join companies c on c.id = cr.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, r.name, c.id  from users u left join roles r on r.id = u.role_id left join companies c on c.id = r.company_id where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Firstname,
 		&user.Lastname,

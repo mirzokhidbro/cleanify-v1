@@ -3,6 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +30,7 @@ func (h *Handler) UpdateOrderItemModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
+	fmt.Println(body)
 	_, err := h.Stg.UpdateOrderItemModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

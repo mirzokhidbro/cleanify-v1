@@ -10,11 +10,12 @@ type CreateOrderItemModel struct {
 }
 
 type UpdateOrderItemRequest struct {
-	ID          int     `json:"id"`
+	ID          int     `json:"id", binding:"required"`
 	Price       float32 `json:"price"`
 	Width       float32 `json:"width"`
 	Height      float32 `json:"height"`
 	Description string  `json:"description"`
+	Type        string  `json:"types"`
 }
 
 type OrderItem struct {

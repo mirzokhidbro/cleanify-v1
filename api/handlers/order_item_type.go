@@ -61,3 +61,32 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, data)
 }
+
+func (h *Handler) EditOrderItemType(c *gin.Context) {
+	token, err := utils.ExtractTokenID(c)
+	var body models.EditOrderItemTypeRequest
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	body.CopmanyID = *user.CompanyID
+
+	_, err = h.Stg.UpdateOrderItemTypeModel(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.BadRequest, "Successfully updated")
+}

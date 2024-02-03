@@ -4,13 +4,13 @@ import (
 	"bw-erp/models"
 )
 
-func (stg *Postgres) CreateCompanyRoleModel(id string, entity models.CreateCompanyRoleModel) error {
+func (stg *Postgres) CreateCompanyRoleModel(id string, entity models.CreateRoleModel) error {
 	_, err := stg.GetCompanyById(entity.CompanyId)
 	if err != nil {
 		return err
 	}
 
-	_, err = stg.db.Exec(`INSERT INTO company_roles(
+	_, err = stg.db.Exec(`INSERT INTO roles(
 		id,
 		name,
 		company_id
@@ -30,26 +30,26 @@ func (stg *Postgres) CreateCompanyRoleModel(id string, entity models.CreateCompa
 	return nil
 }
 
-func (stg *Postgres) GetRolesListByCompany(companyID string) ([]models.CompanyRoleListByCompany, error) {
-	rows, err := stg.db.Query(`select id, name, company_id from company_roles where company_id = $1`, companyID)
+func (stg *Postgres) GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error) {
+	rows, err := stg.db.Query(`select id, name, company_id from roles where company_id = $1`, companyID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var companyRoles []models.CompanyRoleListByCompany
+	var roles []models.RoleListByCompany
 	for rows.Next() {
-		var companyRole models.CompanyRoleListByCompany
-		err = rows.Scan(&companyRole.ID, &companyRole.Name, &companyRole.CompanyID)
+		var role models.RoleListByCompany
+		err = rows.Scan(&role.ID, &role.Name, &role.CompanyID)
 		if err != nil {
 			return nil, err
 		}
-		companyRoles = append(companyRoles, companyRole)
+		roles = append(roles, role)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return companyRoles, nil
+	return roles, nil
 }

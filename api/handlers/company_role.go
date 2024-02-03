@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) CreateCompanyRoleModel(c *gin.Context) {
-	var body models.CreateCompanyRoleModel
+func (h *Handler) CreateRoleModel(c *gin.Context) {
+	var body models.CreateRoleModel
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

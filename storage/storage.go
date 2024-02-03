@@ -17,8 +17,8 @@ type StorageI interface {
 	GetCompanyByOwnerId(ownerId string) ([]models.Company, error)
 
 	// company role
-	CreateCompanyRoleModel(id string, entity models.CreateCompanyRoleModel) error
-	GetRolesListByCompany(companyID string) ([]models.CompanyRoleListByCompany, error)
+	CreateCompanyRoleModel(id string, entity models.CreateRoleModel) error
+	GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error)
 
 	//orders
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
@@ -34,6 +34,7 @@ type StorageI interface {
 	//order item type
 	CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error
 	GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error)
+	UpdateOrderItemTypeModel(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error)
 
 	//company bots
 	CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error

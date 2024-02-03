@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
 )
@@ -80,4 +81,31 @@ func (stg *Postgres) GetOrderItemTypeById(orderItemTypeId string) (models.OrderI
 	}
 
 	return orderItemType, nil
+}
+
+func (stg *Postgres) UpdateOrderItemTypeModel(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error) {
+	query := `UPDATE 
+					"order_item_types" 
+						SET price = :price,updated_at = now()
+					WHERE
+		  				id = :id and company_id = :company_id`
+
+	params := map[string]interface{}{
+		"id":         entity.ID,
+		"price":      entity.Price,
+		"company_id": entity.CopmanyID,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }
