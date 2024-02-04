@@ -74,6 +74,10 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		statistics := baseRouter.Group("statistics")
 		statistics.Use(middleware.AuthMiddleware()).GET("work-volume/:company-id", h.GetWorkVolumeList) //
 	}
+	{
+		statistics := baseRouter.Group("permissions")
+		statistics.Use(middleware.AuthMiddleware()).GET("", h.GetPermissionList)
+	}
 	return
 }
 

@@ -56,4 +56,7 @@ type StorageI interface {
 
 	//work volume
 	GetWorkVolumeList(companyID string) ([]models.WorkVolume, error)
+
+	// permission
+	GetPermissionList(Scope string) ([]models.Permissions, error)
 }
