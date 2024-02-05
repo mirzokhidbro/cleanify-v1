@@ -141,7 +141,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 		return order, err
 	}
 
-	rows, err := stg.db.Query(`select order_id, type, price, width, height, description from order_items where order_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, description from order_items where order_id = $1`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -149,7 +149,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 
 	for rows.Next() {
 		var item models.OrderItem
-		if err := rows.Scan(&item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.Description); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.Description); err != nil {
 			return order, err
 		}
 		order.OrderItems = append(order.OrderItems, item)

@@ -19,6 +19,7 @@ type UpdateOrderItemRequest struct {
 }
 
 type OrderItem struct {
+	ID          int     `json:"id"`
 	OrderID     int     `json:"order_id"`
 	Type        string  `json:"type"`
 	Price       float32 `json:"price"`
