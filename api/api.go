@@ -20,7 +20,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		usersRouter := baseRouter.Group("/users")
 		usersRouter.POST("", h.CreateUser)
-		usersRouter.GET("", h.GetUsersList)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetUsersList)
 	}
 
 	{

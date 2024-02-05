@@ -5,6 +5,7 @@ import (
 	"bw-erp/models"
 	"bw-erp/utils"
 	"errors"
+	"strings"
 )
 
 func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) error {
@@ -59,7 +60,7 @@ func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg Postgres) GetUserById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, r.name, c.id  from users u left join roles r on r.id = u.role_id left join companies c on c.id = r.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, r.name, c.id, r.id  from users u left join roles r on r.id = u.role_id left join companies c on c.id = r.company_id where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Firstname,
 		&user.Lastname,
@@ -67,9 +68,30 @@ func (stg Postgres) GetUserById(id string) (models.User, error) {
 		&user.Company,
 		&user.Role,
 		&user.CompanyID,
+		&user.RoleID,
 	)
 	if err != nil {
 		return user, err
+	}
+
+	if user.RoleID != nil {
+		var roleAndPermission models.RoleAndPermission
+		_ = stg.db.QueryRow(`select role_id, permission_ids from role_and_permissions where role_id = $1`, user.RoleID).Scan(
+			&roleAndPermission.RoleID,
+			&roleAndPermission.PermissionIDs,
+		)
+		if roleAndPermission.PermissionIDs != "" {
+			permissionIds := utils.GetArray(roleAndPermission.PermissionIDs)
+			Permission := ""
+			for _, permissionID := range permissionIds {
+				permission, err := stg.GetPermissionByPrimaryKey(permissionID)
+				if err == nil {
+					Permission += "|" + permission.Slug
+				}
+			}
+			user.Permissions = strings.TrimPrefix(Permission, "|")
+		}
+
 	}
 
 	return user, nil

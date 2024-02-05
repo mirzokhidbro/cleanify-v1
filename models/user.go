@@ -21,13 +21,15 @@ type AuthUserModel struct {
 }
 
 type User struct {
-	ID        string  `json:"id"`
-	Firstname string  `json:"firstname"`
-	Lastname  string  `json:"lastname"`
-	Phone     string  `json:"phone"`
-	Role      *string `json:"role"`
-	Company   *string `json:"company"`
-	CompanyID *string `json:"company_id"`
+	ID          string  `json:"id"`
+	Firstname   string  `json:"firstname"`
+	Lastname    string  `json:"lastname"`
+	Phone       string  `json:"phone"`
+	Role        *string `json:"role"`
+	Company     *string `json:"company"`
+	CompanyID   *string `json:"company_id"`
+	RoleID      *string `json:"role_id"`
+	Permissions string  `json:"permissions"`
 }
 
 type NullString struct {
