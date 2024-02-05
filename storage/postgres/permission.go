@@ -3,11 +3,13 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/utils"
+	"errors"
 )
 
-func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permissions, error) {
+func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permission, error) {
 	var arr []interface{}
-	var permissions []models.Permissions
+	var permissions []models.Permission
 	params := make(map[string]interface{})
 	query := `SELECT 
 				id,
@@ -33,7 +35,7 @@ func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permissions, erro
 	defer rows.Close()
 
 	for rows.Next() {
-		var permission models.Permissions
+		var permission models.Permission
 		err = rows.Scan(
 			&permission.ID,
 			&permission.Slug,
@@ -50,4 +52,20 @@ func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permissions, erro
 	}
 
 	return permissions, nil
+}
+
+func (stg *Postgres) GetPermissionByPrimaryKey(ID string) (models.Permission, error) {
+	var permission models.Permission
+	if !utils.IsValidUUID(ID) {
+		return permission, errors.New("Permission id si noto'g'ri!")
+	}
+	err := stg.db.QueryRow(`select id, slug, name from permissions where id = $1`, ID).Scan(
+		&permission.ID,
+		&permission.Slug,
+		&permission.Name,
+	)
+	if err != nil {
+		return permission, errors.New("Permission topilmadi!")
+	}
+	return permission, nil
 }

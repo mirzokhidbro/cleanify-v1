@@ -87,3 +87,9 @@ CREATE TABLE IF NOT EXISTS "permissions" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS "role_and_permissions" (
+    "id" SERIAL PRIMARY KEY,
+    "role_id" VARCHAR UNIQUE,
+    "permission_ids" VARCHAR[]
+);

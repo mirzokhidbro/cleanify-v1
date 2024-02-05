@@ -37,9 +37,10 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
-		companyRoleRouter := baseRouter.Group("/company-role")
-		companyRoleRouter.POST("", h.CreateRoleModel)
-		companyRoleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
+		roleRouter := baseRouter.Group("/role")
+		roleRouter.POST("", h.CreateRoleModel)
+		roleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
+		roleRouter.Use(middleware.AuthMiddleware()).POST("/give-permissions", h.GetPermissionsToRole)
 	}
 
 	{

@@ -9,7 +9,6 @@ import (
 
 func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
 	_, err = stg.GetCompanyById(entity.CompanyID)
-	fmt.Print("\n order create page")
 	if err != nil {
 		return 0, errors.New("Company not found")
 	}

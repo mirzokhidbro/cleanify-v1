@@ -10,3 +10,9 @@ type RoleListByCompany struct {
 	Name      string `json:"name"`
 	CompanyID string `json:"company_id"`
 }
+
+type GetPermissionToRoleRequest struct {
+	CompanyID     string   `json:"company_id"`
+	RoleID        string   `json:"role_id" binding:"required"`
+	PermissionIDs []string `json:"permission_ids" binding:"required"`
+}

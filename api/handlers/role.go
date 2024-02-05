@@ -17,7 +17,7 @@ func (h *Handler) CreateRoleModel(c *gin.Context) {
 	}
 	id := uuid.New()
 
-	err := h.Stg.CreateCompanyRoleModel(id.String(), body)
+	err := h.Stg.CreateRoleModel(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -53,4 +53,35 @@ func (h *Handler) GetRolesListByCompany(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, data)
+}
+
+func (h *Handler) GetPermissionsToRole(c *gin.Context) {
+	var body models.GetPermissionToRoleRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	body.CompanyID = *user.CompanyID
+
+	err = h.Stg.GetPermissionsToRole(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "Success!")
 }

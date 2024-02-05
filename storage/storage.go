@@ -17,8 +17,9 @@ type StorageI interface {
 	GetCompanyByOwnerId(ownerId string) ([]models.Company, error)
 
 	// company role
-	CreateCompanyRoleModel(id string, entity models.CreateRoleModel) error
+	CreateRoleModel(id string, entity models.CreateRoleModel) error
 	GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error)
+	GetPermissionsToRole(models.GetPermissionToRoleRequest) error
 
 	//orders
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
@@ -58,5 +59,6 @@ type StorageI interface {
 	GetWorkVolumeList(companyID string) ([]models.WorkVolume, error)
 
 	// permission
-	GetPermissionList(Scope string) ([]models.Permissions, error)
+	GetPermissionList(Scope string) ([]models.Permission, error)
+	GetPermissionByPrimaryKey(ID string) (models.Permission, error)
 }
