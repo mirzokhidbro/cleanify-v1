@@ -25,6 +25,25 @@ func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) e
 		entity.CompanyId,
 	)
 
+	query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
+
+	_, err = stg.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	_, err = stg.db.Exec(`INSERT INTO role_and_permissions(
+		role_id,
+		permission_ids
+	) VALUES (
+		$1,
+		$2
+	)`,
+		id,
+		PermissionIDs,
+	)
+
 	if err != nil {
 		return err
 	}

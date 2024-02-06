@@ -15,6 +15,20 @@ func (h *Handler) CreateRoleModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	// token, err := utils.ExtractTokenID(c)
+
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	// user, err := h.Stg.GetUserById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+	// fmt.Print(user)
+	// body.CompanyId = *user.CompanyID
 	id := uuid.New()
 
 	err := h.Stg.CreateRoleModel(id.String(), body)

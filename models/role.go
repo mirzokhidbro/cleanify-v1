@@ -3,6 +3,7 @@ package models
 type CreateRoleModel struct {
 	Name      string `json:"name" binding:"required" minLength:"2" maxLength:"255"`
 	CompanyId string `json:"company_id" binding:"required"`
+	PermissionIDs []string `json:"permission_ids" binding:"required"`
 }
 
 type RoleListByCompany struct {
