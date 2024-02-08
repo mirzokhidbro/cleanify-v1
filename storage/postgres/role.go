@@ -74,6 +74,26 @@ func (stg *Postgres) GetRolesListByCompany(companyID string) ([]models.RoleListB
 	return roles, nil
 }
 
+func (stg *Postgres) GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error) {
+	var model models.GetRoleByPrimaryKey
+	var response models.RoleByPrimaryKey
+	err := stg.db.QueryRow(`select r.id, r.name, rp.permission_ids from roles r left join role_and_permissions rp on r.id::text = rp.role_id where r.id::text = $1`, roleID).Scan(
+		&model.ID,
+		&model.Name,
+		&model.PermissionIDs,
+	)
+	if err != nil {
+		return response, err
+	}
+	permissionIds := utils.GetArray(model.PermissionIDs)
+	response.ID = model.ID
+	response.Name = model.Name
+	response.PermissionIDs = permissionIds
+
+
+	return response, nil
+}
+
 func (stg *Postgres) GetPermissionsToRole(entity models.GetPermissionToRoleRequest) error {
 	for _, permission_id := range entity.PermissionIDs {
 		_, err := stg.GetPermissionByPrimaryKey(permission_id)

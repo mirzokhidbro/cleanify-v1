@@ -41,11 +41,11 @@ func (h *Handler) CreateRoleModel(c *gin.Context) {
 }
 
 func (h *Handler) GetRolesListByCompany(c *gin.Context) {
-	// companyID := c.Param("company-id")
-	// if !utils.IsValidUUID(companyID) {
-	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
-	// 	return
-	// }
+	companyID := c.Param("company-id")
+	if !utils.IsValidUUID(companyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+		return
+	}
 
 	token, err := utils.ExtractTokenID(c)
 
@@ -54,13 +54,13 @@ func (h *Handler) GetRolesListByCompany(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	_, err = h.Stg.GetUserById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	data, err := h.Stg.GetRolesListByCompany(*user.CompanyID)
+	data, err := h.Stg.GetRolesListByCompany(companyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -98,4 +98,20 @@ func (h *Handler) GetPermissionsToRole(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, "Success!")
+}
+
+func (h *Handler) GetRoleByPrimaryKey(c *gin.Context) {
+	roleID := c.Param("role-id")
+	if !utils.IsValidUUID(roleID) {
+		h.handleResponse(c, http.InvalidArgument, "role id is an invalid uuid")
+		return
+	}
+
+	data, err := h.Stg.GetRoleByPrimaryKey(roleID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, data)
 }

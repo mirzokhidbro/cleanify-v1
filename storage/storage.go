@@ -16,10 +16,11 @@ type StorageI interface {
 	CreateCompanyModel(id string, entity models.CreateCompanyModel) error
 	GetCompanyByOwnerId(ownerId string) ([]models.Company, error)
 
-	// company role
+	// role
 	CreateRoleModel(id string, entity models.CreateRoleModel) error
 	GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error)
 	GetPermissionsToRole(models.GetPermissionToRoleRequest) error
+	GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error)
 
 	//orders
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
