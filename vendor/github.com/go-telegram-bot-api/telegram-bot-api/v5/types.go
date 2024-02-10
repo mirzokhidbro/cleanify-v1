@@ -1378,6 +1378,16 @@ type InlineKeyboardButton struct {
 	//
 	// optional
 	Pay bool `json:"pay,omitempty"`
+
+	WebApp *WebAppInfo `json:"web_app,omitempty"`
+}
+
+// WebAppInfo (https://core.telegram.org/bots/api#webappinfo)
+//
+// Describes a Web App.
+type WebAppInfo struct {
+	// An HTTPS URL of a Web App to be opened with additional data as specified in Initializing Web Apps
+	Url string `json:"url"`
 }
 
 // LoginURL represents a parameter of the inline keyboard button used to

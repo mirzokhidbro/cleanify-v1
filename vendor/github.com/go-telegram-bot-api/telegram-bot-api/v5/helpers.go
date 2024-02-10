@@ -693,6 +693,17 @@ func NewInlineKeyboardButtonURL(text, url string) InlineKeyboardButton {
 	}
 }
 
+// NewInlineKeyboardButtonURL creates an inline keyboard button with text
+// which goes to a URL.
+func NewInlineKeyboardButtonWebApp(text, url string) InlineKeyboardButton {
+	return InlineKeyboardButton{
+		Text: text,
+		WebApp: &WebAppInfo{
+			Url: url,
+		},
+	}
+}
+
 // NewInlineKeyboardButtonSwitch creates an inline keyboard button with
 // text which allows the user to switch to a chat or return to a chat.
 func NewInlineKeyboardButtonSwitch(text, sw string) InlineKeyboardButton {

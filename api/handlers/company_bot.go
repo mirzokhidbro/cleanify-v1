@@ -40,7 +40,6 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 	body.Lastname = bot.Self.LastName
 	body.Username = bot.Self.UserName
 
-	
 	id := uuid.New()
 	err = h.Stg.CreateCompanyBotModel(id.String(), body)
 	if err != nil {

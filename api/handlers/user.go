@@ -3,6 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
+	"bw-erp/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -26,7 +27,19 @@ func (h *Handler) CreateUser(c *gin.Context) {
 }
 
 func (h *Handler) GetUsersList(c *gin.Context) {
-	users, err := h.Stg.GetUsersList()
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	users, err := h.Stg.GetUsersList(*user.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

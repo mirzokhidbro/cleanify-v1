@@ -27,7 +27,7 @@ func (h *Handler) CreateRoleModel(c *gin.Context) {
 	// 	h.handleResponse(c, http.BadRequest, err.Error())
 	// 	return
 	// }
-	// fmt.Print(user)
+
 	// body.CompanyId = *user.CompanyID
 	id := uuid.New()
 

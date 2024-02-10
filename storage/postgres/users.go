@@ -97,17 +97,19 @@ func (stg Postgres) GetUserById(id string) (models.User, error) {
 	return user, nil
 }
 
-func (stg Postgres) GetUsersList() ([]models.User, error) {
-	rows, err := stg.db.Query(`select 
-									u.id, 
-									u.firstname, 
-									u.lastname, 
-									u.phone, 
-									c.name, 
-									cr.name  
-									from users u 
-									left join roles cr on cr.id = u.role_id 
-									left join companies c on c.id = cr.company_id`)
+func (stg Postgres) GetUsersList(companyID string) ([]models.User, error) {
+	rows, err := stg.db.Query(`SELECT 
+								u.id, 
+								u.firstname, 
+								u.lastname, 
+								u.phone, 
+								c.name, 
+								cr.name  
+								FROM users u 
+								LEFT JOIN roles cr ON cr.id = u.role_id 
+								LEFT JOIN companies c ON c.id = cr.company_id 
+								WHERE c.id is not null and c.id = $1`, companyID)
+
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,7 @@ type StorageI interface {
 	CreateUserModel(id string, entity models.CreateUserModel) error
 	GetUserByPhone(phone string) (models.AuthUserModel, error)
 	GetUserById(id string) (models.User, error)
-	GetUsersList() ([]models.User, error)
+	GetUsersList(companyID string) ([]models.User, error)
 	ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error
 
 	// company
