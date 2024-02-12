@@ -16,7 +16,22 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	_, err := h.Stg.CreateOrderModel(body)
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	body.CompanyID = *user.CompanyID
+
+	_, err = h.Stg.CreateOrderModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

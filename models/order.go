@@ -7,12 +7,13 @@ import (
 )
 
 type CreateOrderModel struct {
-	CompanyID   string `json:"company_id", binding:"required"`
-	Phone       string `json:"phone", binding:"required"`
-	Count       int    `json:"count", binding:"required"`
-	Slug        string `json:"slug", binding:"required"`
+	CompanyID   string `json:"company_id" binding:"required"`
+	Phone       string `json:"phone" binding:"required"`
+	Count       int    `json:"count" binding:"required"`
+	Slug        string `json:"slug" binding:"required"`
 	Description string `json:"description"`
 	ChatID      int64  `json:"chat_id"`
+	Address     string `json:"address" binding:"required"`
 }
 
 type OrderList struct {
@@ -45,6 +46,7 @@ type Order struct {
 	UpdatedAt   time.Time   `json:"updated_at"`
 	Latitute    *float64    `json:"latitute"`
 	Longitude   *float64    `json:"longitude"`
+	Address     *string     `json:"address"`
 	OrderItems  []OrderItem `json:"order_items"`
 }
 

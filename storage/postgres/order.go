@@ -4,7 +4,6 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
-	"fmt"
 )
 
 func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
@@ -19,14 +18,16 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 		count,
 		slug,
 		description,
-		chat_id
+		chat_id,
+		address
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
@@ -34,10 +35,10 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 		entity.Slug,
 		entity.Description,
 		entity.ChatID,
+		entity.Address,
 	).Scan(&id)
 
 	if err != nil {
-		fmt.Print("\n order create error ", err)
 		return 0, err
 	}
 
@@ -125,7 +126,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 	var order models.Order
-	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, created_at, updated_at from orders where id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.Phone,
@@ -134,6 +135,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 		&order.Description,
 		&order.Latitute,
 		&order.Longitude,
+		&order.Address,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)

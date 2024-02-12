@@ -93,3 +93,6 @@ CREATE TABLE IF NOT EXISTS "role_and_permissions" (
     "role_id" VARCHAR UNIQUE,
     "permission_ids" VARCHAR[]
 );
+
+ALTER TABLE "orders"
+ADD "address" VARCHAR;
