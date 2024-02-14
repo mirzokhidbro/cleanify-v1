@@ -41,6 +41,7 @@ type Order struct {
 	Phone       string      `json:"phone"`
 	Count       int         `json:"count"`
 	Slug        string      `json:"slug"`
+	Status      int16       `json:"status"`
 	Description string      `json:"description"`
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
