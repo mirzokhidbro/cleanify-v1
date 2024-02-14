@@ -10,7 +10,7 @@ func (stg *Postgres) GetWorkVolumeList(companyID string) ([]models.WorkVolume, e
 	var workVolumes []models.WorkVolume
 	params := make(map[string]interface{})
 	query := `SELECT 
-		sum(width*height) meter_square, 
+	round(sum((width::numeric * height::numeric)), 2) as meter_square,
 		washed_at::date, 
 		type 
 		FROM order_items oi inner join orders o on oi.order_id = o.id`
