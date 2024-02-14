@@ -126,7 +126,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 	var order models.Order
-	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, created_at, updated_at from orders where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, status, created_at, updated_at from orders where id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.Phone,
@@ -136,6 +136,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 		&order.Latitute,
 		&order.Longitude,
 		&order.Address,
+		&order.Status,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
