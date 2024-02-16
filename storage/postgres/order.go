@@ -124,6 +124,55 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	return res, nil
 }
 
+func (stg *Postgres) GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error) {
+	rows, err := stg.db.Query(`select  
+		id,
+		address, 
+		phone
+	from orders 
+	where company_id = $1 and status = $2`, companyID, Status)
+	if err != nil {
+		return nil, err
+	}
+
+	var orders []models.Order
+	for rows.Next() {
+		var order models.Order
+		err = rows.Scan(
+			&order.ID,
+			&order.Address,
+			&order.Phone,
+		)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
+func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Order, error) {
+	var order models.Order
+	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where company_id = $1 and phone = $2`, companyID, Phone).Scan(
+		&order.ID,
+		&order.CompanyID,
+		&order.Phone,
+		&order.Count,
+		&order.Slug,
+		&order.Description,
+		&order.Latitute,
+		&order.Longitude,
+		&order.CreatedAt,
+		&order.UpdatedAt,
+	)
+	if err != nil {
+		return order, err
+	}
+
+	return order, nil
+}
+
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
 	var order models.Order
 	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, status, created_at, updated_at from orders where id = $1`, ID).Scan(

@@ -28,6 +28,8 @@ type StorageI interface {
 	GetOrderLocation(ID int) (models.Order, error)
 	GetOrderByPrimaryKey(ID int) (models.Order, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
+	GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error)
+	GetOrderByPhone(companyID string, Phone string) (models.Order, error)
 
 	//order-items
 	CreateOrderItemModel(entity models.CreateOrderItemModel) error

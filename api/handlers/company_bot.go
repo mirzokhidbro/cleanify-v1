@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
 	tgmodels "github.com/go-telegram/bot/models"
+	"github.com/go-telegram/ui/keyboard/inline"
 )
 
 // tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -128,8 +129,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, helloHandler)
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, newApplicationHandler)
+				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
 				b.Start(ctx)
 			}()
 		}
@@ -140,11 +140,48 @@ func (h *Handler) BotStart(c *gin.Context) {
 	h.handleResponse(c, http.OK, "OK!")
 }
 
-func newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   "Bu yerda inline keyboard chiqishi kerak bo'ladi!",
-	})
+func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+
+	orders, err := h.Stg.GetOrdersByStatus("4a954141-5203-4e46-ae8a-519ebd098167", 0)
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   err.Error(),
+		})
+	} else {
+		kb := inline.New(b)
+		for _, order := range orders {
+			buttonName := *order.Address + " | " + order.Phone
+			kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+		}
+
+		kb.Row().Button("Cancel", []byte("cancel"), h.onInlineKeyboardSelect)
+
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:      update.Message.Chat.ID,
+			Text:        "Select the variant",
+			ReplyMarkup: kb,
+		})
+	}
+
+}
+
+func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tgmodels.InaccessibleMessage, data []byte) {
+	order, err := h.Stg.GetOrderByPhone("4a954141-5203-4e46-ae8a-519ebd098167", string(data))
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: mes.Chat.ID,
+			Text:   err.Error(),
+		})
+	} else {
+		if order.Phone != "" {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: mes.Chat.ID,
+				Text:   "You selected: " + order.Phone,
+			})
+		}
+
+	}
 }
 
 func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
@@ -178,6 +215,8 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 		switch *user.Page {
 		case "Registration":
 			h.RegistrationPage(ctx, b, update, botID)
+		case "Order":
+			h.OrderPage(ctx, b, update, user)
 		}
 	}
 }
@@ -209,7 +248,7 @@ func (h *Handler) RegistrationPage(ctx context.Context, b *bot.Bot, update *tgmo
 	}
 }
 
-// func (h *Handler) OrderPage(update tgbotapi.Update, bot *tgbotapi.BotAPI, user models.BotUser) {
+// func (h *Handler) OrderPage(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
 // 	if *user.DialogStep == "" {
 // 		if update.Message.Text != "Buyurtma kiritish" {
 // 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Yangi buyurtma qo'shish uchun <b>Buyurtma kiritish</b> tugmasini bosing")
