@@ -9,8 +9,8 @@ import (
 type CreateOrderModel struct {
 	CompanyID   string `json:"company_id" binding:"required"`
 	Phone       string `json:"phone" binding:"required"`
-	Count       int    `json:"count" binding:"required"`
-	Slug        string `json:"slug" binding:"required"`
+	Count       int    `json:"count"`
+	Slug        string `json:"slug"`
 	Description string `json:"description"`
 	ChatID      int64  `json:"chat_id"`
 	Address     string `json:"address" binding:"required"`
