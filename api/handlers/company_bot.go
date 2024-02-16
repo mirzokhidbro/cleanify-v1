@@ -216,7 +216,7 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 		case "Registration":
 			h.RegistrationPage(ctx, b, update, botID)
 		case "Order":
-			h.OrderPage(ctx, b, update, user)
+			// h.OrderPage(ctx, b, update, user)
 		}
 	}
 }
