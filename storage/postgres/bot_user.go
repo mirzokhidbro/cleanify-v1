@@ -85,7 +85,7 @@ func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.
 		&botUser.DialogStep,
 	)
 	if err != nil {
-		return botUser, err
+		return botUser, errors.New("Bu botdan foydalanish uchun avtorizatsiyadan o'tish kerak!")
 	}
 
 	return botUser, nil

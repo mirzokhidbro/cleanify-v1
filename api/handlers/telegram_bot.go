@@ -55,27 +55,37 @@ func (h *Handler) BotStart(c *gin.Context) {
 }
 
 func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+	orders, _ := h.Stg.GetOrdersByStatus("4a954141-5203-4e46-ae8a-519ebd098167", 0)
+	botData, _ := b.GetMe(ctx)
+	botID := botData.ID
+	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
 
-	orders, err := h.Stg.GetOrdersByStatus("4a954141-5203-4e46-ae8a-519ebd098167", 0)
-	if err != nil {
+	if err != nil || user.UserID == nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
+			Text:   "Bu botdan foydalanish uchun avtorizatsiyadan o'tish kerak!",
 		})
 	} else {
-		kb := inline.New(b)
-		for _, order := range orders {
-			buttonName := *order.Address + " | " + order.Phone
-			kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+		if err != nil {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   err.Error(),
+			})
+		} else {
+			kb := inline.New(b)
+			for _, order := range orders {
+				buttonName := *order.Address + " | " + order.Phone
+				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+			}
+
+			kb.Row().Button("Cancel", []byte("cancel"), h.onInlineKeyboardSelect)
+
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:      update.Message.Chat.ID,
+				Text:        "Buyurtmani tanlang",
+				ReplyMarkup: kb,
+			})
 		}
-
-		kb.Row().Button("Cancel", []byte("cancel"), h.onInlineKeyboardSelect)
-
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:      update.Message.Chat.ID,
-			Text:        "Buyurtmani tanlang",
-			ReplyMarkup: kb,
-		})
 	}
 
 }
@@ -130,37 +140,39 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
-	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
+	if update != nil && update.Message != nil {
+		user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
 
-	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
-		})
-		err = h.Stg.CreateBotUserModel(models.CreateBotUserModel{
-			BotID:      int(botData.ID),
-			ChatID:     int(update.Message.Chat.ID),
-			Page:       "Registration",
-			DialogStep: "AskPhoneNumber",
-		})
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
 				Text:   err.Error(),
 			})
-		} else {
-			text := "Salom " + update.Message.From.FirstName + " Iltimos tizimdagi telefon raqamingizni kiriting"
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   text,
+			err = h.Stg.CreateBotUserModel(models.CreateBotUserModel{
+				BotID:      int(botData.ID),
+				ChatID:     int(update.Message.Chat.ID),
+				Page:       "Registration",
+				DialogStep: "AskPhoneNumber",
 			})
-		}
-	} else {
-		switch *user.Page {
-		case "Registration":
-			h.RegistrationPage(ctx, b, update, botID)
-		case "Order":
-			h.OrderPage(ctx, b, update, user)
+			if err != nil {
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID: update.Message.Chat.ID,
+					Text:   err.Error(),
+				})
+			} else {
+				text := "Salom " + update.Message.From.FirstName + " Iltimos tizimdagi telefon raqamingizni kiriting"
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID: update.Message.Chat.ID,
+					Text:   text,
+				})
+			}
+		} else {
+			switch *user.Page {
+			case "Registration":
+				h.RegistrationPage(ctx, b, update, botID)
+			case "Order":
+				h.OrderPage(ctx, b, update, user)
+			}
 		}
 	}
 }

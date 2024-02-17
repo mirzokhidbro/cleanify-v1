@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-telegram/bot"
 )
 
 func (h *Handler) CreateOrderModel(c *gin.Context) {
@@ -36,6 +37,18 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	botUser, _ := h.Stg.GetBotUserByUserID(user.ID)
+	opts := []bot.Option{
+		bot.WithDefaultHandler(h.Handler),
+	}
+
+	b, _ := bot.New(botUser.BotToken, opts...)
+	Notification := "#olishkerak\nManzil: " + body.Address + "\nTel: " + body.Phone
+	b.SendMessage(c, &bot.SendMessageParams{
+		ChatID: -1002111182144,
+		Text:   Notification,
+	})
 
 	h.handleResponse(c, http.Created, "Created successfully!")
 }
