@@ -85,11 +85,12 @@ func (stg *Postgres) GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey
 	if err != nil {
 		return response, err
 	}
-	permissionIds := utils.GetArray(model.PermissionIDs)
+	if *&model.PermissionIDs != nil {
+		permissionIds := utils.GetArray(*model.PermissionIDs)
+		response.PermissionIDs = &permissionIds
+	}
 	response.ID = model.ID
 	response.Name = model.Name
-	response.PermissionIDs = permissionIds
-
 
 	return response, nil
 }

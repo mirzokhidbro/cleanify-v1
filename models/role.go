@@ -20,13 +20,13 @@ type GetPermissionToRoleRequest struct {
 
 // [TODO: refactoring!]
 type GetRoleByPrimaryKey struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	PermissionIDs string `json:"permission_ids"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	PermissionIDs *string `json:"permission_ids"`
 }
 
 type RoleByPrimaryKey struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	PermissionIDs []string `json:"permission_ids"`
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	PermissionIDs *[]string `json:"permission_ids"`
 }
