@@ -44,6 +44,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			go func() {
 				defer wg.Done()
 				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
+				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
 		}
@@ -52,6 +53,21 @@ func (h *Handler) BotStart(c *gin.Context) {
 	}()
 
 	h.handleResponse(c, http.OK, "OK!")
+}
+
+func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+	botData, _ := b.GetMe(ctx)
+	err := h.Stg.CreateBotUserModel(models.CreateBotUserModel{
+		BotID:      int(botData.ID),
+		ChatID:     int(update.Message.Chat.ID),
+		Role:       "Group",
+	})
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   err.Error(),
+		})
+	}
 }
 
 func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {

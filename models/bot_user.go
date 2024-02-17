@@ -5,6 +5,7 @@ type CreateBotUserModel struct {
 	ChatID     int    `json:"chat_id"`
 	Page       string `json:"page"`
 	DialogStep string `json:"dialog_step"`
+	Role       string `json:"role"`
 }
 
 type BotUser struct {
