@@ -74,7 +74,7 @@ func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update 
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
 	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
-	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 0)
+	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 83)
 
 	if err != nil || user.UserID == nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
