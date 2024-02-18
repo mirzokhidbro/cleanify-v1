@@ -77,12 +77,20 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 
 func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error) {
 	var botUser models.BotUser
-	err := stg.db.QueryRow(`select bot_id, user_id, status, page, dialog_step from bot_users where chat_id::bigint = $1 and bot_id = $2`, ChatID, BotID).Scan(
+
+	err := stg.db.QueryRow(`with users as (
+		select c.id as company_id, c.name as company_name, u.phone, u.id from users u
+		inner join roles cr on cr.id = u.role_id
+		inner join companies c on c.id = cr.company_id
+	)
+	select bot_id, user_id, status, page, dialog_step, u.company_id from bot_users bu 
+	inner join users u on bu.user_id = u.id where chat_id::bigint = $1 and bot_id = $2`, ChatID, BotID).Scan(
 		&botUser.BotID,
 		&botUser.UserID,
 		&botUser.Status,
 		&botUser.Page,
 		&botUser.DialogStep,
+		&botUser.CompanyID,
 	)
 	if err != nil {
 		return botUser, errors.New("Bu botdan foydalanish uchun avtorizatsiyadan o'tish kerak!")

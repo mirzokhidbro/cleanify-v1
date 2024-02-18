@@ -58,9 +58,9 @@ func (h *Handler) BotStart(c *gin.Context) {
 func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
 	botData, _ := b.GetMe(ctx)
 	err := h.Stg.CreateBotUserModel(models.CreateBotUserModel{
-		BotID:      int(botData.ID),
-		ChatID:     int(update.Message.Chat.ID),
-		Role:       "Group",
+		BotID:  int(botData.ID),
+		ChatID: int(update.Message.Chat.ID),
+		Role:   "Group",
 	})
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
@@ -71,10 +71,10 @@ func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.B
 }
 
 func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	orders, _ := h.Stg.GetOrdersByStatus("4a954141-5203-4e46-ae8a-519ebd098167", 0)
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
 	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
+	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 0)
 
 	if err != nil || user.UserID == nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
@@ -90,11 +90,11 @@ func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update 
 		} else {
 			kb := inline.New(b)
 			for _, order := range orders {
-				buttonName := *order.Address + " | " + order.Phone
+				buttonName := *order.Address + " || " + order.Phone
 				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
 			}
 
-			kb.Row().Button("Cancel", []byte("cancel"), h.onInlineKeyboardSelect)
+			kb.Row().Button("Cancel", []byte("Bekor qilish"), h.onInlineKeyboardSelect)
 
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID:      update.Message.Chat.ID,
@@ -107,47 +107,57 @@ func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update 
 }
 
 func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tgmodels.InaccessibleMessage, data []byte) {
-	order, err := h.Stg.GetOrderByPhone("4a954141-5203-4e46-ae8a-519ebd098167", string(data))
+	botData, _ := b.GetMe(ctx)
+	botID := botData.ID
+	user, err := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: mes.Chat.ID,
 			Text:   err.Error(),
 		})
 	} else {
-		if order.Phone != "" {
-			botData, _ := b.GetMe(ctx)
-			botID := botData.ID
-			user, _ := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
-			dialogStep := "asked order slug"
-			Page := "Order"
-			h.Stg.UpdateBotUserModel(models.BotUser{
-				UserID:     user.UserID,
-				BotID:      int(botID),
-				ChatID:     mes.Chat.ID,
-				DialogStep: &dialogStep,
-				Page:       &Page,
+		order, err := h.Stg.GetOrderByPhone(user.CompanyID, string(data))
+		if err != nil {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: mes.Chat.ID,
+				Text:   err.Error(),
 			})
-			err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
-				BotID:   botID,
-				ChatID:  mes.Chat.ID,
-				OrderID: order.ID,
-			})
-			if err != nil {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: mes.Chat.ID,
-					Text:   "create telegram session " + err.Error(),
+		} else {
+			if order.Phone != "" {
+				botData, _ := b.GetMe(ctx)
+				botID := botData.ID
+				user, _ := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
+				dialogStep := "asked order slug"
+				Page := "Order"
+				h.Stg.UpdateBotUserModel(models.BotUser{
+					UserID:     user.UserID,
+					BotID:      int(botID),
+					ChatID:     mes.Chat.ID,
+					DialogStep: &dialogStep,
+					Page:       &Page,
 				})
-			}
-			if err != nil {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: mes.Chat.ID,
-					Text:   err.Error(),
+				err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
+					BotID:   botID,
+					ChatID:  mes.Chat.ID,
+					OrderID: order.ID,
 				})
-			} else {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: mes.Chat.ID,
-					Text:   string(data) + " tanlandi. Birka nomini kiriting",
-				})
+				if err != nil {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: mes.Chat.ID,
+						Text:   "create telegram session " + err.Error(),
+					})
+				}
+				if err != nil {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: mes.Chat.ID,
+						Text:   err.Error(),
+					})
+				} else {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: mes.Chat.ID,
+						Text:   string(data) + " tanlandi. Birka nomini kiriting",
+					})
+				}
 			}
 		}
 	}
