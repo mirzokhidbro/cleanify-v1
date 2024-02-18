@@ -46,7 +46,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 	b, _ := bot.New(botUser.BotToken, opts...)
 	Notification := "#olishkerak\nManzil: " + body.Address + "\nTel: " + body.Phone
 	b.SendMessage(c, &bot.SendMessageParams{
-		ChatID: -1002111182144,
+		ChatID: -1001871843454,
 		Text:   Notification,
 	})
 

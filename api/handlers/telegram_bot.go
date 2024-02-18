@@ -44,7 +44,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			go func() {
 				defer wg.Done()
 				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
+				// b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
 		}
