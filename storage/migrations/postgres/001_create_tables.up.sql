@@ -32,7 +32,7 @@ ALTER COLUMN "chat_id" SET DATA TYPE BIGINT
 USING chat_id::BIGINT;
 
 ALTER TABLE "orders"
-ALTER COLUMN "status" SET DEFAULT 1;
+ALTER COLUMN "status" SET DEFAULT 83;
 
 CREATE TABLE IF NOT EXISTS "order_items" (
     "id" SERIAL PRIMARY KEY,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS "order_item_types" (
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "company_bots" (
+CREATE TABLE IF NOT EXISTS "telegram_bots" (
     "id" UUID PRIMARY KEY,
     "company_id" UUID REFERENCES "companies"("id") NOT NULL,
     "bot_token" VARCHAR NOT NULL,
@@ -64,17 +64,17 @@ CREATE TABLE IF NOT EXISTS "company_bots" (
     "type" VARCHAR NOT NULL
 );
 
-ALTER TABLE "company_bots"
+ALTER TABLE "telegram_bots"
 ADD UNIQUE (bot_id);
 
-ALTER TABLE "company_bots"
+ALTER TABLE "telegram_bots"
 ADD "firstname" VARCHAR,
 ADD "lastname" VARCHAR,
 ADD "username" VARCHAR;
 
 CREATE TABLE IF NOT EXISTS "telegram_sessions" (
     "id" SERIAL PRIMARY KEY,
-    "bot_id" BIGINT REFERENCES "company_bots"("bot_id") NOT NULL,
+    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id") NOT NULL,
     "order_id" INT REFERENCES "orders"("id") NOT NULL,
 	"chat_id" BIGINT NOT NULL
 );
@@ -96,3 +96,19 @@ CREATE TABLE IF NOT EXISTS "role_and_permissions" (
 
 ALTER TABLE "orders"
 ADD "address" VARCHAR;
+
+CREATE TABLE IF NOT EXISTS "bot_users" (
+    "id" SERIAL PRIMARY KEY,
+    "user_id" VARCHAR,
+    "chat_id" BIGINT NOT NULL,
+    "status" VARCHAR,
+    "page" VARCHAR,
+    "dialog_step" VARCHAR,
+    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id")
+);
+
+ALTER TABLE "bot_users"
+ADD "firstname" VARCHAR,
+ADD "lastname" VARCHAR,
+ADD "username" VARCHAR,
+ADD "company_id" UUID REFERENCES "companies"("id");

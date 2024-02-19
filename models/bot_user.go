@@ -6,6 +6,9 @@ type CreateBotUserModel struct {
 	Page       string `json:"page"`
 	DialogStep string `json:"dialog_step"`
 	Role       string `json:"role"`
+	Firstname  string `json:"firstname"`
+	Lastname   string `json:"lastname"`
+	Username   string `json:"username"`
 }
 
 type BotUser struct {
@@ -17,6 +20,10 @@ type BotUser struct {
 	ChatID     int64   `json:"chat_id"`
 	BotToken   string
 	CompanyID  string
+	// [TODO: hamma userlarni datalari yozilganidan keyin bu fieldlarni olib tashlaymiz.]
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Username  string `json:"username"`
 }
 
 type SelectedUser struct {

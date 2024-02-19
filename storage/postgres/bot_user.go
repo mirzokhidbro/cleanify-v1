@@ -11,17 +11,26 @@ func (stg *Postgres) CreateBotUserModel(entity models.CreateBotUserModel) error 
 		chat_id,
 		page,
 		dialog_step,
-		bot_id
+		bot_id,
+		firstname,
+		lastname,
+		username
 	) VALUES (
 		$1,
 		$2,
 		$3,
-		$4
+		$4,
+		$5,
+		$6,
+		$7
 	)`,
 		entity.ChatID,
 		entity.Page,
 		entity.DialogStep,
 		entity.BotID,
+		entity.Firstname,
+		entity.Lastname,
+		entity.Username,
 	)
 
 	if err != nil {
@@ -45,6 +54,15 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 	if entity.DialogStep != nil {
 		query += `dialog_step = :dialog_step,`
 	}
+	if entity.Firstname != "" {
+		query += `firstname = :firstname,`
+	}
+	if entity.Lastname != "" {
+		query += `lastname = :lastname,`
+	}
+	if entity.Username != "" {
+		query += `username = :username,`
+	}
 
 	if query[len(query)-1:] == "," {
 		query = query[:len(query)-1]
@@ -59,6 +77,9 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 		"dialog_step": entity.DialogStep,
 		"user_id":     entity.UserID,
 		"chat_id":     entity.ChatID,
+		"firstname":   entity.Firstname,
+		"lastname":    entity.Lastname,
+		"username":    entity.Username,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -101,7 +122,7 @@ func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.
 
 func (stg *Postgres) GetBotUserByUserID(UserID string) (models.BotUser, error) {
 	var botUser models.BotUser
-	err := stg.db.QueryRow(`select cb.bot_id, user_id, status, page, dialog_step, chat_id, cb.bot_token from bot_users bu inner join company_bots cb on cb.bot_id = bu.bot_id where user_id = $1`, UserID).Scan(
+	err := stg.db.QueryRow(`select tb.bot_id, user_id, status, page, dialog_step, chat_id, tb.bot_token from bot_users bu inner join telegram_bots tb on tb.bot_id = bu.bot_id where user_id = $1`, UserID).Scan(
 		&botUser.BotID,
 		&botUser.UserID,
 		&botUser.Status,
@@ -126,8 +147,8 @@ func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.Selected
 		inner join companies c on c.id = cr.company_id
 	)
 	select users.company_id, users.company_name, users.phone, users.id from users
-	inner join company_bots cb on cb.company_id = users.company_id
-	where users.phone = $1 and cb.bot_id = $2`
+	inner join telegram_bots tb on tb.company_id = users.company_id
+	where users.phone = $1 and tb.bot_id = $2`
 
 	err := stg.db.QueryRow(query, Phone, BotID).Scan(
 		&user.CompanyID,
@@ -145,7 +166,7 @@ func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.Selected
 func (stg *Postgres) GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error) {
 	var user models.BotUserByCompany
 
-	query := `select cb.company_id, bu.bot_id, bu.chat_id from bot_users bu inner join company_bots cb on bu.bot_id = cb.bot_id where bu.bot_id = $1 and bu.chat_id = $2`
+	query := `select cb.company_id, bu.bot_id, bu.chat_id from bot_users bu inner join telegram_bots cb on bu.bot_id = cb.bot_id where bu.bot_id = $1 and bu.chat_id = $2`
 
 	err = stg.db.QueryRow(query, BotID, ChatID).Scan(
 		&user.CompanyID,

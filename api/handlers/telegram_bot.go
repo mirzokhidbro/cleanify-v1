@@ -44,7 +44,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			go func() {
 				defer wg.Done()
 				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
-				// b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
+				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
 		}
@@ -135,6 +135,9 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 					ChatID:     mes.Chat.ID,
 					DialogStep: &dialogStep,
 					Page:       &Page,
+					Firstname:  mes.Chat.FirstName,
+					Lastname:   mes.Chat.LastName,
+					Username:   mes.Chat.Username,
 				})
 				err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
 					BotID:   botID,
@@ -179,6 +182,9 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 				ChatID:     int(update.Message.Chat.ID),
 				Page:       "Registration",
 				DialogStep: "AskPhoneNumber",
+				Firstname:  update.Message.From.FirstName,
+				Lastname:   update.Message.From.LastName,
+				Username:   update.Message.From.Username,
 			})
 			if err != nil {
 				b.SendMessage(ctx, &bot.SendMessageParams{

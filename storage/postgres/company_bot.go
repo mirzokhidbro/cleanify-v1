@@ -11,7 +11,7 @@ func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompan
 		return errors.New("company not found")
 	}
 
-	_, err = stg.db.Exec(`INSERT INTO company_bots(
+	_, err = stg.db.Exec(`INSERT INTO telegram_bots(
 		id,
 		company_id,
 		bot_token,
@@ -48,7 +48,7 @@ func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompan
 
 func (stg *Postgres) GetTelegramBotByCompany(companyID string) (models.CompanyTelegramBot, error) {
 	var bot models.CompanyTelegramBot
-	err := stg.db.QueryRow(`select id, bot_token, company_id from company_bots where company_id = $1`, companyID).Scan(
+	err := stg.db.QueryRow(`select id, bot_token, company_id from telegram_bots where company_id = $1`, companyID).Scan(
 		&bot.ID,
 		&bot.BotToken,
 		&bot.CompanyID,
@@ -61,7 +61,7 @@ func (stg *Postgres) GetTelegramBotByCompany(companyID string) (models.CompanyTe
 }
 
 func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) {
-	rows, err := stg.db.Query(`select id, bot_token from company_bots where type = 'order'`)
+	rows, err := stg.db.Query(`select id, bot_token from telegram_bots where type = 'order'`)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) 
 
 func (stg *Postgres) GetCompanyIDByBot(botID int64) (models.CompanyTelegramBot, error) {
 	var bot models.CompanyTelegramBot
-	err := stg.db.QueryRow(`select id, bot_token, company_id from company_bots where company_id = $1`, botID).Scan(
+	err := stg.db.QueryRow(`select id, bot_token, company_id from telegram_bots where company_id = $1`, botID).Scan(
 		&bot.ID,
 		&bot.BotToken,
 		&bot.CompanyID,

@@ -13,7 +13,7 @@ INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c13', 'edit_order_item,',       'company',     'Buyurtma elementini taxrirlash');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c14', 'create_order_item_type', 'company',     'Buyurtma turini qo''shish');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c15', 'edit_order_item_type',   'company',     'Buyurtma turini taxrirlash');
-INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c16', 'create_company_bot',     'super-admin', 'Korxona botini qo''shish');
-INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c17', 'start_company_bot',      'company',     'Korxona botini ishga tushirish');
+INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c16', 'create_telegram_bot',     'super-admin', 'Korxona botini qo''shish');
+INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c17', 'start_telegram_bot',      'company',     'Korxona botini ishga tushirish');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c18', 'get_work_volume_by_day', 'company',     'Kunlik ish hajmini ko''rish statistikasini ko''rish');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c19', 'get_permissions_list',   'company',     'Ruxsatlar ro''yxatini ko''rish');
