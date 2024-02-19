@@ -53,6 +53,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		id, 
 		slug, 
 		status, 
+		address,
 		created_at 
 		FROM "orders"`
 
@@ -110,6 +111,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 			&order.ID,
 			&order.Slug,
 			&order.Status,
+			&order.Address,
 			&order.CreatedAt)
 		if err != nil {
 			return res, err
