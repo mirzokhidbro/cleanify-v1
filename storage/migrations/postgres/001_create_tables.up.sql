@@ -24,6 +24,39 @@ CREATE TABLE IF NOT EXISTS "roles" (
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS "telegram_bots" (
+    "id" UUID PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "bot_token" VARCHAR NOT NULL,
+	"bot_id" BIGINT UNIQUE,
+    "type" VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "bot_users" (
+    "id" SERIAL PRIMARY KEY,
+    "user_id" VARCHAR,
+    "chat_id" BIGINT NOT NULL,
+    "status" VARCHAR,
+    "page" VARCHAR,
+    "dialog_step" VARCHAR,
+    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id")
+);
+
+CREATE TABLE IF NOT EXISTS "orders" (
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id"),
+    "chat_id" INTEGER REFERENCES "bot_users"("id"),
+    "phone" VARCHAR NULL,
+    "count" INTEGER,
+    "status" INTEGER,
+    "slug" VARCHAR,
+    "latitute" FLOAT,
+    "longitude" FLOAT,
+    "description" VARCHAR,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 ALTER TABLE "users"
 ADD "role_id" UUID NULL REFERENCES "roles"("id");
 
@@ -56,14 +89,6 @@ CREATE TABLE IF NOT EXISTS "order_item_types" (
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "telegram_bots" (
-    "id" UUID PRIMARY KEY,
-    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
-    "bot_token" VARCHAR NOT NULL,
-	"bot_id" BIGINT,
-    "type" VARCHAR NOT NULL
-);
-
 ALTER TABLE "telegram_bots"
 ADD UNIQUE (bot_id);
 
@@ -83,7 +108,7 @@ CREATE TABLE IF NOT EXISTS "permissions" (
     "id" UUID PRIMARY KEY,
     "slug" VARCHAR UNIQUE,
     "name" VARCHAR UNIQUE,
-    "scope" VARCHAR DEFAULT ("company"),
+    "scope" VARCHAR DEFAULT ('company'),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -96,16 +121,6 @@ CREATE TABLE IF NOT EXISTS "role_and_permissions" (
 
 ALTER TABLE "orders"
 ADD "address" VARCHAR;
-
-CREATE TABLE IF NOT EXISTS "bot_users" (
-    "id" SERIAL PRIMARY KEY,
-    "user_id" VARCHAR,
-    "chat_id" BIGINT NOT NULL,
-    "status" VARCHAR,
-    "page" VARCHAR,
-    "dialog_step" VARCHAR,
-    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id")
-);
 
 ALTER TABLE "bot_users"
 ADD "firstname" VARCHAR,
