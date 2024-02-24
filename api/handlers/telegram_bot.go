@@ -17,6 +17,16 @@ import (
 	"github.com/google/uuid"
 )
 
+var kb = &tgmodels.ReplyKeyboardMarkup{
+	Keyboard: [][]tgmodels.KeyboardButton{
+		{
+			{Text: "Zayavkalar"},
+			// {Text: "Tanlanganlar"},
+		},
+	},
+	ResizeKeyboard: true,
+}
+
 func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 	var body models.CreateCompanyBotModel
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -82,7 +92,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
+				// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
 				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
@@ -109,48 +119,46 @@ func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.B
 	}
 }
 
-func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	botData, _ := b.GetMe(ctx)
-	botID := botData.ID
-	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
-	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 83)
+// func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+// 	botData, _ := b.GetMe(ctx)
+// 	botID := botData.ID
+// 	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
+// 	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 83)
 
-	if err != nil || user.UserID == nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Bu botdan foydalanish uchun avtorizatsiyadan o'tish kerak!",
-		})
-	} else {
-		if err != nil {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   err.Error(),
-			})
-		} else {
-			if len(orders) != 0 {
-				kb := inline.New(b)
-				for _, order := range orders {
-					buttonName := *order.Address + " || " + order.Phone
-					kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
-				}
+// 	if err != nil || user.UserID == nil {
+// 		b.SendMessage(ctx, &bot.SendMessageParams{
+// 			ChatID: update.Message.Chat.ID,
+// 			Text:   "Bu botdan foydalanish uchun avtorizatsiyadan o'tish kerak!",
+// 		})
+// 	} else {
+// 		if err != nil {
+// 			b.SendMessage(ctx, &bot.SendMessageParams{
+// 				ChatID: update.Message.Chat.ID,
+// 				Text:   err.Error(),
+// 			})
+// 		} else {
+// 			if len(orders) != 0 {
+// 				kb := inline.New(b)
+// 				for _, order := range orders {
+// 					buttonName := *order.Address + " || " + order.Phone
+// 					kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+// 				}
 
-				kb.Row().Button("Cancel", []byte("Bekor qilish"), h.onInlineKeyboardSelect)
+// 				b.SendMessage(ctx, &bot.SendMessageParams{
+// 					ChatID:      update.Message.Chat.ID,
+// 					Text:        "Buyurtmani tanlang",
+// 					ReplyMarkup: kb,
+// 				})
+// 			} else {
+// 				b.SendMessage(ctx, &bot.SendMessageParams{
+// 					ChatID: update.Message.Chat.ID,
+// 					Text:   "Mavjud emas ❌",
+// 				})
+// 			}
+// 		}
+// 	}
 
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID:      update.Message.Chat.ID,
-					Text:        "Buyurtmani tanlang",
-					ReplyMarkup: kb,
-				})
-			} else {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: update.Message.Chat.ID,
-					Text:   "Mavjud emas ❌",
-				})
-			}
-		}
-	}
-
-}
+// }
 
 func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tgmodels.InaccessibleMessage, data []byte) {
 	botData, _ := b.GetMe(ctx)
@@ -265,36 +273,85 @@ func (h *Handler) RegistrationPage(ctx context.Context, b *bot.Bot, update *tgmo
 			Text:   err.Error(),
 		})
 	} else {
+		page := "Order"
+		DialogStep := ""
 		_, err = h.Stg.UpdateBotUserModel(models.BotUser{
-			UserID: user.UserID,
-			BotID:  int(botID),
-			ChatID: chatID,
+			UserID:     user.UserID,
+			BotID:      int(botID),
+			ChatID:     chatID,
+			Page:       &page,
+			DialogStep: &DialogStep,
 		})
 		if err != nil {
 			h.handleError(ctx, b, update, err.Error(), update.Message.MessageThreadID)
 		} else {
 			text := "Foydalanuvchi muvaffaqiyatli ro'yxatdan o'tkazildi"
 			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   text,
+				ChatID:      update.Message.Chat.ID,
+				Text:        text,
+				ReplyMarkup: kb,
 			})
 		}
 	}
 }
 
 func (h *Handler) OrderPage(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
-	if *user.DialogStep == "" {
-
+	if update.Message.Text == "Zayavkalar" && *user.DialogStep == "" {
+		h.Applications(ctx, b, update, user)
 	} else {
-		switch *user.DialogStep {
-		case "asked order slug":
-			h.AskedOrderSlug(ctx, b, update, user)
-		case "order count asked":
-			h.AskedOrderCount(ctx, b, update, user)
-		case "order location asked":
-			h.AskedOrderLocation(ctx, b, update, user)
+		if *user.DialogStep == "" {
+
+		} else {
+			switch *user.DialogStep {
+			case "asked order slug":
+				h.AskedOrderSlug(ctx, b, update, user)
+			case "order count asked":
+				h.AskedOrderCount(ctx, b, update, user)
+			case "order location asked":
+				h.AskedOrderLocation(ctx, b, update, user)
+			}
 		}
 	}
+}
+
+func (h *Handler) Applications(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
+	botData, _ := b.GetMe(ctx)
+	botID := botData.ID
+	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
+	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 83)
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "user " + err.Error(),
+		})
+	}
+
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   err.Error(),
+		})
+	} else {
+		if len(orders) != 0 {
+			kb := inline.New(b)
+			for _, order := range orders {
+				buttonName := *order.Address + " || " + order.Phone
+				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+			}
+
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:      update.Message.Chat.ID,
+				Text:        "Buyurtmani tanlang",
+				ReplyMarkup: kb,
+			})
+		} else {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Mavjud emas ❌",
+			})
+		}
+	}
+
 }
 
 func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
@@ -448,8 +505,9 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 				} else {
 					h.Stg.DeleteTelegramSession(session.ID)
 					b.SendMessage(ctx, &bot.SendMessageParams{
-						ChatID: update.Message.Chat.ID,
-						Text:   "Buyurtma qabul qilindi",
+						ChatID:      update.Message.Chat.ID,
+						Text:        "Buyurtma qabul qilindi",
+						ReplyMarkup: kb,
 					})
 				}
 			}

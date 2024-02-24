@@ -58,9 +58,10 @@ type OrderSendLocationRequest struct {
 
 type UpdateOrderRequest struct {
 	ID          int     `json:"id", binding:"required"`
-	Slug        string  `json:"slug, omitempty"`
-	Status      int16   `json:"status, omitempty"`
-	Phone       string  `json:"phone, omitempty"`
+	Slug        string  `json:"slug"`
+	Status      int16   `json:"status"`
+	Phone       string  `json:"phone"`
+	ChatID      int64   `json:"chat_id"`
 	Description string  `json:"description"`
 	Count       string  `json:"count"`
 	Latitute    float64 `json:"latitute"`
