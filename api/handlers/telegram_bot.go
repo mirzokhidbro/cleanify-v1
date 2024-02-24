@@ -14,7 +14,46 @@ import (
 	"github.com/go-telegram/bot"
 	tgmodels "github.com/go-telegram/bot/models"
 	"github.com/go-telegram/ui/keyboard/inline"
+	"github.com/google/uuid"
 )
+
+func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
+	var body models.CreateCompanyBotModel
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	opts := []bot.Option{
+		bot.WithDefaultHandler(h.Handler),
+	}
+
+	b, err := bot.New(body.BotToken, opts...)
+	if err != nil {
+		panic(err)
+	}
+	botData, err := b.GetMe(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	body.Firstname = botData.FirstName
+	body.Lastname = botData.LastName
+	body.Username = botData.Username
+	body.BotID = int(botData.ID)
+
+	id := uuid.New()
+
+	err = h.Stg.CreateCompanyBotModel(id.String(), body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, id)
+}
 
 func (h *Handler) BotStart(c *gin.Context) {
 	bots, err := h.Stg.GetTelegramOrderBot()
@@ -88,19 +127,26 @@ func (h *Handler) newApplicationHandler(ctx context.Context, b *bot.Bot, update 
 				Text:   err.Error(),
 			})
 		} else {
-			kb := inline.New(b)
-			for _, order := range orders {
-				buttonName := *order.Address + " || " + order.Phone
-				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+			if len(orders) != 0 {
+				kb := inline.New(b)
+				for _, order := range orders {
+					buttonName := *order.Address + " || " + order.Phone
+					kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+				}
+
+				kb.Row().Button("Cancel", []byte("Bekor qilish"), h.onInlineKeyboardSelect)
+
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID:      update.Message.Chat.ID,
+					Text:        "Buyurtmani tanlang",
+					ReplyMarkup: kb,
+				})
+			} else {
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID: update.Message.Chat.ID,
+					Text:   "Mavjud emas ❌",
+				})
 			}
-
-			kb.Row().Button("Cancel", []byte("Bekor qilish"), h.onInlineKeyboardSelect)
-
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID:      update.Message.Chat.ID,
-				Text:        "Buyurtmani tanlang",
-				ReplyMarkup: kb,
-			})
 		}
 	}
 

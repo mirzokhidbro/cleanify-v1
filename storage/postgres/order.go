@@ -18,7 +18,6 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 		count,
 		slug,
 		description,
-		chat_id,
 		address
 	) VALUES (
 		$1,
@@ -26,15 +25,14 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 		$3,
 		$4,
 		$5,
-		$6,
-		$7
+		$6
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
 		entity.Count,
 		entity.Slug,
 		entity.Description,
-		entity.ChatID,
+		// entity.ChatID,
 		entity.Address,
 	).Scan(&id)
 

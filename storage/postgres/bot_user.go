@@ -141,23 +141,19 @@ func (stg *Postgres) GetBotUserByUserID(UserID string) (models.BotUser, error) {
 func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error) {
 	var user models.SelectedUser
 
-	query := `with users as (
-		select c.id as company_id, c.name as company_name, u.phone, u.id from users u
-		inner join roles cr on cr.id = u.role_id
-		inner join companies c on c.id = cr.company_id
-	)
-	select users.company_id, users.company_name, users.phone, users.id from users
-	inner join telegram_bots tb on tb.company_id = users.company_id
-	where users.phone = $1 and tb.bot_id = $2`
+	query := `select c.id as company_id, c.name as company_name, u.phone, u.id from users u
+	inner join roles cr on cr.id = u.role_id
+	inner join companies c on c.id = cr.company_id
+	where u.phone = $1 `
 
-	err := stg.db.QueryRow(query, Phone, BotID).Scan(
+	err := stg.db.QueryRow(query, Phone).Scan(
 		&user.CompanyID,
 		&user.CompanyName,
 		&user.Phone,
 		&user.UserID,
 	)
 	if err != nil {
-		return user, errors.New("Tizimda bunday foydalanuvchi mavjud emas!")
+		return user, err
 	}
 
 	return user, nil
