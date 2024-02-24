@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS "bot_users" (
     "chat_id" BIGINT NOT NULL,
     "status" VARCHAR,
     "page" VARCHAR,
+    "role" VARCHAR,
     "dialog_step" VARCHAR,
     "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id")
 );
@@ -91,6 +92,9 @@ CREATE TABLE IF NOT EXISTS "order_item_types" (
 
 ALTER TABLE "telegram_bots"
 ADD UNIQUE (bot_id);
+
+ALTER TABLE "bot_users"
+ADD UNIQUE (chat_id);
 
 ALTER TABLE "telegram_bots"
 ADD "firstname" VARCHAR,
