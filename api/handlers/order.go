@@ -42,15 +42,19 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 	opts := []bot.Option{
 		bot.WithDefaultHandler(h.Handler),
 	}
+	group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
 
-	b, _ := bot.New(botUser.BotToken, opts...)
-	Notification := "#olishkerak\nManzil: " + body.Address + "\nTel: " + body.Phone
-	b.SendMessage(c, &bot.SendMessageParams{
-		ChatID: -1001871843454,
-		Text:   Notification,
-	})
+	if err == nil {
+		b, _ := bot.New(botUser.BotToken, opts...)
+		Notification := "#olishkerak\nManzil: " + body.Address + "\nTel: " + body.Phone
+		b.SendMessage(c, &bot.SendMessageParams{
+			ChatID: group.ChatID,
+			Text:   Notification,
+		})
+	}
 
 	h.handleResponse(c, http.Created, "Created successfully!")
+
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {

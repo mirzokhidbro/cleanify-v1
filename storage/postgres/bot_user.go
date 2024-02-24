@@ -175,3 +175,20 @@ func (stg *Postgres) GetBotUserByCompany(BotID int64, ChatID int64) (botUser mod
 
 	return user, nil
 }
+
+func (stg *Postgres) GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error) {
+	var user models.BotUserByCompany
+
+	query := `select company_id, bot_id, chat_id from bot_users where role = 'group' and company_id = $1 `
+
+	err := stg.db.QueryRow(query, CompanyID).Scan(
+		&user.CompanyID,
+		&user.BotID,
+		&user.ChatID,
+	)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}

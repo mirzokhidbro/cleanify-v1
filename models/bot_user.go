@@ -38,3 +38,8 @@ type BotUserByCompany struct {
 	BotID     int64  `json:"bot_id"`
 	ChatID    int64  `json:"chat_id"`
 }
+
+type GetNotificationGroup struct {
+	CompanyID string
+	Role      string
+}

@@ -52,6 +52,7 @@ type StorageI interface {
 	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
 	GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
 	GetBotUserByUserID(UserID string) (models.BotUser, error)
+	GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error)
 
 	// telegram-session
 	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
