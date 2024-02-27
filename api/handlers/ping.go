@@ -7,5 +7,5 @@ import (
 )
 
 func (h *Handler) Ping(c *gin.Context) {
-	h.handleResponse(c, http.OK, "Ping!!")
+	h.handleResponse(c, http.OK, "Ping!")
 }
