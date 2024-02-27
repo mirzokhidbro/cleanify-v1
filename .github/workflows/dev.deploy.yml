@@ -1,0 +1,29 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.21'
+
+      - name: Build Go application
+        run: |
+          cd /home/bwerp_dev/www/backend/bw-erp
+          go build -o main ./cmd/main.go
+
+      - name: Deploy
+        run: |
+          # Add your deployment steps here
+          # For example, deploying to a server or cloud service
+          echo "Deploying the application..."
