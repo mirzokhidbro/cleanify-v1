@@ -32,8 +32,9 @@ jobs:
         run: |
             # Add your deployment steps here
             # For example, deploying to a server or cloud service
+            echo ${{ secrets.BWERP_DEV_PASSWORD }}
             echo "Deploying the application..."
-            echo "password" | sudo -S systemctl restart bwerp_dev
-        env:
-          password: ${{ secrets.BWERP_DEV_PASSWORD }}
+        #     echo "password" | sudo -S systemctl restart bwerp_dev
+        # env:
+        #   password: ${{ secrets.BWERP_DEV_PASSWORD }}
         
