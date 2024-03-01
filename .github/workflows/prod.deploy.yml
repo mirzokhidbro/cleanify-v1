@@ -1,0 +1,34 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.21'
+
+      - name: Remove old project files and folders
+        run: find /home/bwerp_prod/www/backend/bw-erp -type f ! -name '.env' -delete
+
+      - name: Copy project
+        run: cp -r /home/bwerp_prod/actions-runner/_work/bw-erp/bw-erp/* /home/bwerp_prod/www/backend/bw-erp
+
+      - name: Build Go application
+        run: |
+          cd /home/bwerp_prod/www/backend/bw-erp
+          go build -o main ./cmd/main.go
+
+    #   - name: Deploy
+    #     run: |
+    #       echo "${{ secrets.BWERP_PROD_PASSWORD }}" | sudo -S systemctl restart bwerp_dev
+        
