@@ -21,7 +21,6 @@ jobs:
         run: |
           echo "${{ secrets.BWERP_PROD_PASSWORD }}" | sudo -S find /home/bwerp_prod/www/backend/bw-erp -type f ! -name '.env' -delete
         
-
       - name: Copy project
         run: cp -r /home/bwerp_prod/actions-runner/_work/bw-erp/bw-erp/* /home/bwerp_prod/www/backend/bw-erp
 
