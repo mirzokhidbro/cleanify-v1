@@ -80,6 +80,14 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		statistics := baseRouter.Group("permissions")
 		statistics.Use(middleware.AuthMiddleware()).GET("", h.GetPermissionList)
 	}
+
+	{
+		clientRouter := baseRouter.Group("/client")
+		clientRouter.Use(middleware.AuthMiddleware()).POST("/:company-id", h.CreateClientModel)
+		clientRouter.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
+		clientRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetClientsList)
+	}
+
 	return
 }
 

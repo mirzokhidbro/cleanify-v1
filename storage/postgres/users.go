@@ -10,7 +10,7 @@ import (
 
 func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) error {
 	if entity.ConfirmationPassword != entity.Password {
-		return errors.New("confirmation password is not the same with password!")
+		return errors.New("confirmation password is not the same with password")
 	}
 	password, _ := utils.HashPassword(entity.Password)
 	_, err := stg.db.Exec(`INSERT INTO users(
@@ -140,7 +140,7 @@ func (stg Postgres) GetUsersList(companyID string) ([]models.User, error) {
 
 func (stg *Postgres) ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error {
 	if entity.NewPassword != entity.NewPasswordConfirmation {
-		return errors.New("confirmation password is not the same with password!")
+		return errors.New("confirmation password is not the same with password")
 	}
 	password, _ := utils.HashPassword(entity.NewPassword)
 

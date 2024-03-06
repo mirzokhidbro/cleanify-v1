@@ -13,3 +13,4 @@ DROP TABLE IF EXISTS "telegram_bots";
 DROP TABLE IF EXISTS "telegram_sessions";
 DROP TABLE IF EXISTS "permissions"
 DROP TABLE IF EXISTS "role_and_permissions"
+DROP TABLE IF EXISTS "clients"

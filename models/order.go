@@ -36,20 +36,24 @@ type OrdersListRequest struct {
 	Slug   string `json:"slug,omitempty"`
 }
 
+type OrderShowResponse struct {
+	Order
+	OrderItems []OrderItem `json:"order_items"`
+}
+
 type Order struct {
-	ID          int         `json:"id"`
-	CompanyID   string      `json:"company_id"`
-	Phone       string      `json:"phone"`
-	Count       int         `json:"count"`
-	Slug        string      `json:"slug"`
-	Status      int16       `json:"status"`
-	Description string      `json:"description"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Latitute    *float64    `json:"latitute"`
-	Longitude   *float64    `json:"longitude"`
-	Address     *string     `json:"address"`
-	OrderItems  []OrderItem `json:"order_items"`
+	ID          int       `json:"id"`
+	CompanyID   string    `json:"company_id"`
+	Phone       string    `json:"phone"`
+	Count       int       `json:"count"`
+	Slug        string    `json:"slug"`
+	Status      int16     `json:"status"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Latitute    *float64  `json:"latitute"`
+	Longitude   *float64  `json:"longitude"`
+	Address     *string   `json:"address"`
 }
 
 type OrderSendLocationRequest struct {

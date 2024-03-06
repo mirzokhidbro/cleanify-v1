@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"bw-erp/models"
-	"fmt"
 )
 
 func (stg *Postgres) CreateTelegramSessionModel(entity models.TelegramSessionModel) error {
@@ -21,7 +20,6 @@ func (stg *Postgres) CreateTelegramSessionModel(entity models.TelegramSessionMod
 	)
 
 	if err != nil {
-		fmt.Print("\n session create error", err)
 		return err
 	}
 
