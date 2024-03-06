@@ -26,7 +26,7 @@ type StorageI interface {
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
 	GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error)
 	GetOrderLocation(ID int) (models.Order, error)
-	GetOrderByPrimaryKey(ID int) (models.Order, error)
+	GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
 	GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error)
 	GetOrderByPhone(companyID string, Phone string) (models.Order, error)
@@ -65,4 +65,9 @@ type StorageI interface {
 	// permission
 	GetPermissionList(Scope string) ([]models.Permission, error)
 	GetPermissionByPrimaryKey(ID string) (models.Permission, error)
+
+	//clients
+	CreateClientModel(entity models.CreateClientModel) (id int, err error)
+	GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error)
+	GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error)
 }

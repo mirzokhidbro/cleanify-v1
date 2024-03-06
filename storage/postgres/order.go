@@ -173,8 +173,8 @@ func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Ord
 	return order, nil
 }
 
-func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.Order, error) {
-	var order models.Order
+func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error) {
+	var order models.OrderShowResponse
 	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, status, created_at, updated_at from orders where id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,

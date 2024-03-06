@@ -131,3 +131,23 @@ ADD "firstname" VARCHAR,
 ADD "lastname" VARCHAR,
 ADD "username" VARCHAR,
 ADD "company_id" UUID REFERENCES "companies"("id");
+
+CREATE TABLE IF NOT EXISTS "clients" (
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "address" VARCHAR,
+    "full_name" VARCHAR,
+    "phone_number" VARCHAR,
+    "additional_phone_number" VARCHAR,
+    "work_number" VARCHAR,
+    "latitute" FLOAT,
+    "longitude" FLOAT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE EXTENSION pg_trgm;
+CREATE INDEX idx_clients_phones ON "clients" USING gin (("phone_number" || ' ' || "additional_phone_number" || ' ' || "work_number") gin_trgm_ops);
+
+ALTER TABLE "orders"
+ADD "client_id" INTEGER REFERENCES "clients"("id");
