@@ -72,7 +72,7 @@ func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientLi
 	}
 
 	if len(queryParam.Address) > 0 {
-		params["slug"] = queryParam.Address
+		params["address"] = queryParam.Address
 		filter += " AND ((address) ILIKE ('%' || :address || '%'))"
 	}
 
