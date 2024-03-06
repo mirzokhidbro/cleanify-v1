@@ -24,7 +24,8 @@ var kb = &tgmodels.ReplyKeyboardMarkup{
 			// {Text: "Tanlanganlar"},
 		},
 	},
-	ResizeKeyboard: true,
+	ResizeKeyboard:  true,
+	OneTimeKeyboard: true,
 }
 
 func (h *Handler) CreateCompanyBotModel(c *gin.Context) {

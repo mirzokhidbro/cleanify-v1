@@ -108,7 +108,7 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 }
 
 func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
-	orderID := c.Param("order-id")
+	orderID := c.Param("client-id")
 	orderId, err := strconv.Atoi(orderID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
