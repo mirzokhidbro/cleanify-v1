@@ -1,8 +1,8 @@
 package models
 
 type CreateCompanyBotModel struct {
-	BotToken  string `json:"bot_token", binding:"required"`
-	CompanyID string `json:"company_id", binding:"required"`
+	BotToken  string `json:"bot_token" binding:"required"`
+	CompanyID string `json:"company_id" binding:"required"`
 	BotID     int    `json:"bot_id"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
