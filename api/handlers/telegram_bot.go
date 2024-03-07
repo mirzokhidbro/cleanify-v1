@@ -5,7 +5,6 @@ import (
 	"bw-erp/models"
 	"bw-erp/utils"
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -178,7 +177,7 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 				Text:   err.Error(),
 			})
 		} else {
-			if order.Phone != "" {
+			if order.PhoneNumber != "" {
 				botData, _ := b.GetMe(ctx)
 				botID := botData.ID
 				user, _ := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
@@ -336,8 +335,8 @@ func (h *Handler) Applications(ctx context.Context, b *bot.Bot, update *tgmodels
 		if len(orders) != 0 {
 			kb := inline.New(b)
 			for _, order := range orders {
-				buttonName := *order.Address + " || " + order.Phone
-				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+				buttonName := *order.Address + " || " + order.PhoneNumber
+				kb.Row().Button(buttonName, []byte(order.PhoneNumber), h.onInlineKeyboardSelect)
 			}
 
 			b.SendMessage(ctx, &bot.SendMessageParams{
@@ -372,31 +371,24 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 			Text:   "user " + err.Error(),
 		})
 	} else {
+		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "get user " + err.Error(),
+				Text:   "create telegram session " + err.Error(),
 			})
 		} else {
-			session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
-			if err != nil {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: update.Message.Chat.ID,
-					Text:   "create telegram session " + err.Error(),
-				})
-			} else {
 
-				orderID := session.OrderID
-				h.Stg.UpdateOrder(&models.UpdateOrderRequest{
-					ID:   orderID,
-					Slug: update.Message.Text,
-				})
+			orderID := session.OrderID
+			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+				ID:   orderID,
+				Slug: update.Message.Text,
+			})
 
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: update.Message.Chat.ID,
-					Text:   "Buyurtma sonini kiriting.",
-				})
-			}
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Buyurtma sonini kiriting.",
+			})
 		}
 
 	}
@@ -537,7 +529,6 @@ func (h *Handler) SendLocation(c *gin.Context) {
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	}
-	fmt.Print(user.UserID + "\n")
 
 	botUser, _ := h.Stg.GetBotUserByUserID(user.UserID)
 
@@ -563,7 +554,7 @@ func (h *Handler) SendLocation(c *gin.Context) {
 	})
 	b.SendMessage(c, &bot.SendMessageParams{
 		ChatID: botUser.ChatID,
-		Text:   "Buyurtma birkasi: " + order.Slug + "\nBuyurtmachi telefon raqami: " + order.Phone,
+		Text:   "Buyurtma birkasi: " + order.Slug + "\nBuyurtmachi telefon raqami: " + order.PhoneNumber,
 	})
 
 	h.handleResponse(c, http.OK, "Lokatsiya jo'natildi!")

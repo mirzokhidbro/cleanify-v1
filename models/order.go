@@ -8,6 +8,7 @@ import (
 
 type CreateOrderModel struct {
 	CompanyID   string `json:"company_id" binding:"required"`
+	ClientID    int    `json:"client_id" binding:"required"`
 	Phone       string `json:"phone" binding:"required"`
 	Count       int    `json:"count"`
 	Slug        string `json:"slug"`
@@ -42,18 +43,20 @@ type OrderShowResponse struct {
 }
 
 type Order struct {
-	ID          int       `json:"id"`
-	CompanyID   string    `json:"company_id"`
-	Phone       string    `json:"phone"`
-	Count       int       `json:"count"`
-	Slug        string    `json:"slug"`
-	Status      int16     `json:"status"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Latitute    *float64  `json:"latitute"`
-	Longitude   *float64  `json:"longitude"`
-	Address     *string   `json:"address"`
+	ID                    int       `json:"id"`
+	CompanyID             string    `json:"company_id"`
+	PhoneNumber           string    `json:"phone_number"`
+	AdditionalPhoneNumber string    `json:"additional_phone_number"`
+	WorkNumber            string    `json:"work_number"`
+	Count                 int       `json:"count"`
+	Slug                  string    `json:"slug"`
+	Status                int16     `json:"status"`
+	Description           string    `json:"description"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	Latitute              *float64  `json:"latitute"`
+	Longitude             *float64  `json:"longitude"`
+	Address               *string   `json:"address"`
 }
 
 type OrderSendLocationRequest struct {
@@ -61,7 +64,7 @@ type OrderSendLocationRequest struct {
 }
 
 type UpdateOrderRequest struct {
-	ID          int     `json:"id", binding:"required"`
+	ID          int     `json:"id" binding:"required"`
 	Slug        string  `json:"slug"`
 	Status      int16   `json:"status"`
 	Phone       string  `json:"phone"`

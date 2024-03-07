@@ -4,7 +4,6 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
-	"fmt"
 )
 
 func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int, err error) {
@@ -130,7 +129,6 @@ func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientLi
 
 func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
 	var client models.GetClientByPrimaryKeyResponse
-	fmt.Print("aa")
 	err := stg.db.QueryRow(`select id, address, full_name, phone_number, additional_phone_number, work_number, latitute, longitude from clients where id = $1`, ID).Scan(
 		&client.ID,
 		&client.Address,
