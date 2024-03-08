@@ -54,5 +54,6 @@ type GetClientByPrimaryKeyResponse struct {
 type OrderLink struct {
 	ID        int       `json:"id"`
 	Count     int       `json:"count"`
+	Slug      string    `json:"slug"`
 	CreatedAt time.Time `json:"created_at"`
 }

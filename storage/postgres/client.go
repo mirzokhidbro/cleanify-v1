@@ -145,7 +145,7 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 		return client, errors.New("error happened there 1")
 	}
 
-	rows, err := stg.db.Query(`select id, count, created_at from orders where client_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, count, slug, created_at from orders where client_id = $1`, ID)
 	if err != nil {
 		return client, errors.New("error happened there 3")
 	}
@@ -153,7 +153,7 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 
 	for rows.Next() {
 		var item models.OrderLink
-		if err := rows.Scan(&item.ID, &item.Count, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt); err != nil {
 			return client, errors.New("error happened there 3")
 		}
 		client.Orders = append(client.Orders, item)
