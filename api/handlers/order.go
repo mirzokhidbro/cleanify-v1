@@ -32,6 +32,22 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 
 	body.CompanyID = *user.CompanyID
 
+	if body.IsNewClient {
+		clientID, err := h.Stg.CreateClientModel(models.CreateClientModel{
+			CompanyID:   body.CompanyID,
+			PhoneNumber: body.Phone,
+			Address:     body.Address,
+		})
+		body.ClientID = clientID
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	} else if body.ClientID == 0 {
+		h.handleResponse(c, http.BadRequest, "client id is required")
+		return
+	}
+
 	_, err = h.Stg.CreateOrderModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
