@@ -258,6 +258,8 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 				h.RegistrationPage(ctx, b, update, botID)
 			case "Order":
 				h.OrderPage(ctx, b, update, user)
+			case "SetLocation":
+				h.SetClientLocation(ctx, b, update, user)
 			}
 		}
 	}
@@ -390,7 +392,6 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 				Text:   "Buyurtma sonini kiriting.",
 			})
 		}
-
 	}
 }
 
@@ -501,6 +502,69 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 						ChatID:      update.Message.Chat.ID,
 						Text:        "Buyurtma qabul qilindi",
 						ReplyMarkup: kb,
+					})
+				}
+			}
+		}
+	}
+}
+
+func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
+	botData, _ := b.GetMe(ctx)
+	botID := botData.ID
+	chatID := update.Message.Chat.ID
+
+	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   err.Error(),
+		})
+	} else {
+		if update.Message.Location == nil {
+			kb := &tgmodels.ReplyKeyboardMarkup{
+				Keyboard: [][]tgmodels.KeyboardButton{
+					{
+						{Text: "Lokatsiya", RequestLocation: true},
+					},
+				},
+				ResizeKeyboard:  true,
+				OneTimeKeyboard: true,
+			}
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:      update.Message.Chat.ID,
+				Text:        "Iltimos lokatsiya kiriting!",
+				ReplyMarkup: kb,
+			})
+		} else {
+			_, err := h.Stg.UpdateClient(&models.UpdateClientRequest{
+				ID:        session.OrderID,
+				Latitute:  update.Message.Location.Latitude,
+				Longitude: update.Message.Location.Longitude,
+			})
+			if err != nil {
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID: update.Message.Chat.ID,
+					Text:   err.Error(),
+				})
+			} else {
+				dialogStep := ""
+				_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+					UserID:     user.UserID,
+					BotID:      int(botID),
+					ChatID:     update.Message.Chat.ID,
+					DialogStep: &dialogStep,
+				})
+				if err != nil {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   err.Error(),
+					})
+				} else {
+					h.Stg.DeleteTelegramSession(session.ID)
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   "Klient lokatsiyasi belgilandi!",
 					})
 				}
 			}
