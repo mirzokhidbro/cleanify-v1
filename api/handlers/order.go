@@ -55,18 +55,20 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 	}
 
 	botUser, _ := h.Stg.GetBotUserByUserID(user.ID)
-	opts := []bot.Option{
-		bot.WithDefaultHandler(h.Handler),
-	}
-	group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
+	if botUser.BotToken != "" {
+		opts := []bot.Option{
+			bot.WithDefaultHandler(h.Handler),
+		}
+		group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
 
-	if err == nil {
-		b, _ := bot.New(botUser.BotToken, opts...)
-		Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone
-		b.SendMessage(c, &bot.SendMessageParams{
-			ChatID: group.ChatID,
-			Text:   Notification,
-		})
+		if err == nil {
+			b, _ := bot.New(botUser.BotToken, opts...)
+			Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone
+			b.SendMessage(c, &bot.SendMessageParams{
+				ChatID: group.ChatID,
+				Text:   Notification,
+			})
+		}
 	}
 
 	h.handleResponse(c, http.Created, "Created successfully!")
