@@ -57,3 +57,9 @@ type OrderLink struct {
 	Slug      string    `json:"slug"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type UpdateClientRequest struct {
+	ID        int     `json:"id"`
+	Latitute  float64 `json:"latitute"`
+	Longitude float64 `json:"longitude"`
+}

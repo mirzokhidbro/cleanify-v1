@@ -61,7 +61,7 @@ type OrderSendLocationRequest struct {
 }
 
 type UpdateOrderRequest struct {
-	ID          int     `json:"id", binding:"required"`
+	ID          int     `json:"id" binding:"required"`
 	Slug        string  `json:"slug"`
 	Status      int16   `json:"status"`
 	Phone       string  `json:"phone"`

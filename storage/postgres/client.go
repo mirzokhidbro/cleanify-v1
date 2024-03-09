@@ -142,7 +142,7 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 		&client.Longitude,
 	)
 	if err != nil {
-		return client, errors.New("error happened there 1")
+		return client, errors.New("client not found")
 	}
 
 	rows, err := stg.db.Query(`select id, count, slug, created_at from orders where client_id = $1`, ID)
@@ -160,4 +160,38 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 	}
 
 	return client, nil
+}
+
+func (stg *Postgres) UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "clients" SET `
+
+	if entity.Longitude != 0 {
+		query += `longitude = :longitude,`
+	}
+	if entity.Latitute != 0 {
+		query += `latitute = :latitute,`
+	}
+
+	query += `updated_at = now()
+			  WHERE
+					id = :id`
+
+	params := map[string]interface{}{
+		"id":        entity.ID,
+		"longitude": entity.Longitude,
+		"latitute":  entity.Latitute,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }
