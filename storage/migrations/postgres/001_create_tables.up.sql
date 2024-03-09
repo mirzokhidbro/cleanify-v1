@@ -104,7 +104,7 @@ ADD "username" VARCHAR;
 CREATE TABLE IF NOT EXISTS "telegram_sessions" (
     "id" SERIAL PRIMARY KEY,
     "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id") NOT NULL,
-    "order_id" INT REFERENCES "orders"("id") NOT NULL,
+    "order_id" INT,
     "chat_id" BIGINT NOT NULL
 );
 
