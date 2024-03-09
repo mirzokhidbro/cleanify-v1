@@ -8,13 +8,14 @@ import (
 
 type CreateOrderModel struct {
 	CompanyID   string `json:"company_id" binding:"required"`
-	ClientID    int    `json:"client_id" binding:"required"`
+	ClientID    int    `json:"client_id"`
 	Phone       string `json:"phone" binding:"required"`
 	Count       int    `json:"count"`
 	Slug        string `json:"slug"`
 	Description string `json:"description"`
 	ChatID      int64  `json:"chat_id"`
 	Address     string `json:"address" binding:"required"`
+	IsNewClient bool   `json:"is_new_client"`
 }
 
 type OrderList struct {
