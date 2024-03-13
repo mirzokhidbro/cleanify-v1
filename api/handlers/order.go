@@ -37,6 +37,8 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			CompanyID:   body.CompanyID,
 			PhoneNumber: body.Phone,
 			Address:     body.Address,
+			Longitude:   body.Longitude,
+			Latitute:    body.Latitute,
 		})
 		body.ClientID = clientID
 		if err != nil {

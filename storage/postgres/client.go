@@ -18,14 +18,18 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 		full_name,
 		phone_number,
 		additional_phone_number,
-		work_number
+		work_number,
+		longitude,
+		latitute
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7,
+		$8
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Address,
@@ -33,6 +37,8 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 		entity.PhoneNumber,
 		entity.AdditionalPhoneNumber,
 		entity.WorkNumber,
+		entity.Longitude,
+		entity.Latitute,
 	).Scan(&id)
 
 	if err != nil {

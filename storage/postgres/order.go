@@ -187,7 +187,8 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 									o.description, 
 									c.latitute, 
 									c.longitude, 
-									o.created_at, 
+									o.client_id, 
+									o.created_at,
 									o.updated_at 
 								from orders o
 								left join clients c on o.client_id = c.id 
@@ -202,6 +203,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 		&order.Description,
 		&order.Latitute,
 		&order.Longitude,
+		&order.ClientID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -244,16 +246,26 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	if entity.Description != "" {
 		query += `description = :description,`
 	}
-	if entity.Longitude != 0 {
-		query += `longitude = :longitude,`
-	}
-	if entity.Latitute != 0 {
-		query += `latitute = :latitute,`
-	}
 
 	query += `updated_at = now()
 			  WHERE
 					id = :id`
+
+	order, _ := stg.GetOrderByPrimaryKey(entity.ID)
+	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
+		updateOrderQuery := `UPDATE "clients" SET longitude = :longitude, latitute = :latitute WHERE id = :clientId`
+		clientParams := map[string]interface{}{
+			"clientId":  order.ClientID,
+			"longitude": entity.Longitude,
+			"latitute":  entity.Latitute,
+		}
+		updateOrderQuery, arr := helper.ReplaceQueryParams(updateOrderQuery, clientParams)
+		_, err := stg.db.Exec(updateOrderQuery, arr...)
+		if err != nil {
+			return 0, err
+		}
+
+	}
 
 	params := map[string]interface{}{
 		"id":          entity.ID,
@@ -262,8 +274,6 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 		"phone":       entity.Phone,
 		"description": entity.Description,
 		"count":       entity.Count,
-		"longitude":   entity.Longitude,
-		"latitute":    entity.Latitute,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
