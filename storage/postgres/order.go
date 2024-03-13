@@ -179,9 +179,9 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 	var order models.OrderShowResponse
 	err := stg.db.QueryRow(`select o.id, 
 									o.company_id, 
-									c.phone_number, 
-									c.additional_phone_number, 
-									c.work_number, 
+									COALESCE(c.phone_number, ''), 
+									COALESCE(c.additional_phone_number, ''), 
+									COALESCE(c.work_number, ''), 
 									o.count, 
 									o.slug, 
 									o.description, 
