@@ -187,7 +187,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 									o.description, 
 									c.latitute, 
 									c.longitude, 
-									COALESCE(o.client_id, ''), 
+									COALESCE(o.client_id, 0), 
 									o.created_at,
 									o.updated_at 
 								from orders o
