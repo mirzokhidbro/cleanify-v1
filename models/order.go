@@ -7,15 +7,17 @@ import (
 )
 
 type CreateOrderModel struct {
-	CompanyID   string `json:"company_id" binding:"required"`
-	ClientID    int    `json:"client_id"`
-	Phone       string `json:"phone" binding:"required"`
-	Count       int    `json:"count"`
-	Slug        string `json:"slug"`
-	Description string `json:"description"`
-	ChatID      int64  `json:"chat_id"`
-	Address     string `json:"address" binding:"required"`
-	IsNewClient bool   `json:"is_new_client"`
+	CompanyID   string  `json:"company_id" binding:"required"`
+	ClientID    int     `json:"client_id"`
+	Phone       string  `json:"phone" binding:"required"`
+	Count       int     `json:"count"`
+	Slug        string  `json:"slug"`
+	Description string  `json:"description"`
+	ChatID      int64   `json:"chat_id"`
+	Address     string  `json:"address" binding:"required"`
+	IsNewClient bool    `json:"is_new_client"`
+	Latitute    float64 `json:"latitute"`
+	Longitude   float64 `json:"longitude"`
 }
 
 type OrderList struct {
@@ -46,6 +48,7 @@ type OrderShowResponse struct {
 type Order struct {
 	ID                    int       `json:"id"`
 	CompanyID             string    `json:"company_id"`
+	ClientID              int       `json:"client_id"`
 	PhoneNumber           string    `json:"phone_number"`
 	AdditionalPhoneNumber string    `json:"additional_phone_number"`
 	WorkNumber            string    `json:"work_number"`
