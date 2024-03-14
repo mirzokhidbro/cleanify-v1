@@ -5,9 +5,13 @@ import (
 	"bw-erp/models"
 	"bw-erp/utils"
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -93,7 +97,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			go func() {
 				defer wg.Done()
 				// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
+				b.RegisterHandler(bot.HandlerTypeMessageText, "/code", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
 		}
@@ -105,17 +109,28 @@ func (h *Handler) BotStart(c *gin.Context) {
 }
 
 func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	botData, _ := b.GetMe(ctx)
-	err := h.Stg.CreateBotUserModel(models.CreateBotUserModel{
-		BotID:  int(botData.ID),
-		ChatID: int(update.Message.Chat.ID),
-		Role:   "Group",
-	})
-	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
+	// botData, _ := b.GetMe(ctx)
+	if update.Message.Chat.ID < 0 {
+		rand.Seed(time.Now().UnixNano())
+		randomNumber := rand.Intn(900000) + 100000
+		fmt.Print(update.Message.Chat.FirstName)
+		err := h.Stg.CreateTelegramGroupModel(models.CreateTelegramGroupRequest{
+			ChatID: int(update.Message.Chat.ID),
+			Name:   update.Message.Chat.FirstName,
+			Code:   randomNumber,
 		})
+		if err != nil {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   err.Error(),
+			})
+		} else {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:    update.Message.Chat.ID,
+				Text:      "<code>" + strconv.Itoa(randomNumber) + "</code>",
+				ParseMode: tgmodels.ParseModeHTML,
+			})
+		}
 	}
 }
 

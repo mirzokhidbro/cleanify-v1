@@ -71,4 +71,7 @@ type StorageI interface {
 	GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error)
 	GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error)
 	UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error)
+
+	//telegram groups
+	CreateTelegramGroupModel(entity models.CreateTelegramGroupRequest) error
 }
