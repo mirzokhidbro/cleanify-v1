@@ -74,7 +74,7 @@ type UpdateOrderRequest struct {
 	Phone       string  `json:"phone"`
 	ChatID      int64   `json:"chat_id"`
 	Description string  `json:"description"`
-	Count       string  `json:"count"`
+	Count       int     `json:"count"`
 	Latitute    float64 `json:"latitute"`
 	Longitude   float64 `json:"longitude"`
 }

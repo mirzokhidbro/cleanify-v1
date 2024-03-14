@@ -240,7 +240,7 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	if entity.Phone != "" {
 		query += `phone = :phone,`
 	}
-	if entity.Count != "" {
+	if entity.Count != 0 {
 		query += `count = :count,`
 	}
 	if entity.Description != "" {

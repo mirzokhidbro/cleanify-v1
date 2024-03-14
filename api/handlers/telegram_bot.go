@@ -307,8 +307,8 @@ func (h *Handler) OrderPage(ctx context.Context, b *bot.Bot, update *tgmodels.Up
 			switch *user.DialogStep {
 			case "asked order slug":
 				h.AskedOrderSlug(ctx, b, update, user)
-			case "order count asked":
-				h.AskedOrderCount(ctx, b, update, user)
+			// case "order count asked":
+			// 	h.AskedOrderCount(ctx, b, update, user)
 			case "order location asked":
 				h.AskedOrderLocation(ctx, b, update, user)
 			}
@@ -395,54 +395,54 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 	}
 }
 
-func (h *Handler) AskedOrderCount(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
-	botData, _ := b.GetMe(ctx)
-	botID := botData.ID
-	chatID := update.Message.Chat.ID
+// func (h *Handler) AskedOrderCount(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
+// 	botData, _ := b.GetMe(ctx)
+// 	botID := botData.ID
+// 	chatID := update.Message.Chat.ID
 
-	dialogStep := "order location asked"
-	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
-		UserID:     user.UserID,
-		BotID:      int(botID),
-		ChatID:     chatID,
-		DialogStep: &dialogStep,
-	})
-	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
-		})
-	} else {
-		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
-		if err != nil {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   err.Error(),
-			})
-		} else {
-			orderID := session.OrderID
-			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
-				ID:    orderID,
-				Count: update.Message.Text,
-			})
+// 	dialogStep := "order location asked"
+// 	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+// 		UserID:     user.UserID,
+// 		BotID:      int(botID),
+// 		ChatID:     chatID,
+// 		DialogStep: &dialogStep,
+// 	})
+// 	if err != nil {
+// 		b.SendMessage(ctx, &bot.SendMessageParams{
+// 			ChatID: update.Message.Chat.ID,
+// 			Text:   err.Error(),
+// 		})
+// 	} else {
+// 		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+// 		if err != nil {
+// 			b.SendMessage(ctx, &bot.SendMessageParams{
+// 				ChatID: update.Message.Chat.ID,
+// 				Text:   err.Error(),
+// 			})
+// 		} else {
+// 			orderID := session.OrderID
+// 			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+// 				ID:    orderID,
+// 				Count: update.Message.Text,
+// 			})
 
-			kb := &tgmodels.ReplyKeyboardMarkup{
-				Keyboard: [][]tgmodels.KeyboardButton{
-					{
-						{Text: "Lokatsiya", RequestLocation: true},
-					},
-				},
-				ResizeKeyboard:  true,
-				OneTimeKeyboard: true,
-			}
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID:      update.Message.Chat.ID,
-				Text:        "Lokatsiya kiriting!",
-				ReplyMarkup: kb,
-			})
-		}
-	}
-}
+// 			kb := &tgmodels.ReplyKeyboardMarkup{
+// 				Keyboard: [][]tgmodels.KeyboardButton{
+// 					{
+// 						{Text: "Lokatsiya", RequestLocation: true},
+// 					},
+// 				},
+// 				ResizeKeyboard:  true,
+// 				OneTimeKeyboard: true,
+// 			}
+// 			b.SendMessage(ctx, &bot.SendMessageParams{
+// 				ChatID:      update.Message.Chat.ID,
+// 				Text:        "Lokatsiya kiriting!",
+// 				ReplyMarkup: kb,
+// 			})
+// 		}
+// 	}
+// }
 
 func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
 	botData, _ := b.GetMe(ctx)
