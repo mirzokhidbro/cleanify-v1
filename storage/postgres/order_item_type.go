@@ -9,7 +9,7 @@ import (
 func (stg *Postgres) CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error {
 	_, err := stg.GetCompanyById(entity.CopmanyID)
 	if err != nil {
-		return errors.New("Selected company not found")
+		return errors.New("selected company not found")
 	}
 
 	_, err = stg.db.Exec(`INSERT INTO order_item_types(

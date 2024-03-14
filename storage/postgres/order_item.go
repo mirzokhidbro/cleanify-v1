@@ -17,7 +17,7 @@ func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) err
 	orderItemType, err := stg.GetOrderItemTypeById(entity.OrderItemTypeID)
 	if err != nil {
 		fmt.Print(err.Error())
-		return errors.New("Order item type not found")
+		return errors.New("order item type not found")
 	}
 
 	itemType := orderItemType.Name
