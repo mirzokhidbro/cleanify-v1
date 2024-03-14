@@ -188,6 +188,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 									c.latitute, 
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
+									COALESCE(o.address, ''),
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -204,6 +205,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 		&order.Latitute,
 		&order.Longitude,
 		&order.ClientID,
+		&order.Address,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
