@@ -157,6 +157,7 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
     "company_id" UUID REFERENCES "companies"("id"),
     "name"  VARCHAR,
     "notification_statuses" INT[],
+    "with_location" BOOLEAN,
     "code" INT,
     "chat_id" BIGINT NOT NULL UNIQUE,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

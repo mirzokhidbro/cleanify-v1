@@ -175,7 +175,7 @@ func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Ord
 	return order, nil
 }
 
-func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error) {
+func (stg *Postgres) GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error) {
 	var order models.OrderShowResponse
 	err := stg.db.QueryRow(`select o.id, 
 									o.company_id, 
@@ -225,6 +225,47 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 			return order, err
 		}
 		order.OrderItems = append(order.OrderItems, item)
+	}
+
+	return order, nil
+}
+
+func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error) {
+	var order models.OrderShowResponse
+	err := stg.db.QueryRow(`select o.id, 
+									o.company_id, 
+									COALESCE(c.phone_number, ''), 
+									COALESCE(c.additional_phone_number, ''), 
+									COALESCE(c.work_number, ''), 
+									o.count, 
+									o.slug, 
+									o.description, 
+									c.latitute, 
+									c.longitude, 
+									COALESCE(o.client_id, 0), 
+									COALESCE(o.address, ''),
+									o.created_at,
+									o.updated_at 
+								from orders o
+								left join clients c on o.client_id = c.id 
+								where o.id = $1`, ID).Scan(
+		&order.ID,
+		&order.CompanyID,
+		&order.PhoneNumber,
+		&order.AdditionalPhoneNumber,
+		&order.WorkNumber,
+		&order.Count,
+		&order.Slug,
+		&order.Description,
+		&order.Latitute,
+		&order.Longitude,
+		&order.ClientID,
+		&order.Address,
+		&order.CreatedAt,
+		&order.UpdatedAt,
+	)
+	if err != nil {
+		return order, err
 	}
 
 	return order, nil

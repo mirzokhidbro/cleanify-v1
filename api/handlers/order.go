@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
+	tgmodels "github.com/go-telegram/bot/models"
 )
 
 func (h *Handler) CreateOrderModel(c *gin.Context) {
@@ -50,27 +51,29 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	_, err = h.Stg.CreateOrderModel(body)
+	orderID, err := h.Stg.CreateOrderModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	botUser, _ := h.Stg.GetBotUserByUserID(user.ID)
-	if botUser.BotToken != "" {
-		opts := []bot.Option{
-			bot.WithDefaultHandler(h.Handler),
-		}
-		group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
-
-		if err == nil {
-			b, _ := bot.New(botUser.BotToken, opts...)
-			Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone
-			b.SendMessage(c, &bot.SendMessageParams{
-				ChatID: group.ChatID,
-				Text:   Notification,
-			})
-		}
+	BotToken := h.Cfg.BotToken
+	if BotToken != "" {
+		go func() {
+			opts := []bot.Option{
+				bot.WithDefaultHandler(h.Handler),
+			}
+			group, err := h.Stg.GetNotificationGroup(*user.CompanyID, 83)
+			if err == nil {
+				b, _ := bot.New(BotToken, opts...)
+				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
+				b.SendMessage(c, &bot.SendMessageParams{
+					ChatID:    group.ChatID,
+					Text:      Notification,
+					ParseMode: tgmodels.ParseModeHTML,
+				})
+			}
+		}()
 	}
 
 	h.handleResponse(c, http.Created, "Created successfully!")
@@ -134,7 +137,7 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetOrderByPrimaryKey(orderId)
+	data, err := h.Stg.GetOrderDetailedByPrimaryKey(orderId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -153,6 +156,55 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
+	}
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.GetUserById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	if body.Status != 0 {
+		BotToken := h.Cfg.BotToken
+		if BotToken != "" {
+			go func() {
+				opts := []bot.Option{
+					bot.WithDefaultHandler(h.Handler),
+				}
+				group, _ := h.Stg.GetNotificationGroup(*user.CompanyID, int(body.Status))
+				if group.ChatID != 0 {
+					order, err := h.Stg.GetOrderByPrimaryKey(body.ID)
+					b, _ := bot.New(BotToken, opts...)
+					if err == nil {
+						if group.WithLocation && (*order.Latitute != 0 || *order.Longitude != 0) {
+							b.SendLocation(c, &bot.SendLocationParams{
+								ChatID:    group.ChatID,
+								Latitude:  *order.Latitute,
+								Longitude: *order.Longitude,
+							})
+							Notification := "Manzil: " + *order.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							b.SendMessage(c, &bot.SendMessageParams{
+								ChatID:    group.ChatID,
+								Text:      Notification,
+								ParseMode: tgmodels.ParseModeHTML,
+							})
+						} else {
+							Notification := "Manzil: " + *order.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							b.SendMessage(c, &bot.SendMessageParams{
+								ChatID:    group.ChatID,
+								Text:      Notification,
+								ParseMode: tgmodels.ParseModeHTML,
+							})
+						}
+					}
+				}
+			}()
+		}
 	}
 
 	h.handleResponse(c, http.OK, rowsAffected)

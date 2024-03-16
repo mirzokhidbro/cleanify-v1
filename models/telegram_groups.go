@@ -9,6 +9,7 @@ type TelegramGroup struct {
 	NotificationStatuses []int8
 	Code                 int
 	ChatID               int
+	WithLocation         bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }
