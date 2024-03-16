@@ -66,7 +66,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			group, err := h.Stg.GetNotificationGroup(*user.CompanyID, 83)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
-				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a> \nIzoh:" + body.Description
+				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:"  + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
 				b.SendMessage(c, &bot.SendMessageParams{
 					ChatID:    group.ChatID,
 					Text:      Notification,
