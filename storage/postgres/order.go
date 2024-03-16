@@ -189,6 +189,7 @@ func (stg *Postgres) GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowRespo
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
 									COALESCE(o.address, ''),
+									o.status,
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -206,6 +207,7 @@ func (stg *Postgres) GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowRespo
 		&order.Longitude,
 		&order.ClientID,
 		&order.Address,
+		&order.Status,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
