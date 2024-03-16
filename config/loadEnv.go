@@ -17,6 +17,7 @@ type Config struct {
 	DefaultOffset  string
 	DefaultLimit   string
 	API_SECRET     string
+	BotToken       string
 }
 
 func LoadConfig() (config Config, err error) {
@@ -35,6 +36,7 @@ func LoadConfig() (config Config, err error) {
 		DefaultOffset:  cast.ToString(os.Getenv("DEFAULT_OFFSET")),
 		DefaultLimit:   cast.ToString(os.Getenv("DEFAULT_LIMIT")),
 		API_SECRET:     cast.ToString(os.Getenv("API_SECRET")),
+		BotToken:       cast.ToString(os.Getenv("BOT_TOKEN")),
 	}
 
 	return
