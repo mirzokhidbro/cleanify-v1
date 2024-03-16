@@ -9,7 +9,7 @@ import (
 func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
 	_, err = stg.GetCompanyById(entity.CompanyID)
 	if err != nil {
-		return 0, errors.New("Company not found")
+		return 0, errors.New("company not found")
 	}
 
 	err = stg.db.QueryRow(`INSERT INTO orders(
@@ -18,22 +18,24 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 		count,
 		slug,
 		description,
-		address
+		address,
+		client_id
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
 		entity.Count,
 		entity.Slug,
 		entity.Description,
-		// entity.ChatID,
 		entity.Address,
+		entity.ClientID,
 	).Scan(&id)
 
 	if err != nil {
@@ -141,7 +143,7 @@ func (stg *Postgres) GetOrdersByStatus(companyID string, Status int) (order []mo
 		err = rows.Scan(
 			&order.ID,
 			&order.Address,
-			&order.Phone,
+			&order.PhoneNumber,
 		)
 		if err != nil {
 			return nil, err
@@ -157,7 +159,7 @@ func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Ord
 	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where company_id = $1 and phone = $2`, companyID, Phone).Scan(
 		&order.ID,
 		&order.CompanyID,
-		&order.Phone,
+		&order.PhoneNumber,
 		&order.Count,
 		&order.Slug,
 		&order.Description,
@@ -175,17 +177,35 @@ func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Ord
 
 func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error) {
 	var order models.OrderShowResponse
-	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, address, status, created_at, updated_at from orders where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select o.id, 
+									o.company_id, 
+									COALESCE(c.phone_number, ''), 
+									COALESCE(c.additional_phone_number, ''), 
+									COALESCE(c.work_number, ''), 
+									o.count, 
+									o.slug, 
+									o.description, 
+									c.latitute, 
+									c.longitude, 
+									COALESCE(o.client_id, 0), 
+									COALESCE(o.address, ''),
+									o.created_at,
+									o.updated_at 
+								from orders o
+								left join clients c on o.client_id = c.id 
+								where o.id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
-		&order.Phone,
+		&order.PhoneNumber,
+		&order.AdditionalPhoneNumber,
+		&order.WorkNumber,
 		&order.Count,
 		&order.Slug,
 		&order.Description,
 		&order.Latitute,
 		&order.Longitude,
+		&order.ClientID,
 		&order.Address,
-		&order.Status,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -222,22 +242,32 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	if entity.Phone != "" {
 		query += `phone = :phone,`
 	}
-	if entity.Count != "" {
+	if entity.Count != 0 {
 		query += `count = :count,`
 	}
 	if entity.Description != "" {
 		query += `description = :description,`
 	}
-	if entity.Longitude != 0 {
-		query += `longitude = :longitude,`
-	}
-	if entity.Latitute != 0 {
-		query += `latitute = :latitute,`
-	}
 
 	query += `updated_at = now()
 			  WHERE
 					id = :id`
+
+	order, _ := stg.GetOrderByPrimaryKey(entity.ID)
+	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
+		updateOrderQuery := `UPDATE "clients" SET longitude = :longitude, latitute = :latitute WHERE id = :clientId`
+		clientParams := map[string]interface{}{
+			"clientId":  order.ClientID,
+			"longitude": entity.Longitude,
+			"latitute":  entity.Latitute,
+		}
+		updateOrderQuery, arr := helper.ReplaceQueryParams(updateOrderQuery, clientParams)
+		_, err := stg.db.Exec(updateOrderQuery, arr...)
+		if err != nil {
+			return 0, err
+		}
+
+	}
 
 	params := map[string]interface{}{
 		"id":          entity.ID,
@@ -246,8 +276,6 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 		"phone":       entity.Phone,
 		"description": entity.Description,
 		"count":       entity.Count,
-		"longitude":   entity.Longitude,
-		"latitute":    entity.Latitute,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -266,10 +294,26 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 
 func (stg *Postgres) GetOrderLocation(ID int) (models.Order, error) {
 	var order models.Order
-	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select o.id, 
+								   o.company_id, 
+								   c.phone_number, 
+								   c.additional_phone_number, 
+								   c.work_number, 
+								   o.count, 
+								   o.slug, 
+								   o.description, 
+								   c.latitute, 
+								   c.longitude, 
+								   o.created_at, 
+								   o.updated_at 
+								from orders o
+							left join clients c on o.client_id = c.id 
+							where o.id = $1`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
-		&order.Phone,
+		&order.PhoneNumber,
+		&order.AdditionalPhoneNumber,
+		&order.WorkNumber,
 		&order.Count,
 		&order.Slug,
 		&order.Description,

@@ -6,9 +6,12 @@ import (
 	"bw-erp/utils"
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -94,7 +97,7 @@ func (h *Handler) BotStart(c *gin.Context) {
 			go func() {
 				defer wg.Done()
 				// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/groupverification", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
+				b.RegisterHandler(bot.HandlerTypeMessageText, "/code", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 				b.Start(ctx)
 			}()
 		}
@@ -106,17 +109,28 @@ func (h *Handler) BotStart(c *gin.Context) {
 }
 
 func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	botData, _ := b.GetMe(ctx)
-	err := h.Stg.CreateBotUserModel(models.CreateBotUserModel{
-		BotID:  int(botData.ID),
-		ChatID: int(update.Message.Chat.ID),
-		Role:   "Group",
-	})
-	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
+	// botData, _ := b.GetMe(ctx)
+	if update.Message.Chat.ID < 0 {
+		rand.Seed(time.Now().UnixNano())
+		randomNumber := rand.Intn(900000) + 100000
+		fmt.Print(update.Message.Chat.FirstName)
+		err := h.Stg.CreateTelegramGroupModel(models.CreateTelegramGroupRequest{
+			ChatID: int(update.Message.Chat.ID),
+			Name:   update.Message.Chat.FirstName,
+			Code:   randomNumber,
 		})
+		if err != nil {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   err.Error(),
+			})
+		} else {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:    update.Message.Chat.ID,
+				Text:      "<code>" + strconv.Itoa(randomNumber) + "</code>",
+				ParseMode: tgmodels.ParseModeHTML,
+			})
+		}
 	}
 }
 
@@ -178,7 +192,7 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 				Text:   err.Error(),
 			})
 		} else {
-			if order.Phone != "" {
+			if order.PhoneNumber != "" {
 				botData, _ := b.GetMe(ctx)
 				botID := botData.ID
 				user, _ := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
@@ -259,6 +273,8 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 				h.RegistrationPage(ctx, b, update, botID)
 			case "Order":
 				h.OrderPage(ctx, b, update, user)
+			case "SetLocation":
+				h.SetClientLocation(ctx, b, update, user)
 			}
 		}
 	}
@@ -306,8 +322,8 @@ func (h *Handler) OrderPage(ctx context.Context, b *bot.Bot, update *tgmodels.Up
 			switch *user.DialogStep {
 			case "asked order slug":
 				h.AskedOrderSlug(ctx, b, update, user)
-			case "order count asked":
-				h.AskedOrderCount(ctx, b, update, user)
+			// case "order count asked":
+			// 	h.AskedOrderCount(ctx, b, update, user)
 			case "order location asked":
 				h.AskedOrderLocation(ctx, b, update, user)
 			}
@@ -336,8 +352,8 @@ func (h *Handler) Applications(ctx context.Context, b *bot.Bot, update *tgmodels
 		if len(orders) != 0 {
 			kb := inline.New(b)
 			for _, order := range orders {
-				buttonName := *order.Address + " || " + order.Phone
-				kb.Row().Button(buttonName, []byte(order.Phone), h.onInlineKeyboardSelect)
+				buttonName := *order.Address + " || " + order.PhoneNumber
+				kb.Row().Button(buttonName, []byte(order.PhoneNumber), h.onInlineKeyboardSelect)
 			}
 
 			b.SendMessage(ctx, &bot.SendMessageParams{
@@ -372,84 +388,76 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 			Text:   "user " + err.Error(),
 		})
 	} else {
-		if err != nil {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   "get user " + err.Error(),
-			})
-		} else {
-			session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
-			if err != nil {
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: update.Message.Chat.ID,
-					Text:   "create telegram session " + err.Error(),
-				})
-			} else {
-
-				orderID := session.OrderID
-				h.Stg.UpdateOrder(&models.UpdateOrderRequest{
-					ID:   orderID,
-					Slug: update.Message.Text,
-				})
-
-				b.SendMessage(ctx, &bot.SendMessageParams{
-					ChatID: update.Message.Chat.ID,
-					Text:   "Buyurtma sonini kiriting.",
-				})
-			}
-		}
-
-	}
-}
-
-func (h *Handler) AskedOrderCount(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
-	botData, _ := b.GetMe(ctx)
-	botID := botData.ID
-	chatID := update.Message.Chat.ID
-
-	dialogStep := "order location asked"
-	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
-		UserID:     user.UserID,
-		BotID:      int(botID),
-		ChatID:     chatID,
-		DialogStep: &dialogStep,
-	})
-	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   err.Error(),
-		})
-	} else {
 		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   err.Error(),
+				Text:   "create telegram session " + err.Error(),
 			})
 		} else {
+
 			orderID := session.OrderID
 			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
-				ID:    orderID,
-				Count: update.Message.Text,
+				ID:   orderID,
+				Slug: update.Message.Text,
 			})
 
-			kb := &tgmodels.ReplyKeyboardMarkup{
-				Keyboard: [][]tgmodels.KeyboardButton{
-					{
-						{Text: "Lokatsiya", RequestLocation: true},
-					},
-				},
-				ResizeKeyboard:  true,
-				OneTimeKeyboard: true,
-			}
 			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID:      update.Message.Chat.ID,
-				Text:        "Lokatsiya kiriting!",
-				ReplyMarkup: kb,
+				ChatID: update.Message.Chat.ID,
+				Text:   "Buyurtma sonini kiriting.",
 			})
 		}
 	}
 }
+
+// func (h *Handler) AskedOrderCount(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
+// 	botData, _ := b.GetMe(ctx)
+// 	botID := botData.ID
+// 	chatID := update.Message.Chat.ID
+
+// 	dialogStep := "order location asked"
+// 	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+// 		UserID:     user.UserID,
+// 		BotID:      int(botID),
+// 		ChatID:     chatID,
+// 		DialogStep: &dialogStep,
+// 	})
+// 	if err != nil {
+// 		b.SendMessage(ctx, &bot.SendMessageParams{
+// 			ChatID: update.Message.Chat.ID,
+// 			Text:   err.Error(),
+// 		})
+// 	} else {
+// 		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+// 		if err != nil {
+// 			b.SendMessage(ctx, &bot.SendMessageParams{
+// 				ChatID: update.Message.Chat.ID,
+// 				Text:   err.Error(),
+// 			})
+// 		} else {
+// 			orderID := session.OrderID
+// 			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+// 				ID:    orderID,
+// 				Count: update.Message.Text,
+// 			})
+
+// 			kb := &tgmodels.ReplyKeyboardMarkup{
+// 				Keyboard: [][]tgmodels.KeyboardButton{
+// 					{
+// 						{Text: "Lokatsiya", RequestLocation: true},
+// 					},
+// 				},
+// 				ResizeKeyboard:  true,
+// 				OneTimeKeyboard: true,
+// 			}
+// 			b.SendMessage(ctx, &bot.SendMessageParams{
+// 				ChatID:      update.Message.Chat.ID,
+// 				Text:        "Lokatsiya kiriting!",
+// 				ReplyMarkup: kb,
+// 			})
+// 		}
+// 	}
+// }
 
 func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
 	botData, _ := b.GetMe(ctx)
@@ -516,6 +524,69 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 	}
 }
 
+func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
+	botData, _ := b.GetMe(ctx)
+	botID := botData.ID
+	chatID := update.Message.Chat.ID
+
+	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   err.Error(),
+		})
+	} else {
+		if update.Message.Location == nil {
+			kb := &tgmodels.ReplyKeyboardMarkup{
+				Keyboard: [][]tgmodels.KeyboardButton{
+					{
+						{Text: "Lokatsiya", RequestLocation: true},
+					},
+				},
+				ResizeKeyboard:  true,
+				OneTimeKeyboard: true,
+			}
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:      update.Message.Chat.ID,
+				Text:        "Iltimos lokatsiya kiriting!",
+				ReplyMarkup: kb,
+			})
+		} else {
+			_, err := h.Stg.UpdateClient(&models.UpdateClientRequest{
+				ID:        session.OrderID,
+				Latitute:  update.Message.Location.Latitude,
+				Longitude: update.Message.Location.Longitude,
+			})
+			if err != nil {
+				b.SendMessage(ctx, &bot.SendMessageParams{
+					ChatID: update.Message.Chat.ID,
+					Text:   err.Error(),
+				})
+			} else {
+				dialogStep := ""
+				_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+					UserID:     user.UserID,
+					BotID:      int(botID),
+					ChatID:     update.Message.Chat.ID,
+					DialogStep: &dialogStep,
+				})
+				if err != nil {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   err.Error(),
+					})
+				} else {
+					h.Stg.DeleteTelegramSession(session.ID)
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   "Klient lokatsiyasi belgilandi!",
+					})
+				}
+			}
+		}
+	}
+}
+
 func (h *Handler) handleError(ctx context.Context, b *bot.Bot, update *tgmodels.Update, errorMessage string, replyToMessageID int) {
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      update.Message.Chat.ID,
@@ -537,7 +608,6 @@ func (h *Handler) SendLocation(c *gin.Context) {
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	}
-	fmt.Print(user.UserID + "\n")
 
 	botUser, _ := h.Stg.GetBotUserByUserID(user.UserID)
 
@@ -563,7 +633,7 @@ func (h *Handler) SendLocation(c *gin.Context) {
 	})
 	b.SendMessage(c, &bot.SendMessageParams{
 		ChatID: botUser.ChatID,
-		Text:   "Buyurtma birkasi: " + order.Slug + "\nBuyurtmachi telefon raqami: " + order.Phone,
+		Text:   "Buyurtma birkasi: " + order.Slug + "\nBuyurtmachi telefon raqami: " + order.PhoneNumber,
 	})
 
 	h.handleResponse(c, http.OK, "Lokatsiya jo'natildi!")

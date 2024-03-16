@@ -5,12 +5,14 @@ import (
 )
 
 type CreateClientModel struct {
-	CompanyID             string `json:"company_id"`
-	Address               string `json:"address" binding:"required" minLength:"2" maxLength:"255"`
-	FullName              string `json:"full_name"`
-	PhoneNumber           string `json:"phone_number" binding:"required"`
-	AdditionalPhoneNumber string `json:"additional_phone_number"`
-	WorkNumber            string `json:"work_number"`
+	CompanyID             string  `json:"company_id"`
+	Address               string  `json:"address" binding:"required" minLength:"2" maxLength:"255"`
+	FullName              string  `json:"full_name"`
+	PhoneNumber           string  `json:"phone_number" binding:"required"`
+	AdditionalPhoneNumber string  `json:"additional_phone_number"`
+	WorkNumber            string  `json:"work_number"`
+	Latitute              float64 `json:"latitute"`
+	Longitude             float64 `json:"longitude"`
 }
 
 type ClientListRequest struct {
@@ -54,5 +56,12 @@ type GetClientByPrimaryKeyResponse struct {
 type OrderLink struct {
 	ID        int       `json:"id"`
 	Count     int       `json:"count"`
+	Slug      string    `json:"slug"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type UpdateClientRequest struct {
+	ID        int     `json:"id"`
+	Latitute  float64 `json:"latitute"`
+	Longitude float64 `json:"longitude"`
 }

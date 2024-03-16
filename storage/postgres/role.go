@@ -11,7 +11,7 @@ func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) e
 		return err
 	}
 
-	_, err = stg.db.Exec(`INSERT INTO roles(
+	_, _ = stg.db.Exec(`INSERT INTO roles(
 		id,
 		name,
 		company_id
@@ -85,7 +85,7 @@ func (stg *Postgres) GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey
 	if err != nil {
 		return response, err
 	}
-	if *&model.PermissionIDs != nil {
+	if *model.PermissionIDs != "" {
 		permissionIds := utils.GetArray(*model.PermissionIDs)
 		response.PermissionIDs = &permissionIds
 	}

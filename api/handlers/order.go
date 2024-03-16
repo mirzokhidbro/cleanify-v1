@@ -32,6 +32,24 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 
 	body.CompanyID = *user.CompanyID
 
+	if body.IsNewClient {
+		clientID, err := h.Stg.CreateClientModel(models.CreateClientModel{
+			CompanyID:   body.CompanyID,
+			PhoneNumber: body.Phone,
+			Address:     body.Address,
+			Longitude:   body.Longitude,
+			Latitute:    body.Latitute,
+		})
+		body.ClientID = clientID
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	} else if body.ClientID == 0 {
+		h.handleResponse(c, http.BadRequest, "client id is required")
+		return
+	}
+
 	_, err = h.Stg.CreateOrderModel(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -39,18 +57,20 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 	}
 
 	botUser, _ := h.Stg.GetBotUserByUserID(user.ID)
-	opts := []bot.Option{
-		bot.WithDefaultHandler(h.Handler),
-	}
-	group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
+	if botUser.BotToken != "" {
+		opts := []bot.Option{
+			bot.WithDefaultHandler(h.Handler),
+		}
+		group, err := h.Stg.GetNotificationGroup(*user.CompanyID)
 
-	if err == nil {
-		b, _ := bot.New(botUser.BotToken, opts...)
-		Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone
-		b.SendMessage(c, &bot.SendMessageParams{
-			ChatID: group.ChatID,
-			Text:   Notification,
-		})
+		if err == nil {
+			b, _ := bot.New(botUser.BotToken, opts...)
+			Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone
+			b.SendMessage(c, &bot.SendMessageParams{
+				ChatID: group.ChatID,
+				Text:   Notification,
+			})
+		}
 	}
 
 	h.handleResponse(c, http.Created, "Created successfully!")

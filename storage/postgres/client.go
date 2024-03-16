@@ -4,7 +4,6 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"errors"
-	"fmt"
 )
 
 func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int, err error) {
@@ -19,14 +18,18 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 		full_name,
 		phone_number,
 		additional_phone_number,
-		work_number
+		work_number,
+		longitude,
+		latitute
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7,
+		$8
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Address,
@@ -34,6 +37,8 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 		entity.PhoneNumber,
 		entity.AdditionalPhoneNumber,
 		entity.WorkNumber,
+		entity.Longitude,
+		entity.Latitute,
 	).Scan(&id)
 
 	if err != nil {
@@ -130,7 +135,6 @@ func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientLi
 
 func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
 	var client models.GetClientByPrimaryKeyResponse
-	fmt.Print("aa")
 	err := stg.db.QueryRow(`select id, address, full_name, phone_number, additional_phone_number, work_number, latitute, longitude from clients where id = $1`, ID).Scan(
 		&client.ID,
 		&client.Address,
@@ -142,10 +146,10 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 		&client.Longitude,
 	)
 	if err != nil {
-		return client, errors.New("error happened there 1")
+		return client, errors.New("client not found")
 	}
 
-	rows, err := stg.db.Query(`select id, count, created_at from orders where client_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, count, slug, created_at from orders where client_id = $1`, ID)
 	if err != nil {
 		return client, errors.New("error happened there 3")
 	}
@@ -153,11 +157,45 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 
 	for rows.Next() {
 		var item models.OrderLink
-		if err := rows.Scan(&item.ID, &item.Count, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt); err != nil {
 			return client, errors.New("error happened there 3")
 		}
 		client.Orders = append(client.Orders, item)
 	}
 
 	return client, nil
+}
+
+func (stg *Postgres) UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "clients" SET `
+
+	if entity.Longitude != 0 {
+		query += `longitude = :longitude,`
+	}
+	if entity.Latitute != 0 {
+		query += `latitute = :latitute,`
+	}
+
+	query += `updated_at = now()
+			  WHERE
+					id = :id`
+
+	params := map[string]interface{}{
+		"id":        entity.ID,
+		"longitude": entity.Longitude,
+		"latitute":  entity.Latitute,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }

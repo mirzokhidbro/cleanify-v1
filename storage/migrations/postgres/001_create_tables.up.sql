@@ -104,8 +104,8 @@ ADD "username" VARCHAR;
 CREATE TABLE IF NOT EXISTS "telegram_sessions" (
     "id" SERIAL PRIMARY KEY,
     "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id") NOT NULL,
-    "order_id" INT REFERENCES "orders"("id") NOT NULL,
-	"chat_id" BIGINT NOT NULL
+    "order_id" INT,
+    "chat_id" BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "permissions" (
@@ -151,3 +151,14 @@ CREATE INDEX idx_clients_phones ON "clients" USING gin (("phone_number" || ' ' |
 
 ALTER TABLE "orders"
 ADD "client_id" INTEGER REFERENCES "clients"("id");
+
+CREATE TABLE IF NOT EXISTS "telegram_groups" (
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id"),
+    "name"  VARCHAR,
+    "notification_statuses" INT[],
+    "code" INT,
+    "chat_id" BIGINT NOT NULL UNIQUE,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
