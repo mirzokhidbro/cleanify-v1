@@ -26,10 +26,11 @@ type StorageI interface {
 	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
 	GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error)
 	GetOrderLocation(ID int) (models.Order, error)
-	GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error)
+	GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error)
 	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
 	GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error)
 	GetOrderByPhone(companyID string, Phone string) (models.Order, error)
+	GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error)
 
 	//order-items
 	CreateOrderItemModel(entity models.CreateOrderItemModel) error
@@ -52,7 +53,7 @@ type StorageI interface {
 	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
 	GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
 	GetBotUserByUserID(UserID string) (models.BotUser, error)
-	GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error)
+	// GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error)
 
 	// telegram-session
 	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
@@ -74,4 +75,5 @@ type StorageI interface {
 
 	//telegram groups
 	CreateTelegramGroupModel(entity models.CreateTelegramGroupRequest) error
+	GetNotificationGroup(CompanyID string, Status int) (models.TelegramGroup, error)
 }

@@ -17,3 +17,4 @@ INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c17', 'start_telegram_bot',      'company',     'Korxona botini ishga tushirish');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c18', 'get_work_volume_by_day', 'company',     'Kunlik ish hajmini ko''rish statistikasini ko''rish');
 INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c19', 'get_permissions_list',   'company',     'Ruxsatlar ro''yxatini ko''rish');
+INSERT INTO "permissions"("id", "slug", "scope", "name") VALUES ('9cbb32da-e473-4312-8413-95524ec08c20', 'get_clients_list',        'company',     'Klientlar ro''yxatini ko''rish');
