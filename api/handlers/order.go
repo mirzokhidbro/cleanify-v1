@@ -181,20 +181,20 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 					order, err := h.Stg.GetOrderByPrimaryKey(body.ID)
 					b, _ := bot.New(BotToken, opts...)
 					if err == nil {
-						if group.WithLocation && (*order.Latitute != 0 || *order.Longitude != 0) {
+						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) {
 							b.SendLocation(c, &bot.SendLocationParams{
 								ChatID:    group.ChatID,
 								Latitude:  *order.Latitute,
 								Longitude: *order.Longitude,
 							})
-							Notification := "Manzil: " + *order.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							Notification := "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							b.SendMessage(c, &bot.SendMessageParams{
 								ChatID:    group.ChatID,
 								Text:      Notification,
 								ParseMode: tgmodels.ParseModeHTML,
 							})
 						} else {
-							Notification := "Manzil: " + *order.Address + "\nTel: " + body.Phone + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							Notification := "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							b.SendMessage(c, &bot.SendMessageParams{
 								ChatID:    group.ChatID,
 								Text:      Notification,
