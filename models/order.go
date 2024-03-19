@@ -25,6 +25,8 @@ type OrderList struct {
 	Slug      string    `json:"slug"`
 	Address   *string   `json:"address"`
 	Status    int16     `json:"status"`
+	Square    float64   `json:"square"`
+	Price     int       `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
