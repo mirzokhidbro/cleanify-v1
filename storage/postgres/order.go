@@ -55,8 +55,8 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		o.status, 
 		o.address,
 		o.created_at,
-		coalesce(sum(oi.price*oi.width*oi.height), 0) as price, 
-		coalesce(sum(oi.width*oi.height), 0) as square 
+		round(coalesce(sum(oi.price*oi.width*oi.height), 0)::numeric, 1) as price,
+		round(coalesce(sum(oi.width*oi.height), 0)::numeric) as square
 		FROM "orders" as o left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
