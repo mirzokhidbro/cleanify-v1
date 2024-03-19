@@ -66,7 +66,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			group, err := h.Stg.GetNotificationGroup(*user.CompanyID, 83)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
-				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:"  + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
+				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
 				b.SendMessage(c, &bot.SendMessageParams{
 					ChatID:    group.ChatID,
 					Text:      Notification,
@@ -116,8 +116,17 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 		h.handleResponse(c, http.InvalidArgument, err.Error())
 		return
 	}
+	orderID := c.Query("id")
+	ID := 0
+	if len(orderID) > 0 {
+		ID, err = strconv.Atoi(orderID)
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	}
 	data, err := h.Stg.GetOrdersList(*user.CompanyID, models.OrdersListRequest{
-		Slug:   c.Query("slug"),
+		ID:     ID,
 		Status: status,
 		Limit:  int32(limit),
 		Offset: int32(offset),

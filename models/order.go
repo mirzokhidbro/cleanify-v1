@@ -36,10 +36,10 @@ type OrderListResponse struct {
 }
 
 type OrdersListRequest struct {
-	Limit  int32  `json:"limit"`
-	Offset int32  `json:"offset"`
-	Status int    `json:"status,omitempty"`
-	Slug   string `json:"slug,omitempty"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+	Status int   `json:"status,omitempty"`
+	ID     int   `json:"slug,omitempty"`
 }
 
 type OrderShowResponse struct {

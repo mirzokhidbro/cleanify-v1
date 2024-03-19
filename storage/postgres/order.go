@@ -69,14 +69,19 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	params["company_id"] = companyID
 	filter += " and (company_id = :company_id)"
 
-	if len(queryParam.Slug) > 0 {
-		params["slug"] = queryParam.Slug
-		filter += " AND ((slug) ILIKE ('%' || :slug || '%'))"
+	// if len(queryParam.ID) > 0 {
+	// 	params["id"] = queryParam.ID
+	// 	filter += " AND (('id') ILIKE ('%' || :id || '%'))"
+	// }
+
+	if queryParam.ID != 0 {
+		params["id"] = queryParam.ID
+		filter += " AND (o.id = :id)"
 	}
 
 	if queryParam.Status != 0 {
 		params["status"] = queryParam.Status
-		filter += " AND (status = :status)"
+		filter += " AND (o.status = :status)"
 	}
 
 	if queryParam.Offset > 0 {
@@ -88,7 +93,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		params["limit"] = queryParam.Limit
 		limit = " LIMIT :limit"
 	}
-	cQ := `SELECT count(1) FROM "orders"` + filter
+	cQ := `SELECT count(1) FROM "orders" as o` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
 	err = stg.db.QueryRow(cQ, arr...).Scan(
 		&res.Count,
