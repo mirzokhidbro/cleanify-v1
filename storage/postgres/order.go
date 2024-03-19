@@ -50,14 +50,17 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	res = models.OrderListResponse{}
 	params := make(map[string]interface{})
 	query := `SELECT 
-		id, 
-		slug, 
-		status, 
-		address,
-		created_at 
-		FROM "orders"`
+		o.id, 
+		o.slug, 
+		o.status, 
+		o.address,
+		o.created_at,
+		coalesce(sum(oi.price*oi.width*oi.height), 0) as price, 
+		coalesce(sum(oi.width*oi.height), 0) as square 
+		FROM "orders" as o left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
+	group := " group by o.id, o.slug, o.status, o.address, o.created_at"
 	order := " ORDER BY created_at"
 	arrangement := " DESC"
 	offset := " OFFSET 0"
@@ -95,7 +98,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		return res, err
 	}
 
-	q := query + filter + order + arrangement + offset + limit
+	q := query + filter + group + order + arrangement + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
 	rows, err := stg.db.Query(q, arr...)
@@ -112,7 +115,10 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 			&order.Slug,
 			&order.Status,
 			&order.Address,
-			&order.CreatedAt)
+			&order.CreatedAt,
+			&order.Price,
+			&order.Square,
+		)
 		if err != nil {
 			return res, err
 		}
