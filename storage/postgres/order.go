@@ -50,14 +50,17 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	res = models.OrderListResponse{}
 	params := make(map[string]interface{})
 	query := `SELECT 
-		id, 
-		slug, 
-		status, 
-		address,
-		created_at 
-		FROM "orders"`
+		o.id, 
+		o.slug, 
+		o.status, 
+		o.address,
+		o.created_at,
+		coalesce(sum(oi.price*oi.width*oi.height), 0) as price, 
+		coalesce(sum(oi.width*oi.height), 0) as square 
+		FROM "orders" as o left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
+	group := " group by o.id, o.slug, o.status, o.address, o.created_at"
 	order := " ORDER BY created_at"
 	arrangement := " DESC"
 	offset := " OFFSET 0"
@@ -66,14 +69,19 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	params["company_id"] = companyID
 	filter += " and (company_id = :company_id)"
 
-	if len(queryParam.Slug) > 0 {
-		params["slug"] = queryParam.Slug
-		filter += " AND ((slug) ILIKE ('%' || :slug || '%'))"
+	// if len(queryParam.ID) > 0 {
+	// 	params["id"] = queryParam.ID
+	// 	filter += " AND (('id') ILIKE ('%' || :id || '%'))"
+	// }
+
+	if queryParam.ID != 0 {
+		params["id"] = queryParam.ID
+		filter += " AND (o.id = :id)"
 	}
 
 	if queryParam.Status != 0 {
 		params["status"] = queryParam.Status
-		filter += " AND (status = :status)"
+		filter += " AND (o.status = :status)"
 	}
 
 	if queryParam.Offset > 0 {
@@ -85,7 +93,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		params["limit"] = queryParam.Limit
 		limit = " LIMIT :limit"
 	}
-	cQ := `SELECT count(1) FROM "orders"` + filter
+	cQ := `SELECT count(1) FROM "orders" as o` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
 	err = stg.db.QueryRow(cQ, arr...).Scan(
 		&res.Count,
@@ -95,7 +103,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		return res, err
 	}
 
-	q := query + filter + order + arrangement + offset + limit
+	q := query + filter + group + order + arrangement + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
 	rows, err := stg.db.Query(q, arr...)
@@ -112,7 +120,10 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 			&order.Slug,
 			&order.Status,
 			&order.Address,
-			&order.CreatedAt)
+			&order.CreatedAt,
+			&order.Price,
+			&order.Square,
+		)
 		if err != nil {
 			return res, err
 		}

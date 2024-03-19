@@ -25,6 +25,8 @@ type OrderList struct {
 	Slug      string    `json:"slug"`
 	Address   *string   `json:"address"`
 	Status    int16     `json:"status"`
+	Square    float64   `json:"square"`
+	Price     int       `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -34,10 +36,10 @@ type OrderListResponse struct {
 }
 
 type OrdersListRequest struct {
-	Limit  int32  `json:"limit"`
-	Offset int32  `json:"offset"`
-	Status int    `json:"status,omitempty"`
-	Slug   string `json:"slug,omitempty"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+	Status int   `json:"status,omitempty"`
+	ID     int   `json:"slug,omitempty"`
 }
 
 type OrderShowResponse struct {
