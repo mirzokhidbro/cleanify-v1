@@ -5,6 +5,7 @@ import (
 	"bw-erp/models"
 	"bw-erp/utils"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -125,11 +126,36 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 			return
 		}
 	}
+	var (
+		DateFrom time.Time
+		DateTo   time.Time
+	)
+
+	DateFromQuery := c.Query("date_from")
+	if DateFromQuery != "" {
+		DateFrom, err = utils.StringToTime(DateFromQuery)
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	}
+
+	DateToQuery := c.Query("date_to")
+	if DateToQuery != "" {
+		DateTo, err = utils.StringToTime(DateToQuery)
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, err.Error())
+			return
+		}
+	}
+
 	data, err := h.Stg.GetOrdersList(*user.CompanyID, models.OrdersListRequest{
-		ID:     ID,
-		Status: status,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		ID:       ID,
+		Status:   status,
+		Limit:    int32(limit),
+		Offset:   int32(offset),
+		DateFrom: DateFrom,
+		DateTo:   DateTo,
 	})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
