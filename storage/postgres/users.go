@@ -24,20 +24,26 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		return errors.New("confirmation password is not the same with password")
 	}
 	password, _ := utils.HashPassword(entity.Password)
+	PermissionIDs := utils.SetArray(entity.PermissionIDs)
+
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
 		phone,
 		firstname,
 		lastname,
 		role_id,
-		password
+		password,
+		permission_ids,
+		company_id
 	) VALUES (
 		$1,
 		$2,
 		$3, 
 		$4,
 		$5,
-		$6
+		$6,
+		$7,
+		$8
 	)`,
 		id,
 		entity.Phone,
@@ -45,6 +51,8 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		entity.Lastname,
 		entity.RoleID,
 		password,
+		PermissionIDs,
+		entity.CompanyID,
 	)
 
 	if err != nil {

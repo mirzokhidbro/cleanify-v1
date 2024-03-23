@@ -166,5 +166,4 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
 
 ALTER TABLE "users"
 ADD COLUMN "permission_ids" VARCHAR[],
-ADD COLUMN "is_owner" BOOLEAN DEFAULT false NOT NULL,
 ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
