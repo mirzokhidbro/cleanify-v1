@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"context"
 	"fmt"
 	"math/rand"
@@ -552,7 +552,7 @@ func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgm
 				ReplyMarkup: kb,
 			})
 		} else {
-			_, err := h.Stg.UpdateClient(&models.UpdateClientRequest{
+			_, err := h.Stg.Client().Update(&models.UpdateClientRequest{
 				ID:        session.OrderID,
 				Latitute:  update.Message.Location.Latitude,
 				Longitude: update.Message.Location.Longitude,

@@ -3,10 +3,21 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/storage/repo"
 	"errors"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int, err error) {
+type clientRepo struct {
+	db *sqlx.DB
+}
+
+func NewClientRepo(db *sqlx.DB) repo.ClientStorageI {
+	return &clientRepo{db: db}
+}
+
+func (stg *clientRepo) Create(entity models.CreateClientModel) (id int, err error) {
 	_, err = stg.GetCompanyById(entity.CompanyID)
 	if err != nil {
 		return 0, errors.New("company not found")
@@ -48,7 +59,7 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 	return id, nil
 }
 
-func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error) {
+func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error) {
 	var arr []interface{}
 	res = models.ClientListResponse{}
 	params := make(map[string]interface{})
@@ -133,7 +144,7 @@ func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientLi
 	return res, nil
 }
 
-func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
+func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
 	var client models.GetClientByPrimaryKeyResponse
 	err := stg.db.QueryRow(`select id, address, full_name, phone_number, additional_phone_number, work_number, latitute, longitude from clients where id = $1`, ID).Scan(
 		&client.ID,
@@ -166,7 +177,7 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 	return client, nil
 }
 
-func (stg *Postgres) UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
+func (stg *clientRepo) Update(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "clients" SET `
 
 	if entity.Longitude != 0 {

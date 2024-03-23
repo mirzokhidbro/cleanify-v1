@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 )
 
 func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) error {

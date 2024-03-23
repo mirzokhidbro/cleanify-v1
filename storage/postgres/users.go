@@ -3,7 +3,7 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"errors"
 	"strings"
 )

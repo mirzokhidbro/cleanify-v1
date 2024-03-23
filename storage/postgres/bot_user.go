@@ -3,10 +3,21 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/storage/repo"
 	"errors"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateBotUserModel(entity models.CreateBotUserModel) error {
+type botUserRepo struct {
+	db *sqlx.DB
+}
+
+func NewBotUserRepo(db *sqlx.DB) repo.BotUserI {
+	return &botUserRepo{db: db}
+}
+
+func (stg *botUserRepo) Create(entity models.CreateBotUserModel) error {
 	_, err := stg.db.Exec(`INSERT INTO bot_users(
 		chat_id,
 		page,
@@ -39,7 +50,7 @@ func (stg *Postgres) CreateBotUserModel(entity models.CreateBotUserModel) error 
 	return nil
 }
 
-func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error) {
+func (stg *botUserRepo) Update(entity models.BotUser) (rowsAffected int64, err error) {
 	query := `UPDATE "bot_users" SET `
 
 	if entity.UserID != nil {
@@ -96,7 +107,7 @@ func (stg *Postgres) UpdateBotUserModel(entity models.BotUser) (rowsAffected int
 	return rowsAffected, nil
 }
 
-func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error) {
+func (stg *botUserRepo) GetByChatID(ChatID int64, BotID int64) (models.BotUser, error) {
 	var botUser models.BotUser
 
 	err := stg.db.QueryRow(`with users as (
@@ -120,7 +131,7 @@ func (stg *Postgres) GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.
 	return botUser, nil
 }
 
-func (stg *Postgres) GetBotUserByUserID(UserID string) (models.BotUser, error) {
+func (stg *botUserRepo) GetByUserID(UserID string) (models.BotUser, error) {
 	var botUser models.BotUser
 	err := stg.db.QueryRow(`select tb.bot_id, user_id, status, page, dialog_step, chat_id, tb.bot_token from bot_users bu inner join telegram_bots tb on tb.bot_id = bu.bot_id where user_id = $1`, UserID).Scan(
 		&botUser.BotID,
@@ -138,7 +149,7 @@ func (stg *Postgres) GetBotUserByUserID(UserID string) (models.BotUser, error) {
 	return botUser, nil
 }
 
-func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error) {
+func (stg *botUserRepo) GetSelectedBotUser(BotID int64, Phone string) (models.SelectedUser, error) {
 	var user models.SelectedUser
 
 	query := `select c.id as company_id, c.name as company_name, u.phone, u.id from users u
@@ -159,7 +170,7 @@ func (stg *Postgres) GetSelectedUser(BotID int64, Phone string) (models.Selected
 	return user, nil
 }
 
-func (stg *Postgres) GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error) {
+func (stg *botUserRepo) GetByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error) {
 	var user models.BotUserByCompany
 
 	query := `select cb.company_id, bu.bot_id, bu.chat_id from bot_users bu inner join telegram_bots cb on bu.bot_id = cb.bot_id where bu.bot_id = $1 and bu.chat_id = $2`

@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +34,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 	body.CompanyID = *user.CompanyID
 
 	if body.IsNewClient {
-		clientID, err := h.Stg.CreateClientModel(models.CreateClientModel{
+		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
 			CompanyID:   body.CompanyID,
 			PhoneNumber: body.Phone,
 			Address:     body.Address,

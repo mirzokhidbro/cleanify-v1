@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +40,7 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 
 	body.CompanyID = *user.CompanyID
 
-	_, err = h.Stg.CreateClientModel(body)
+	_, err = h.Stg.Client().Create(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -80,7 +80,7 @@ func (h *Handler) GetClientsList(c *gin.Context) {
 		return
 	}
 
-	data, err := h.Stg.GetClientsList(*user.CompanyID, models.ClientListRequest{
+	data, err := h.Stg.Client().GetList(*user.CompanyID, models.ClientListRequest{
 		Phone:   c.Query("phone"),
 		Address: c.Query("address"),
 		Limit:   int32(limit),
@@ -101,7 +101,7 @@ func (h *Handler) GetClientByPrimaryKey(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetClientByPrimaryKey(clientId)
+	data, err := h.Stg.Client().GetByPrimaryKey(clientId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -116,7 +116,7 @@ func (h *Handler) SetLocation(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetClientByPrimaryKey(clientId)
+	data, err := h.Stg.Client().GetByPrimaryKey(clientId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
