@@ -84,6 +84,16 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		filter += " AND (o.status = :status)"
 	}
 
+	if !queryParam.DateFrom.IsZero() {
+		params["date_from"] = queryParam.DateFrom
+		filter += " AND (o.created_at >= :date_from::date)"
+	}
+
+	if !queryParam.DateTo.IsZero() {
+		params["date_to"] = queryParam.DateTo
+		filter += " AND (o.created_at <= :date_to::date)"
+	}
+
 	if queryParam.Offset > 0 {
 		params["offset"] = queryParam.Offset
 		offset = " OFFSET :offset"
