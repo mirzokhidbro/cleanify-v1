@@ -214,23 +214,32 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				}
 				group, _ := h.Stg.GetNotificationGroup(*user.CompanyID, int(body.Status))
 				if group.ChatID != 0 {
+					var Notification = ""
 					order, err := h.Stg.GetOrderByPrimaryKey(body.ID)
 					b, _ := bot.New(BotToken, opts...)
 					if err == nil {
-						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) {
+						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
+							if body.Status == 3 {
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.Itoa(order.Price) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							} else {
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							}
 							b.SendLocation(c, &bot.SendLocationParams{
 								ChatID:    group.ChatID,
 								Latitude:  *order.Latitute,
 								Longitude: *order.Longitude,
 							})
-							Notification := "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							b.SendMessage(c, &bot.SendMessageParams{
 								ChatID:    group.ChatID,
 								Text:      Notification,
 								ParseMode: tgmodels.ParseModeHTML,
 							})
 						} else {
-							Notification := "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							if body.Status == 3 {
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.Itoa(order.Price) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							} else {
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+							}
 							b.SendMessage(c, &bot.SendMessageParams{
 								ChatID:    group.ChatID,
 								Text:      Notification,

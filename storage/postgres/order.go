@@ -267,11 +267,15 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
 									COALESCE(o.address, ''),
+									COALESCE(sum(oi.price*oi.width*oi.height), 0) as price, 
+									COALESCE(sum(oi.width*oi.height), 0) as square, 
 									o.created_at,
 									o.updated_at 
 								from orders o
 								left join clients c on o.client_id = c.id 
-								where o.id = $1`, ID).Scan(
+								left join order_items oi on o.id = oi.order_id
+								where o.id = $1 group by o.id, 	o.company_id, c.phone_number, c.additional_phone_number, c.work_number, o.count,o.slug, o.description, 
+								c.latitute, c.longitude, o.client_id, o.address,o.created_at,o.updated_at`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.PhoneNumber,
@@ -284,6 +288,8 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 		&order.Longitude,
 		&order.ClientID,
 		&order.Address,
+		&order.Price,
+		&order.Square,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
