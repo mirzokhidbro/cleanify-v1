@@ -3,14 +3,20 @@ package postgres
 import (
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) error {
-	_, err := stg.GetCompanyById(entity.CompanyId)
-	if err != nil {
-		return err
-	}
+type roleRepo struct {
+	db *sqlx.DB
+}
 
+func NewRoleRepo(db *sqlx.DB) repo.RoleI {
+	return &roleRepo{db: db}
+}
+
+func (stg *roleRepo) Create(id string, entity models.CreateRoleModel) error {
 	_, _ = stg.db.Exec(`INSERT INTO roles(
 		id,
 		name,
@@ -27,7 +33,7 @@ func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) e
 
 	query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
 
-	_, err = stg.db.Exec(query, id)
+	_, err := stg.db.Exec(query, id)
 	if err != nil {
 		return err
 	}
@@ -50,7 +56,7 @@ func (stg *Postgres) CreateRoleModel(id string, entity models.CreateRoleModel) e
 	return nil
 }
 
-func (stg *Postgres) GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error) {
+func (stg *roleRepo) GetListByCompany(companyID string) ([]models.RoleListByCompany, error) {
 	rows, err := stg.db.Query(`select id, name, company_id from roles where company_id = $1`, companyID)
 	if err != nil {
 		return nil, err
@@ -74,7 +80,7 @@ func (stg *Postgres) GetRolesListByCompany(companyID string) ([]models.RoleListB
 	return roles, nil
 }
 
-func (stg *Postgres) GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error) {
+func (stg *roleRepo) GetByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error) {
 	var model models.GetRoleByPrimaryKey
 	var response models.RoleByPrimaryKey
 	err := stg.db.QueryRow(`select r.id, r.name, rp.permission_ids from roles r left join role_and_permissions rp on r.id::text = rp.role_id where r.id::text = $1`, roleID).Scan(
@@ -95,7 +101,7 @@ func (stg *Postgres) GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey
 	return response, nil
 }
 
-func (stg *Postgres) GetPermissionsToRole(entity models.GetPermissionToRoleRequest) error {
+func (stg *roleRepo) GetPermissionsToRole(entity models.GetPermissionToRoleRequest) error {
 	for _, permission_id := range entity.PermissionIDs {
 		_, err := stg.GetPermissionByPrimaryKey(permission_id)
 		if err != nil {

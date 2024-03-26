@@ -15,9 +15,16 @@ func (h *Handler) CreateCompanyModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	_, err := h.Stg.User().GetById(body.OwnerId)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	id := uuid.New()
 
-	err := h.Stg.CreateCompanyModel(id.String(), body)
+	err = h.Stg.Company().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -39,13 +46,13 @@ func (h *Handler) GetCompanyByOwnerId(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(jwtData.UserID)
+	user, err := h.Stg.User().GetById(jwtData.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	company, err := h.Stg.GetCompanyByOwnerId(user.ID)
+	company, err := h.Stg.Company().GetByOwnerId(user.ID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

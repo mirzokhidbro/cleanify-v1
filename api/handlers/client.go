@@ -20,6 +20,12 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 		return
 	}
 
+	_, err := h.Stg.Company().GetById(companyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "company not found")
+		return
+	}
+
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -32,7 +38,7 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -74,7 +80,7 @@ func (h *Handler) GetClientsList(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -128,19 +134,19 @@ func (h *Handler) SetLocation(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	botUser, err := h.Stg.GetBotUserByUserID(user.ID)
+	botUser, err := h.Stg.BotUser().GetByUserID(user.ID)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
+	err = h.Stg.TelegramSession().Create(models.TelegramSessionModel{
 		BotID:   int64(botUser.BotID),
 		ChatID:  botUser.ChatID,
 		OrderID: data.ID,
@@ -154,7 +160,7 @@ func (h *Handler) SetLocation(c *gin.Context) {
 	}
 
 	page := "SetLocation"
-	h.Stg.UpdateBotUserModel(models.BotUser{
+	h.Stg.BotUser().Update(models.BotUser{
 		UserID: &user.ID,
 		BotID:  int(botUser.BotID),
 		ChatID: botUser.ChatID,

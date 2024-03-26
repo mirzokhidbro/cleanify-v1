@@ -2,9 +2,20 @@ package postgres
 
 import (
 	"bw-erp/models"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateTelegramSessionModel(entity models.TelegramSessionModel) error {
+type telegramSessionRepo struct {
+	db *sqlx.DB
+}
+
+func NewTelegramSessionRepo(db *sqlx.DB) repo.TelegramSessionI {
+	return &telegramSessionRepo{db: db}
+}
+
+func (stg *telegramSessionRepo) Create(entity models.TelegramSessionModel) error {
 	_, err := stg.db.Exec(`INSERT INTO telegram_sessions(
 		order_id,
 		bot_id,
@@ -26,7 +37,7 @@ func (stg *Postgres) CreateTelegramSessionModel(entity models.TelegramSessionMod
 	return nil
 }
 
-func (stg *Postgres) DeleteTelegramSession(ID int) (rowsAffected int64, err error) {
+func (stg *telegramSessionRepo) Delete(ID int) (rowsAffected int64, err error) {
 	query := `DELETE FROM "telegram_sessions" WHERE id = $1`
 
 	result, err := stg.db.Exec(query, ID)
@@ -43,7 +54,7 @@ func (stg *Postgres) DeleteTelegramSession(ID int) (rowsAffected int64, err erro
 	return rowsAffected, err
 }
 
-func (stg *Postgres) GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error) {
+func (stg *telegramSessionRepo) GetByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error) {
 	var session models.TelegramSessionModel
 	err := stg.db.QueryRow(`select id, bot_id, chat_id, order_id from telegram_sessions where bot_id = $1 and chat_id = $2`, BotID, ChatID).Scan(
 		&session.ID,

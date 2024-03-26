@@ -2,9 +2,20 @@ package postgres
 
 import (
 	"bw-erp/models"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateTelegramGroupModel(entity models.CreateTelegramGroupRequest) error {
+type telegramGroupRepo struct {
+	db *sqlx.DB
+}
+
+func NewTelegramGroupRepo(db *sqlx.DB) repo.TelegramGroupI {
+	return &telegramGroupRepo{db: db}
+}
+
+func (stg *telegramGroupRepo) Create(entity models.CreateTelegramGroupRequest) error {
 	_, err := stg.db.Exec(`INSERT INTO telegram_groups(
 		chat_id,
 		code,
@@ -25,7 +36,7 @@ func (stg *Postgres) CreateTelegramGroupModel(entity models.CreateTelegramGroupR
 	return nil
 }
 
-func (stg *Postgres) GetNotificationGroup(CompanyID string, Status int) (models.TelegramGroup, error) {
+func (stg *telegramGroupRepo) GetNotificationGroup(CompanyID string, Status int) (models.TelegramGroup, error) {
 	var group models.TelegramGroup
 	query := `select chat_id,with_location from telegram_groups where company_id = $1 and $2 = any(notification_statuses) limit 1 `
 

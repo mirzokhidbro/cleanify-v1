@@ -4,7 +4,6 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
-	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -18,12 +17,13 @@ func NewOrderItemTypeRepo(db *sqlx.DB) repo.OrderItemTypeI {
 }
 
 func (stg *orderItemTypeRepo) Create(id string, entity models.OrderItemTypeModel) error {
-	_, err := stg.Company().GetById(entity.CopmanyID)
-	if err != nil {
-		return errors.New("selected company not found")
-	}
+	// [TODO: get by primary key metodini yozish kerak]
+	// _, err := stg.Company().GetById(entity.CopmanyID)
+	// if err != nil {
+	// 	return errors.New("selected company not found")
+	// }
 
-	_, err = stg.db.Exec(`INSERT INTO order_item_types(
+	_, err := stg.db.Exec(`INSERT INTO order_item_types(
 		id,
 		name,
 		company_id,

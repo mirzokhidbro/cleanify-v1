@@ -18,11 +18,6 @@ func NewClientRepo(db *sqlx.DB) repo.ClientStorageI {
 }
 
 func (stg *clientRepo) Create(entity models.CreateClientModel) (id int, err error) {
-	_, err = stg.GetCompanyById(entity.CompanyID)
-	if err != nil {
-		return 0, errors.New("company not found")
-	}
-
 	err = stg.db.QueryRow(`INSERT INTO clients(
 		company_id,
 		address,

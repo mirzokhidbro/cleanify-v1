@@ -60,7 +60,7 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 
 	id := uuid.New()
 
-	err = h.Stg.CreateCompanyBotModel(id.String(), body)
+	err = h.Stg.TelegramBot().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -70,7 +70,7 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 }
 
 func (h *Handler) BotStart(c *gin.Context) {
-	bots, err := h.Stg.GetTelegramOrderBot()
+	bots, err := h.Stg.TelegramBot().GetOrderBot()
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -114,7 +114,7 @@ func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.B
 		rand.Seed(time.Now().UnixNano())
 		randomNumber := rand.Intn(900000) + 100000
 		fmt.Print(update.Message.Chat.FirstName)
-		err := h.Stg.CreateTelegramGroupModel(models.CreateTelegramGroupRequest{
+		err := h.Stg.TelegramGroup().Create(models.CreateTelegramGroupRequest{
 			ChatID: int(update.Message.Chat.ID),
 			Name:   update.Message.Chat.FirstName,
 			Code:   randomNumber,
@@ -178,14 +178,14 @@ func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.B
 func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tgmodels.InaccessibleMessage, data []byte) {
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
-	user, err := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
+	user, err := h.Stg.BotUser().GetByChatID(mes.Chat.ID, botID)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: mes.Chat.ID,
 			Text:   err.Error(),
 		})
 	} else {
-		order, err := h.Stg.GetOrderByPhone(user.CompanyID, string(data))
+		order, err := h.Stg.Order().GetByPhone(user.CompanyID, string(data))
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: mes.Chat.ID,
@@ -195,10 +195,10 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 			if order.PhoneNumber != "" {
 				botData, _ := b.GetMe(ctx)
 				botID := botData.ID
-				user, _ := h.Stg.GetBotUserByChatIDModel(mes.Chat.ID, botID)
+				user, _ := h.Stg.BotUser().GetByChatID(mes.Chat.ID, botID)
 				dialogStep := "asked order slug"
 				Page := "Order"
-				h.Stg.UpdateBotUserModel(models.BotUser{
+				h.Stg.BotUser().Update(models.BotUser{
 					UserID:     user.UserID,
 					BotID:      int(botID),
 					ChatID:     mes.Chat.ID,
@@ -208,7 +208,7 @@ func (h *Handler) onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes tg
 					Lastname:   mes.Chat.LastName,
 					Username:   mes.Chat.Username,
 				})
-				err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
+				err = h.Stg.TelegramSession().Create(models.TelegramSessionModel{
 					BotID:   botID,
 					ChatID:  mes.Chat.ID,
 					OrderID: order.ID,
@@ -239,14 +239,14 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
 	if update != nil && update.Message != nil {
-		user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
+		user, err := h.Stg.BotUser().GetByChatID(update.Message.Chat.ID, botID)
 
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
 				Text:   err.Error(),
 			})
-			err = h.Stg.CreateBotUserModel(models.CreateBotUserModel{
+			err = h.Stg.BotUser().Create(models.CreateBotUserModel{
 				BotID:      int(botData.ID),
 				ChatID:     int(update.Message.Chat.ID),
 				Page:       "Registration",
@@ -283,7 +283,7 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 func (h *Handler) RegistrationPage(ctx context.Context, b *bot.Bot, update *tgmodels.Update, botID int64) {
 	phone := update.Message.Text
 	chatID := update.Message.Chat.ID
-	user, err := h.Stg.GetSelectedUser(botID, phone)
+	user, err := h.Stg.BotUser().GetSelectedBotUser(botID, phone)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
@@ -292,7 +292,7 @@ func (h *Handler) RegistrationPage(ctx context.Context, b *bot.Bot, update *tgmo
 	} else {
 		page := "Order"
 		DialogStep := ""
-		_, err = h.Stg.UpdateBotUserModel(models.BotUser{
+		_, err = h.Stg.BotUser().Update(models.BotUser{
 			UserID:     user.UserID,
 			BotID:      int(botID),
 			ChatID:     chatID,
@@ -334,8 +334,8 @@ func (h *Handler) OrderPage(ctx context.Context, b *bot.Bot, update *tgmodels.Up
 func (h *Handler) Applications(ctx context.Context, b *bot.Bot, update *tgmodels.Update, user models.BotUser) {
 	botData, _ := b.GetMe(ctx)
 	botID := botData.ID
-	user, err := h.Stg.GetBotUserByChatIDModel(update.Message.Chat.ID, botID)
-	orders, _ := h.Stg.GetOrdersByStatus(user.CompanyID, 83)
+	user, err := h.Stg.BotUser().GetByChatID(update.Message.Chat.ID, botID)
+	orders, _ := h.Stg.Order().GetByStatus(user.CompanyID, 83)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
@@ -376,7 +376,7 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 	botID := botData.ID
 	chatID := update.Message.Chat.ID
 	dialogStep := "order count asked"
-	_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+	_, err := h.Stg.BotUser().Update(models.BotUser{
 		UserID:     user.UserID,
 		BotID:      int(botID),
 		ChatID:     chatID,
@@ -388,7 +388,7 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 			Text:   "user " + err.Error(),
 		})
 	} else {
-		session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+		session, err := h.Stg.TelegramSession().GetByChatIDBotID(chatID, botID)
 		if err != nil {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
@@ -397,7 +397,7 @@ func (h *Handler) AskedOrderSlug(ctx context.Context, b *bot.Bot, update *tgmode
 		} else {
 
 			orderID := session.OrderID
-			h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+			h.Stg.Order().Update(&models.UpdateOrderRequest{
 				ID:   orderID,
 				Slug: update.Message.Text,
 			})
@@ -464,7 +464,7 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 	botID := botData.ID
 	chatID := update.Message.Chat.ID
 
-	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+	session, err := h.Stg.TelegramSession().GetByChatIDBotID(chatID, botID)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
@@ -487,7 +487,7 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 				ReplyMarkup: kb,
 			})
 		} else {
-			_, err := h.Stg.UpdateOrder(&models.UpdateOrderRequest{
+			_, err := h.Stg.Order().Update(&models.UpdateOrderRequest{
 				ID:        session.OrderID,
 				Latitute:  update.Message.Location.Latitude,
 				Longitude: update.Message.Location.Longitude,
@@ -500,7 +500,7 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 				})
 			} else {
 				dialogStep := ""
-				_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+				_, err := h.Stg.BotUser().Update(models.BotUser{
 					UserID:     user.UserID,
 					BotID:      int(botID),
 					ChatID:     update.Message.Chat.ID,
@@ -512,7 +512,7 @@ func (h *Handler) AskedOrderLocation(ctx context.Context, b *bot.Bot, update *tg
 						Text:   err.Error(),
 					})
 				} else {
-					h.Stg.DeleteTelegramSession(session.ID)
+					h.Stg.TelegramSession().Delete(session.ID)
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID:      update.Message.Chat.ID,
 						Text:        "Buyurtma qabul qilindi",
@@ -529,7 +529,7 @@ func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgm
 	botID := botData.ID
 	chatID := update.Message.Chat.ID
 
-	session, err := h.Stg.GetTelegramSessionByChatIDBotID(chatID, botID)
+	session, err := h.Stg.TelegramSession().GetByChatIDBotID(chatID, botID)
 	if err != nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
@@ -564,7 +564,7 @@ func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgm
 				})
 			} else {
 				dialogStep := ""
-				_, err := h.Stg.UpdateBotUserModel(models.BotUser{
+				_, err := h.Stg.BotUser().Update(models.BotUser{
 					UserID:     user.UserID,
 					BotID:      int(botID),
 					ChatID:     update.Message.Chat.ID,
@@ -576,7 +576,7 @@ func (h *Handler) SetClientLocation(ctx context.Context, b *bot.Bot, update *tgm
 						Text:   err.Error(),
 					})
 				} else {
-					h.Stg.DeleteTelegramSession(session.ID)
+					h.Stg.TelegramSession().Delete(session.ID)
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID: update.Message.Chat.ID,
 						Text:   "Klient lokatsiyasi belgilandi!",
@@ -603,13 +603,13 @@ func (h *Handler) SendLocation(c *gin.Context) {
 	}
 
 	user, _ := utils.ExtractTokenID(c)
-	order, err := h.Stg.GetOrderLocation(query.OrderID)
+	order, err := h.Stg.Order().GetLocation(query.OrderID)
 	if err != nil {
 		h.handleResponse(c, http.OK, err.Error())
 		return
 	}
 
-	botUser, _ := h.Stg.GetBotUserByUserID(user.UserID)
+	botUser, _ := h.Stg.BotUser().GetByUserID(user.UserID)
 
 	if order.Latitute == nil || order.Longitude == nil {
 		h.handleResponse(c, http.OK, "Bu buyurtma lokatsiyasi mavjud emas!")

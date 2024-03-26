@@ -4,11 +4,22 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"bw-erp/storage/repo"
 	"errors"
 	"strings"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) error {
+type userRepo struct {
+	db *sqlx.DB
+}
+
+func NewUserRepo(db *sqlx.DB) repo.UserI {
+	return &userRepo{db: db}
+}
+
+func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 	if entity.ConfirmationPassword != entity.Password {
 		return errors.New("confirmation password is not the same with password")
 	}
@@ -43,7 +54,7 @@ func (stg Postgres) CreateUserModel(id string, entity models.CreateUserModel) er
 	return err
 }
 
-func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
+func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 	var user models.AuthUserModel
 	err := stg.db.QueryRow(`SELECT id, phone, password from users where phone = $1`, phone).Scan(
 		&user.ID,
@@ -58,7 +69,7 @@ func (stg Postgres) GetUserByPhone(phone string) (models.AuthUserModel, error) {
 	return user, nil
 }
 
-func (stg Postgres) GetUserById(id string) (models.User, error) {
+func (stg userRepo) GetById(id string) (models.User, error) {
 	var user models.User
 	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, r.name, c.id, r.id  from users u left join roles r on r.id = u.role_id left join companies c on c.id = r.company_id where u.id = $1`, id).Scan(
 		&user.ID,
@@ -97,7 +108,7 @@ func (stg Postgres) GetUserById(id string) (models.User, error) {
 	return user, nil
 }
 
-func (stg Postgres) GetUsersList(companyID string) ([]models.User, error) {
+func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 	rows, err := stg.db.Query(`SELECT 
 								u.id, 
 								u.firstname, 
@@ -138,7 +149,7 @@ func (stg Postgres) GetUsersList(companyID string) ([]models.User, error) {
 	return users, nil
 }
 
-func (stg *Postgres) ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error {
+func (stg userRepo) ChangePassword(userID string, entity models.ChangePasswordRequest) error {
 	if entity.NewPassword != entity.NewPasswordConfirmation {
 		return errors.New("confirmation password is not the same with password")
 	}

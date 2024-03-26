@@ -17,7 +17,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	}
 	id := uuid.New()
 
-	err := h.Stg.CreateUserModel(id.String(), body)
+	err := h.Stg.User().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -34,12 +34,12 @@ func (h *Handler) GetUsersList(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	users, err := h.Stg.GetUsersList(*user.CompanyID)
+	users, err := h.Stg.User().GetList(*user.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

@@ -7,6 +7,7 @@ type CreateOrderItemModel struct {
 	Width           float32 `json:"width" binding:"required"`
 	Height          float32 `json:"height" binding:"required"`
 	Description     string  `json:"description"`
+	ItemType        string
 }
 
 type UpdateOrderItemRequest struct {

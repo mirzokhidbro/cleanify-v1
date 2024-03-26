@@ -16,13 +16,7 @@ func NewCompanyRepo(db *sqlx.DB) repo.CompanyStorageI {
 }
 
 func (stg *companyRepo) Create(id string, entity models.CreateCompanyModel) error {
-
-	_, err := stg.GetUserById(entity.OwnerId)
-	if err != nil {
-		return err
-	}
-
-	_, err = stg.db.Exec(`INSERT INTO companies(
+	_, err := stg.db.Exec(`INSERT INTO companies(
 		id,
 		name,
 		owner_id

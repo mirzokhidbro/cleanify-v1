@@ -2,10 +2,21 @@ package postgres
 
 import (
 	"bw-erp/models"
+	"bw-erp/storage/repo"
 	"errors"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompanyBotModel) error {
+type telegramBotRepo struct {
+	db *sqlx.DB
+}
+
+func NewTelegramBotRepo(db *sqlx.DB) repo.TelegramBotI {
+	return &telegramBotRepo{db: db}
+}
+
+func (stg *telegramBotRepo) Create(id string, entity models.CreateCompanyBotModel) error {
 	_, err := stg.GetCompanyById(entity.CompanyID)
 	if err != nil {
 		return errors.New("company not found")
@@ -46,7 +57,7 @@ func (stg *Postgres) CreateCompanyBotModel(id string, entity models.CreateCompan
 	return nil
 }
 
-func (stg *Postgres) GetTelegramBotByCompany(companyID string) (models.CompanyTelegramBot, error) {
+func (stg *telegramBotRepo) GetByCompany(companyID string) (models.CompanyTelegramBot, error) {
 	var bot models.CompanyTelegramBot
 	err := stg.db.QueryRow(`select id, bot_token, company_id from telegram_bots where company_id = $1`, companyID).Scan(
 		&bot.ID,
@@ -60,7 +71,7 @@ func (stg *Postgres) GetTelegramBotByCompany(companyID string) (models.CompanyTe
 	return bot, nil
 }
 
-func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) {
+func (stg *telegramBotRepo) GetOrderBot() ([]models.CompanyTelegramBot, error) {
 	rows, err := stg.db.Query(`select id, bot_token from telegram_bots where type = 'order'`)
 	if err != nil {
 		return nil, err
@@ -84,7 +95,7 @@ func (stg *Postgres) GetTelegramOrderBot() ([]models.CompanyTelegramBot, error) 
 	return bots, nil
 }
 
-func (stg *Postgres) GetCompanyIDByBot(botID int64) (models.CompanyTelegramBot, error) {
+func (stg *telegramBotRepo) GetCompanyIDByBot(botID int64) (models.CompanyTelegramBot, error) {
 	var bot models.CompanyTelegramBot
 	err := stg.db.QueryRow(`select id, bot_token, company_id from telegram_bots where company_id = $1`, botID).Scan(
 		&bot.ID,
