@@ -220,7 +220,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 					if err == nil {
 						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
 							if body.Status == 3 {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.Itoa(order.Price) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							} else {
 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							}
@@ -236,7 +236,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 							})
 						} else {
 							if body.Status == 3 {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.Itoa(order.Price) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							} else {
 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							}

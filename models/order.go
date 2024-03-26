@@ -66,7 +66,7 @@ type Order struct {
 	Longitude             *float64  `json:"longitude"`
 	Address               *string   `json:"address"`
 	Square                float64   `json:"square"`
-	Price                 int       `json:"price"`
+	Price                 float64   `json:"price"`
 }
 
 type OrderSendLocationRequest struct {

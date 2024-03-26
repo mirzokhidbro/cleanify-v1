@@ -55,8 +55,8 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 		o.status, 
 		o.address,
 		o.created_at,
-		round(coalesce(sum(oi.price*oi.width*oi.height), 0)::numeric, 2) as price,
-		round(coalesce(sum(oi.width*oi.height), 0)::numeric, 2) as square
+		ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
+		round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
 		FROM "orders" as o left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
@@ -267,8 +267,8 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
 									COALESCE(o.address, ''),
-									COALESCE(sum(oi.price*oi.width*oi.height), 0) as price, 
-									COALESCE(sum(oi.width*oi.height), 0) as square, 
+									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price,
+									round(cast(COALESCE(sum(oi.width*oi.height), 0) as numeric), 2) as square, 
 									o.created_at,
 									o.updated_at 
 								from orders o
