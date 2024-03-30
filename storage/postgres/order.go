@@ -60,8 +60,8 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		o.status, 
 		o.address,
 		o.created_at,
-		round(coalesce(sum(oi.price*oi.width*oi.height), 0)::numeric, 2) as price,
-		round(coalesce(sum(oi.width*oi.height), 0)::numeric, 2) as square
+		ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
+		round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
 		FROM "orders" as o left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
@@ -87,6 +87,16 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	if queryParam.Status != 0 {
 		params["status"] = queryParam.Status
 		filter += " AND (o.status = :status)"
+	}
+
+	if !queryParam.DateFrom.IsZero() {
+		params["date_from"] = queryParam.DateFrom
+		filter += " AND (o.created_at >= :date_from::date)"
+	}
+
+	if !queryParam.DateTo.IsZero() {
+		params["date_to"] = queryParam.DateTo
+		filter += " AND (o.created_at <= :date_to::date)"
 	}
 
 	if queryParam.Offset > 0 {
@@ -262,11 +272,15 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
 									COALESCE(o.address, ''),
+									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price,
+									round(cast(COALESCE(sum(oi.width*oi.height), 0) as numeric), 2) as square, 
 									o.created_at,
 									o.updated_at 
 								from orders o
 								left join clients c on o.client_id = c.id 
-								where o.id = $1`, ID).Scan(
+								left join order_items oi on o.id = oi.order_id
+								where o.id = $1 group by o.id, 	o.company_id, c.phone_number, c.additional_phone_number, c.work_number, o.count,o.slug, o.description, 
+								c.latitute, c.longitude, o.client_id, o.address,o.created_at,o.updated_at`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.PhoneNumber,
@@ -279,6 +293,8 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 		&order.Longitude,
 		&order.ClientID,
 		&order.Address,
+		&order.Price,
+		&order.Square,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
