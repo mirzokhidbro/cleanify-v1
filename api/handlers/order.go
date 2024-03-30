@@ -5,7 +5,6 @@ import (
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -195,6 +194,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				}
 				group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
 				if group.ChatID != 0 {
+					var Notification = ""
 					order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
 					b, _ := bot.New(BotToken, opts...)
 					if err == nil {
