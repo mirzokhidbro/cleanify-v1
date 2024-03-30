@@ -4,6 +4,7 @@ import (
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
 	"bw-erp/storage/repo"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -130,4 +131,20 @@ func (stg *roleRepo) GetPermissionsToRole(entity models.GetPermissionToRoleReque
 		return err
 	}
 	return nil
+}
+
+func (stg *roleRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, error) {
+	var permission models.Permission
+	if !utils.IsValidUUID(ID) {
+		return permission, errors.New("permission id si noto'g'ri")
+	}
+	err := stg.db.QueryRow(`select id, slug, name from permissions where id = $1`, ID).Scan(
+		&permission.ID,
+		&permission.Slug,
+		&permission.Name,
+	)
+	if err != nil {
+		return permission, errors.New("permission topilmadi")
+	}
+	return permission, nil
 }

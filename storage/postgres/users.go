@@ -173,3 +173,19 @@ func (stg userRepo) ChangePassword(userID string, entity models.ChangePasswordRe
 	}
 	return err
 }
+
+func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, error) {
+	var permission models.Permission
+	if !utils.IsValidUUID(ID) {
+		return permission, errors.New("permission id si noto'g'ri")
+	}
+	err := stg.db.QueryRow(`select id, slug, name from permissions where id = $1`, ID).Scan(
+		&permission.ID,
+		&permission.Slug,
+		&permission.Name,
+	)
+	if err != nil {
+		return permission, errors.New("permission topilmadi")
+	}
+	return permission, nil
+}

@@ -8,78 +8,6 @@ import (
 )
 
 type StorageI interface {
-	// user
-	// CreateUserModel(id string, entity models.CreateUserModel) error
-	// GetUserByPhone(phone string) (models.AuthUserModel, error)
-	// GetUserById(id string) (models.User, error)
-	// GetUsersList(companyID string) ([]models.User, error)
-	// ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error
-
-	// company
-	// CreateCompanyModel(id string, entity models.CreateCompanyModel) error
-	// GetCompanyByOwnerId(ownerId string) ([]models.Company, error)
-
-	// role
-	// CreateRoleModel(id string, entity models.CreateRoleModel) error
-	// GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error)
-	// GetPermissionsToRole(models.GetPermissionToRoleRequest) error
-	// GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error)
-
-	//orders
-	// CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
-	// GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error)
-	// GetOrderLocation(ID int) (models.Order, error)
-	// GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error)
-	// UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
-	// GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error)
-	// GetOrderByPhone(companyID string, Phone string) (models.Order, error)
-	// GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error)
-
-	//order-items
-	// CreateOrderItemModel(entity models.CreateOrderItemModel) error
-	// UpdateOrderItemModel(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error)
-
-	//order item type
-	// CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error
-	// GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error)
-	// UpdateOrderItemTypeModel(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error)
-
-	//company bots
-	// CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error
-	// GetTelegramBotByCompany(CompanyID string) (models.CompanyTelegramBot, error)
-	// GetTelegramOrderBot() ([]models.CompanyTelegramBot, error)
-
-	// bot-users
-	// GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error)
-	// CreateBotUserModel(entity models.CreateBotUserModel) error
-	// GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error)
-	// UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
-	// GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
-	// GetBotUserByUserID(UserID string) (models.BotUser, error)
-	// GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error)
-
-	// telegram-session
-	// GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
-	// DeleteTelegramSession(ID int) (rowsAffected int64, err error)
-	// CreateTelegramSessionModel(entity models.TelegramSessionModel) error
-
-	//work volume
-	// GetWorkVolumeList(companyID string) ([]models.WorkVolume, error)
-
-	// permission
-	// GetPermissionList(Scope string) ([]models.Permission, error)
-	// GetPermissionByPrimaryKey(ID string) (models.Permission, error)
-
-	//clients
-	// CreateClientModel(entity models.CreateClientModel) (id int, err error)
-	// GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error)
-	// GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error)
-	// UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error)
-
-	//telegram groups
-	// CreateTelegramGroupModel(entity models.CreateTelegramGroupRequest) error
-	// GetNotificationGroup(CompanyID string, Status int) (models.TelegramGroup, error)
-
 	Client() repo.ClientStorageI
 	BotUser() repo.BotUserI
 	Company() repo.CompanyStorageI
@@ -96,66 +24,88 @@ type StorageI interface {
 }
 
 type storagePg struct {
-	db          *sqlx.DB
-	clientRepo  repo.ClientStorageI
-	botUserRepo repo.BotUserI
+	db              *sqlx.DB
+	client          repo.ClientStorageI
+	botUser         repo.BotUserI
+	user            repo.UserI
+	company         repo.CompanyStorageI
+	orderItemType   repo.OrderItemTypeI
+	order           repo.OrderI
+	orderItem       repo.OrderItemI
+	permission      repo.PermissionI
+	role            repo.RoleI
+	statistics      repo.StatisticsI
+	telegramGroup   repo.TelegramGroupI
+	telegramSession repo.TelegramSessionI
+	telegramBot     repo.TelegramBotI
 }
 
 func NewStoragePg(db *sqlx.DB) StorageI {
 	return &storagePg{
-		db:         db,
-		clientRepo: postgres.NewClientRepo(db),
+		db:              db,
+		client:          postgres.NewClientRepo(db),
+		botUser:         postgres.NewBotUserRepo(db),
+		user:            postgres.NewUserRepo(db),
+		company:         postgres.NewCompanyRepo(db),
+		orderItemType:   postgres.NewOrderItemTypeRepo(db),
+		order:           postgres.NewOrderRepo(db),
+		orderItem:       postgres.NewOrderItemRepo(db),
+		permission:      postgres.NewPermissionRepo(db),
+		role:            postgres.NewRoleRepo(db),
+		statistics:      postgres.NewStatisticsRepo(db),
+		telegramGroup:   postgres.NewTelegramGroupRepo(db),
+		telegramSession: postgres.NewTelegramSessionRepo(db),
 	}
 }
 
 func (s storagePg) Client() repo.ClientStorageI {
-	return s.clientRepo
+	return s.client
 }
 
 func (s storagePg) BotUser() repo.BotUserI {
-	return s.botUserRepo
+	return s.botUser
 }
 
 func (s storagePg) Company() repo.CompanyStorageI {
-	return s.Company()
+	return s.company
 }
 
 func (s storagePg) OrderItemType() repo.OrderItemTypeI {
-	return s.OrderItemType()
+	return s.orderItemType
 }
 
 func (s storagePg) OrderItem() repo.OrderItemI {
-	return s.OrderItem()
+	return s.orderItem
 }
 
 func (s storagePg) Order() repo.OrderI {
-	return s.Order()
+	return s.order
 }
 
 func (s storagePg) Permission() repo.PermissionI {
-	return s.Permission()
+	return s.permission
 }
 
 func (s storagePg) Role() repo.RoleI {
-	return s.Role()
+	return s.role
 }
 
 func (s storagePg) Statistics() repo.StatisticsI {
-	return s.Statistics()
+	return s.statistics
 }
 
-func(s storagePg) TelegramBot() repo.TelegramBotI {
-	return s.TelegramBot()
+func (s storagePg) TelegramBot() repo.TelegramBotI {
+	return s.telegramBot
 }
 
-func(s storagePg) TelegramGroup() repo.TelegramGroupI {
-	return s.TelegramGroup()
+func (s storagePg) TelegramGroup() repo.TelegramGroupI {
+	return s.telegramGroup
 }
 
-func(s storagePg) TelegramSession() repo.TelegramSessionI {
-	return s.TelegramSession()
+func (s storagePg) TelegramSession() repo.TelegramSessionI {
+	return s.telegramSession
 }
 
-func(s storagePg) User() repo.UserI {
-	return s.User()
+func (s storagePg) User() repo.UserI {
+	return s.user
 }

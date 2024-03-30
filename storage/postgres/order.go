@@ -312,7 +312,7 @@ func (stg *orderRepo) Update(entity *models.UpdateOrderRequest) (rowsAffected in
 			  WHERE
 					id = :id`
 
-	order, _ := stg.GetOrderByPrimaryKey(entity.ID)
+	order, _ := stg.GetByPrimaryKey(entity.ID)
 	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
 		updateOrderQuery := `UPDATE "clients" SET longitude = :longitude, latitute = :latitute WHERE id = :clientId`
 		clientParams := map[string]interface{}{
