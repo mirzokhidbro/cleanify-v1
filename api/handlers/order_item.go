@@ -3,7 +3,6 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,21 @@ func (h *Handler) CreateOrderItemModel(c *gin.Context) {
 		return
 	}
 
-	err := h.Stg.CreateOrderItemModel(body)
+	_, err := h.Stg.Order().GetByPrimaryKey(body.OrderID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "Order not found")
+		return
+	}
+
+	orderItemType, err := h.Stg.OrderItemType().GetById(body.OrderItemTypeID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	body.Price = orderItemType.Price
+	body.ItemType = orderItemType.Name
+
+	err = h.Stg.OrderItem().Create(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -30,8 +43,7 @@ func (h *Handler) UpdateOrderItemModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	fmt.Println(body)
-	_, err := h.Stg.UpdateOrderItemModel(body)
+	_, err := h.Stg.OrderItem().Update(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

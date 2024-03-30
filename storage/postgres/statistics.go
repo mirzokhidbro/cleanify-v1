@@ -3,9 +3,20 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) GetWorkVolumeList(companyID string) ([]models.WorkVolume, error) {
+type statisticsRepo struct {
+	db *sqlx.DB
+}
+
+func NewStatisticsRepo(db *sqlx.DB) repo.StatisticsI {
+	return &statisticsRepo{db: db}
+}
+
+func (stg *statisticsRepo) GetWorkVolume(companyID string) ([]models.WorkVolume, error) {
 	var arr []interface{}
 	var workVolumes []models.WorkVolume
 	params := make(map[string]interface{})

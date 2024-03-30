@@ -3,27 +3,22 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
-	"errors"
-	"fmt"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) error {
+type orderItemRepo struct {
+	db *sqlx.DB
+}
 
-	_, err := stg.GetOrderByPrimaryKey(entity.OrderID)
-	if err != nil {
-		return errors.New("order not found")
-	}
+func NewOrderItemRepo(db *sqlx.DB) repo.OrderItemI {
+	return &orderItemRepo{db: db}
+}
 
-	orderItemType, err := stg.GetOrderItemTypeById(entity.OrderItemTypeID)
-	if err != nil {
-		fmt.Print(err.Error())
-		return errors.New("order item type not found")
-	}
+func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 
-	itemType := orderItemType.Name
-	price := orderItemType.Price
-
-	_, err = stg.db.Exec(`INSERT INTO order_items(
+	_, err := stg.db.Exec(`INSERT INTO order_items(
 		order_id,
 		type,
 		price,
@@ -39,8 +34,8 @@ func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) err
 		$6
 	)`,
 		entity.OrderID,
-		itemType,
-		price,
+		entity.ItemType,
+		entity.Price,
 		entity.Width,
 		entity.Height,
 		entity.Description,
@@ -53,7 +48,7 @@ func (stg Postgres) CreateOrderItemModel(entity models.CreateOrderItemModel) err
 	return nil
 }
 
-func (stg *Postgres) UpdateOrderItemModel(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error) {
+func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "order_items" SET `
 
 	if entity.Price != 0 {

@@ -3,16 +3,27 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
-	"errors"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error {
-	_, err := stg.GetCompanyById(entity.CopmanyID)
-	if err != nil {
-		return errors.New("selected company not found")
-	}
+type orderItemTypeRepo struct {
+	db *sqlx.DB
+}
 
-	_, err = stg.db.Exec(`INSERT INTO order_item_types(
+func NewOrderItemTypeRepo(db *sqlx.DB) repo.OrderItemTypeI {
+	return &orderItemTypeRepo{db: db}
+}
+
+func (stg *orderItemTypeRepo) Create(id string, entity models.OrderItemTypeModel) error {
+	// [TODO: get by primary key metodini yozish kerak]
+	// _, err := stg.Company().GetById(entity.CopmanyID)
+	// if err != nil {
+	// 	return errors.New("selected company not found")
+	// }
+
+	_, err := stg.db.Exec(`INSERT INTO order_item_types(
 		id,
 		name,
 		company_id,
@@ -35,7 +46,7 @@ func (stg *Postgres) CreateOrderItemTypeModel(id string, entity models.OrderItem
 	return nil
 }
 
-func (stg *Postgres) GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error) {
+func (stg *orderItemTypeRepo) GetByCompany(CompanyID string) ([]models.OrderItemByCompany, error) {
 	rows, err := stg.db.Query(`select  
 					o.id,
 					o.name, 
@@ -67,7 +78,7 @@ func (stg *Postgres) GetOrderItemTypesByCompany(CompanyID string) ([]models.Orde
 	return orderItemTypes, nil
 }
 
-func (stg *Postgres) GetOrderItemTypeById(orderItemTypeId string) (models.OrderItemByCompany, error) {
+func (stg *orderItemTypeRepo) GetById(orderItemTypeId string) (models.OrderItemByCompany, error) {
 	var orderItemType models.OrderItemByCompany
 	err := stg.db.QueryRow(`select o.id, o.name, o.price, c.name, c.id  from order_item_types o inner join companies c on c.id = o.company_id where o.id = $1`, orderItemTypeId).Scan(
 		&orderItemType.ID,
@@ -83,7 +94,7 @@ func (stg *Postgres) GetOrderItemTypeById(orderItemTypeId string) (models.OrderI
 	return orderItemType, nil
 }
 
-func (stg *Postgres) UpdateOrderItemTypeModel(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error) {
+func (stg *orderItemTypeRepo) Update(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error) {
 	query := `UPDATE 
 					"order_item_types" 
 						SET price = :price,updated_at = now()

@@ -3,15 +3,20 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
-	"errors"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, err error) {
-	_, err = stg.GetCompanyById(entity.CompanyID)
-	if err != nil {
-		return 0, errors.New("company not found")
-	}
+type orderRepo struct {
+	db *sqlx.DB
+}
 
+func NewOrderRepo(db *sqlx.DB) repo.OrderI {
+	return &orderRepo{db: db}
+}
+
+func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error) {
 	err = stg.db.QueryRow(`INSERT INTO orders(
 		company_id,
 		phone,
@@ -45,7 +50,7 @@ func (stg *Postgres) CreateOrderModel(entity models.CreateOrderModel) (id int, e
 	return id, nil
 }
 
-func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error) {
+func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error) {
 	var arr []interface{}
 	res = models.OrderListResponse{}
 	params := make(map[string]interface{})
@@ -147,7 +152,7 @@ func (stg *Postgres) GetOrdersList(companyID string, queryParam models.OrdersLis
 	return res, nil
 }
 
-func (stg *Postgres) GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error) {
+func (stg *orderRepo) GetByStatus(companyID string, Status int) (order []models.Order, err error) {
 	rows, err := stg.db.Query(`select  
 		id,
 		address, 
@@ -175,7 +180,7 @@ func (stg *Postgres) GetOrdersByStatus(companyID string, Status int) (order []mo
 	return orders, nil
 }
 
-func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Order, error) {
+func (stg *orderRepo) GetByPhone(companyID string, Phone string) (models.Order, error) {
 	var order models.Order
 	err := stg.db.QueryRow(`select id, company_id, phone, count, slug, description, latitute, longitude, created_at, updated_at from orders where company_id = $1 and phone = $2`, companyID, Phone).Scan(
 		&order.ID,
@@ -196,7 +201,7 @@ func (stg *Postgres) GetOrderByPhone(companyID string, Phone string) (models.Ord
 	return order, nil
 }
 
-func (stg *Postgres) GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error) {
+func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error) {
 	var order models.OrderShowResponse
 	err := stg.db.QueryRow(`select o.id, 
 									o.company_id, 
@@ -253,7 +258,7 @@ func (stg *Postgres) GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowRespo
 	return order, nil
 }
 
-func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error) {
+func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) {
 	var order models.OrderShowResponse
 	err := stg.db.QueryRow(`select o.id, 
 									o.company_id, 
@@ -300,7 +305,7 @@ func (stg *Postgres) GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, err
 	return order, nil
 }
 
-func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
+func (stg *orderRepo) Update(entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "orders" SET `
 
 	if entity.Slug != "" {
@@ -323,7 +328,7 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 			  WHERE
 					id = :id`
 
-	order, _ := stg.GetOrderByPrimaryKey(entity.ID)
+	order, _ := stg.GetByPrimaryKey(entity.ID)
 	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
 		updateOrderQuery := `UPDATE "clients" SET longitude = :longitude, latitute = :latitute WHERE id = :clientId`
 		clientParams := map[string]interface{}{
@@ -362,7 +367,7 @@ func (stg *Postgres) UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffecte
 	return rowsAffected, nil
 }
 
-func (stg *Postgres) GetOrderLocation(ID int) (models.Order, error) {
+func (stg *orderRepo) GetLocation(ID int) (models.Order, error) {
 	var order models.Order
 	err := stg.db.QueryRow(`select o.id, 
 								   o.company_id, 

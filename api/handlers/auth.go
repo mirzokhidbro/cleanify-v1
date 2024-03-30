@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +15,7 @@ func (h *Handler) AuthUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserByPhone(payload.Phone)
+	user, err := h.Stg.User().GetByPhone(payload.Phone)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, "Foydalanuvchi topilmadi")
 		return
@@ -49,7 +49,7 @@ func (h *Handler) CurrentUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(jwtData.UserID)
+	user, err := h.Stg.User().GetById(jwtData.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -71,7 +71,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserByPhone(jwtData.Phone)
+	user, err := h.Stg.User().GetByPhone(jwtData.Phone)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, user)
@@ -83,7 +83,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "Parol noto'g'ri!")
 		return
 	}
-	err = h.Stg.ChangeUserPassword(jwtData.UserID, payload)
+	err = h.Stg.User().ChangePassword(jwtData.UserID, payload)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

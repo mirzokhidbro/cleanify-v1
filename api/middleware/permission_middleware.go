@@ -3,7 +3,7 @@ package middleware
 import (
 	"bw-erp/api/handlers"
 	"bw-erp/api/http"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ func PermissionMiddleware(h handlers.Handler, permission string) gin.HandlerFunc
 			return
 		}
 
-		user, err := h.Stg.GetUserById(jwtData.UserID)
+		user, err := h.Stg.User().GetById(jwtData.UserID)
 		if err != nil {
 			c.JSON(http.Forbidden.Code, http.Response{
 				Status:      "Forbidden",

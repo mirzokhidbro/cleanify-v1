@@ -1,79 +1,111 @@
 package storage
 
 import (
-	"bw-erp/models"
+	"bw-erp/storage/postgres"
+	"bw-erp/storage/repo"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type StorageI interface {
-	// user
-	CreateUserModel(id string, entity models.CreateUserModel) error
-	GetUserByPhone(phone string) (models.AuthUserModel, error)
-	GetUserById(id string) (models.User, error)
-	GetUsersList(companyID string) ([]models.User, error)
-	ChangeUserPassword(userID string, entity models.ChangePasswordRequest) error
+	Client() repo.ClientStorageI
+	BotUser() repo.BotUserI
+	Company() repo.CompanyStorageI
+	OrderItemType() repo.OrderItemTypeI
+	OrderItem() repo.OrderItemI
+	Order() repo.OrderI
+	Permission() repo.PermissionI
+	Role() repo.RoleI
+	Statistics() repo.StatisticsI
+	TelegramBot() repo.TelegramBotI
+	TelegramGroup() repo.TelegramGroupI
+	TelegramSession() repo.TelegramSessionI
+	User() repo.UserI
+}
 
-	// company
-	CreateCompanyModel(id string, entity models.CreateCompanyModel) error
-	GetCompanyByOwnerId(ownerId string) ([]models.Company, error)
+type storagePg struct {
+	db              *sqlx.DB
+	client          repo.ClientStorageI
+	botUser         repo.BotUserI
+	user            repo.UserI
+	company         repo.CompanyStorageI
+	orderItemType   repo.OrderItemTypeI
+	order           repo.OrderI
+	orderItem       repo.OrderItemI
+	permission      repo.PermissionI
+	role            repo.RoleI
+	statistics      repo.StatisticsI
+	telegramGroup   repo.TelegramGroupI
+	telegramSession repo.TelegramSessionI
+	telegramBot     repo.TelegramBotI
+}
 
-	// role
-	CreateRoleModel(id string, entity models.CreateRoleModel) error
-	GetRolesListByCompany(companyID string) ([]models.RoleListByCompany, error)
-	GetPermissionsToRole(models.GetPermissionToRoleRequest) error
-	GetRoleByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error)
+func NewStoragePg(db *sqlx.DB) StorageI {
+	return &storagePg{
+		db:              db,
+		client:          postgres.NewClientRepo(db),
+		botUser:         postgres.NewBotUserRepo(db),
+		user:            postgres.NewUserRepo(db),
+		company:         postgres.NewCompanyRepo(db),
+		orderItemType:   postgres.NewOrderItemTypeRepo(db),
+		order:           postgres.NewOrderRepo(db),
+		orderItem:       postgres.NewOrderItemRepo(db),
+		permission:      postgres.NewPermissionRepo(db),
+		role:            postgres.NewRoleRepo(db),
+		statistics:      postgres.NewStatisticsRepo(db),
+		telegramGroup:   postgres.NewTelegramGroupRepo(db),
+		telegramSession: postgres.NewTelegramSessionRepo(db),
+	}
+}
 
-	//orders
-	CreateOrderModel(entity models.CreateOrderModel) (id int, err error)
-	GetOrdersList(companyID string, queryParam models.OrdersListRequest) (res models.OrderListResponse, err error)
-	GetOrderLocation(ID int) (models.Order, error)
-	GetOrderDetailedByPrimaryKey(ID int) (models.OrderShowResponse, error)
-	UpdateOrder(entity *models.UpdateOrderRequest) (rowsAffected int64, err error)
-	GetOrdersByStatus(companyID string, Status int) (order []models.Order, err error)
-	GetOrderByPhone(companyID string, Phone string) (models.Order, error)
-	GetOrderByPrimaryKey(ID int) (models.OrderShowResponse, error)
+func (s storagePg) Client() repo.ClientStorageI {
+	return s.client
+}
 
-	//order-items
-	CreateOrderItemModel(entity models.CreateOrderItemModel) error
-	UpdateOrderItemModel(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error)
+func (s storagePg) BotUser() repo.BotUserI {
+	return s.botUser
+}
 
-	//order item type
-	CreateOrderItemTypeModel(id string, entity models.OrderItemTypeModel) error
-	GetOrderItemTypesByCompany(CompanyID string) ([]models.OrderItemByCompany, error)
-	UpdateOrderItemTypeModel(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error)
+func (s storagePg) Company() repo.CompanyStorageI {
+	return s.company
+}
 
-	//company bots
-	CreateCompanyBotModel(CompanyID string, entity models.CreateCompanyBotModel) error
-	GetTelegramBotByCompany(CompanyID string) (models.CompanyTelegramBot, error)
-	GetTelegramOrderBot() ([]models.CompanyTelegramBot, error)
+func (s storagePg) OrderItemType() repo.OrderItemTypeI {
+	return s.orderItemType
+}
 
-	// bot-users
-	GetBotUserByChatIDModel(ChatID int64, BotID int64) (models.BotUser, error)
-	CreateBotUserModel(entity models.CreateBotUserModel) error
-	GetSelectedUser(BotID int64, Phone string) (models.SelectedUser, error)
-	UpdateBotUserModel(entity models.BotUser) (rowsAffected int64, err error)
-	GetBotUserByCompany(BotID int64, ChatID int64) (botUser models.BotUserByCompany, err error)
-	GetBotUserByUserID(UserID string) (models.BotUser, error)
-	// GetNotificationGroup(CompanyID string) (models.BotUserByCompany, error)
+func (s storagePg) OrderItem() repo.OrderItemI {
+	return s.orderItem
+}
 
-	// telegram-session
-	GetTelegramSessionByChatIDBotID(ChatID int64, BotID int64) (models.TelegramSessionModel, error)
-	DeleteTelegramSession(ID int) (rowsAffected int64, err error)
-	CreateTelegramSessionModel(entity models.TelegramSessionModel) error
+func (s storagePg) Order() repo.OrderI {
+	return s.order
+}
 
-	//work volume
-	GetWorkVolumeList(companyID string) ([]models.WorkVolume, error)
+func (s storagePg) Permission() repo.PermissionI {
+	return s.permission
+}
 
-	// permission
-	GetPermissionList(Scope string) ([]models.Permission, error)
-	GetPermissionByPrimaryKey(ID string) (models.Permission, error)
+func (s storagePg) Role() repo.RoleI {
+	return s.role
+}
 
-	//clients
-	CreateClientModel(entity models.CreateClientModel) (id int, err error)
-	GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error)
-	GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error)
-	UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error)
+func (s storagePg) Statistics() repo.StatisticsI {
+	return s.statistics
+}
 
-	//telegram groups
-	CreateTelegramGroupModel(entity models.CreateTelegramGroupRequest) error
-	GetNotificationGroup(CompanyID string, Status int) (models.TelegramGroup, error)
+func (s storagePg) TelegramBot() repo.TelegramBotI {
+	return s.telegramBot
+}
+
+func (s storagePg) TelegramGroup() repo.TelegramGroupI {
+	return s.telegramGroup
+}
+
+func (s storagePg) TelegramSession() repo.TelegramSessionI {
+	return s.telegramSession
+}
+
+func (s storagePg) User() repo.UserI {
+	return s.user
 }

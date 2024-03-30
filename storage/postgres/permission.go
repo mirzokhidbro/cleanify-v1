@@ -3,11 +3,22 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
+	"bw-erp/storage/repo"
 	"errors"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permission, error) {
+type permissionRepo struct {
+	db *sqlx.DB
+}
+
+func NewPermissionRepo(db *sqlx.DB) repo.PermissionI {
+	return &permissionRepo{db: db}
+}
+
+func (stg *permissionRepo) GetList(Scope string) ([]models.Permission, error) {
 	var arr []interface{}
 	var permissions []models.Permission
 	params := make(map[string]interface{})
@@ -53,8 +64,7 @@ func (stg *Postgres) GetPermissionList(Scope string) ([]models.Permission, error
 
 	return permissions, nil
 }
-
-func (stg *Postgres) GetPermissionByPrimaryKey(ID string) (models.Permission, error) {
+func (stg *permissionRepo) GetByPrimaryKey(ID string) (models.Permission, error) {
 	var permission models.Permission
 	if !utils.IsValidUUID(ID) {
 		return permission, errors.New("permission id si noto'g'ri")

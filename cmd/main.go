@@ -5,13 +5,14 @@ import (
 	"bw-erp/api/handlers"
 	"bw-erp/config"
 	"bw-erp/storage"
-	"bw-erp/storage/postgres"
 	"fmt"
 	"net/http"
+
+	"github.com/jmoiron/sqlx"
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
+	cfg, _ := config.LoadConfig()
 
 	psqlConnString := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
@@ -23,10 +24,11 @@ func main() {
 	)
 
 	var stg storage.StorageI
-	stg, err = postgres.InitDB(psqlConnString)
+	tempDB, err := sqlx.Connect("postgres", psqlConnString)
 	if err != nil {
 		panic(err)
 	}
+	stg = storage.NewStoragePg(tempDB)
 
 	h := handlers.NewHandler(stg, cfg)
 
