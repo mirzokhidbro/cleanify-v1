@@ -163,3 +163,8 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+ALTER TABLE "users"
+ADD COLUMN "permission_ids" VARCHAR[],
+ADD COLUMN "is_owner" BOOLEAN DEFAULT false NOT NULL,
+ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
