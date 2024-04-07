@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,9 +22,15 @@ func (h *Handler) CreateOrderItemTypeModel(c *gin.Context) {
 		return
 	}
 
+	_, err := h.Stg.Company().GetById(body.CopmanyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	id := uuid.New()
 
-	err := h.Stg.CreateOrderItemTypeModel(id.String(), body)
+	err = h.Stg.OrderItemType().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -47,13 +53,13 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	data, err := h.Stg.GetOrderItemTypesByCompany(*user.CompanyID)
+	data, err := h.Stg.OrderItemType().GetByCompany(*user.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -75,14 +81,14 @@ func (h *Handler) UpdateOrderItemType(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 	body.CopmanyID = *user.CompanyID
 
-	rowsAffected, err := h.Stg.UpdateOrderItemTypeModel(body)
+	rowsAffected, err := h.Stg.OrderItemType().Update(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

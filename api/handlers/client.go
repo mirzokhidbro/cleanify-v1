@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +20,12 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 		return
 	}
 
+	_, err := h.Stg.Company().GetById(companyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "company not found")
+		return
+	}
+
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -32,7 +38,7 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -40,7 +46,7 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 
 	body.CompanyID = *user.CompanyID
 
-	_, err = h.Stg.CreateClientModel(body)
+	_, err = h.Stg.Client().Create(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -74,13 +80,13 @@ func (h *Handler) GetClientsList(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	data, err := h.Stg.GetClientsList(*user.CompanyID, models.ClientListRequest{
+	data, err := h.Stg.Client().GetList(*user.CompanyID, models.ClientListRequest{
 		Phone:   c.Query("phone"),
 		Address: c.Query("address"),
 		Limit:   int32(limit),
@@ -101,7 +107,7 @@ func (h *Handler) GetClientByPrimaryKey(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetClientByPrimaryKey(clientId)
+	data, err := h.Stg.Client().GetByPrimaryKey(clientId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -116,7 +122,7 @@ func (h *Handler) SetLocation(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetClientByPrimaryKey(clientId)
+	data, err := h.Stg.Client().GetByPrimaryKey(clientId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -128,19 +134,19 @@ func (h *Handler) SetLocation(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	botUser, err := h.Stg.GetBotUserByUserID(user.ID)
+	botUser, err := h.Stg.BotUser().GetByUserID(user.ID)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	err = h.Stg.CreateTelegramSessionModel(models.TelegramSessionModel{
+	err = h.Stg.TelegramSession().Create(models.TelegramSessionModel{
 		BotID:   int64(botUser.BotID),
 		ChatID:  botUser.ChatID,
 		OrderID: data.ID,
@@ -154,7 +160,7 @@ func (h *Handler) SetLocation(c *gin.Context) {
 	}
 
 	page := "SetLocation"
-	h.Stg.UpdateBotUserModel(models.BotUser{
+	h.Stg.BotUser().Update(models.BotUser{
 		UserID: &user.ID,
 		BotID:  int(botUser.BotID),
 		ChatID: botUser.ChatID,

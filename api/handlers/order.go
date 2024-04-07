@@ -3,9 +3,8 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -26,16 +25,22 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = h.Stg.Company().GetById(body.CompanyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "company not found")
 		return
 	}
 
 	body.CompanyID = *user.CompanyID
 
 	if body.IsNewClient {
-		clientID, err := h.Stg.CreateClientModel(models.CreateClientModel{
+		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
 			CompanyID:   body.CompanyID,
 			PhoneNumber: body.Phone,
 			Address:     body.Address,
@@ -52,7 +57,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	orderID, err := h.Stg.CreateOrderModel(body)
+	orderID, err := h.Stg.Order().Create(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -64,7 +69,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			opts := []bot.Option{
 				bot.WithDefaultHandler(h.Handler),
 			}
-			group, err := h.Stg.GetNotificationGroup(*user.CompanyID, 83)
+			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 83)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
 				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
@@ -106,7 +111,7 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -126,36 +131,11 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 			return
 		}
 	}
-	var (
-		DateFrom time.Time
-		DateTo   time.Time
-	)
-
-	DateFromQuery := c.Query("date_from")
-	if DateFromQuery != "" {
-		DateFrom, err = utils.StringToTime(DateFromQuery)
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
-			return
-		}
-	}
-
-	DateToQuery := c.Query("date_to")
-	if DateToQuery != "" {
-		DateTo, err = utils.StringToTime(DateToQuery)
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
-			return
-		}
-	}
-
-	data, err := h.Stg.GetOrdersList(*user.CompanyID, models.OrdersListRequest{
-		ID:       ID,
-		Status:   status,
-		Limit:    int32(limit),
-		Offset:   int32(offset),
-		DateFrom: DateFrom,
-		DateTo:   DateTo,
+	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
+		ID:     ID,
+		Status: status,
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -172,7 +152,7 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	data, err := h.Stg.GetOrderDetailedByPrimaryKey(orderId)
+	data, err := h.Stg.Order().GetDetailedByPrimaryKey(orderId)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -187,7 +167,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, err := h.Stg.UpdateOrder(&body)
+	rowsAffected, err := h.Stg.Order().Update(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -199,7 +179,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -212,10 +192,10 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				opts := []bot.Option{
 					bot.WithDefaultHandler(h.Handler),
 				}
-				group, _ := h.Stg.GetNotificationGroup(*user.CompanyID, int(body.Status))
+				group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
 				if group.ChatID != 0 {
 					var Notification = ""
-					order, err := h.Stg.GetOrderByPrimaryKey(body.ID)
+					order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
 					b, _ := bot.New(BotToken, opts...)
 					if err == nil {
 						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
@@ -236,9 +216,9 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 							})
 						} else {
 							if body.Status == 3 {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							} else {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
+								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
 							}
 							b.SendMessage(c, &bot.SendMessageParams{
 								ChatID:    group.ChatID,

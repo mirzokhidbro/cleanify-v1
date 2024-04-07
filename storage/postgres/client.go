@@ -3,15 +3,21 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/storage/repo"
 	"errors"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int, err error) {
-	_, err = stg.GetCompanyById(entity.CompanyID)
-	if err != nil {
-		return 0, errors.New("company not found")
-	}
+type clientRepo struct {
+	db *sqlx.DB
+}
 
+func NewClientRepo(db *sqlx.DB) repo.ClientStorageI {
+	return &clientRepo{db: db}
+}
+
+func (stg *clientRepo) Create(entity models.CreateClientModel) (id int, err error) {
 	err = stg.db.QueryRow(`INSERT INTO clients(
 		company_id,
 		address,
@@ -48,7 +54,7 @@ func (stg *Postgres) CreateClientModel(entity models.CreateClientModel) (id int,
 	return id, nil
 }
 
-func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error) {
+func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListRequest) (res models.ClientListResponse, err error) {
 	var arr []interface{}
 	res = models.ClientListResponse{}
 	params := make(map[string]interface{})
@@ -133,7 +139,7 @@ func (stg *Postgres) GetClientsList(companyID string, queryParam models.ClientLi
 	return res, nil
 }
 
-func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
+func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
 	var client models.GetClientByPrimaryKeyResponse
 	err := stg.db.QueryRow(`select id, address, full_name, phone_number, additional_phone_number, work_number, latitute, longitude from clients where id = $1`, ID).Scan(
 		&client.ID,
@@ -149,16 +155,25 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 		return client, errors.New("client not found")
 	}
 
-	rows, err := stg.db.Query(`select id, count, slug, created_at from orders where client_id = $1`, ID)
+	rows, err := stg.db.Query(`select 
+									o.id, 
+									o.count, 
+									o.slug, 
+									o.created_at,
+									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
+									round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
+								from orders as o 
+								left join order_items oi on o.id = oi.order_id
+								where client_id = $1 group by o.id, o.count, o.slug, o.created_at`, ID)
 	if err != nil {
-		return client, errors.New("error happened there 3")
+		return client, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var item models.OrderLink
-		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt); err != nil {
-			return client, errors.New("error happened there 3")
+		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt, &item.Price, &item.Square); err != nil {
+			return client, err
 		}
 		client.Orders = append(client.Orders, item)
 	}
@@ -166,7 +181,7 @@ func (stg *Postgres) GetClientByPrimaryKey(ID int) (models.GetClientByPrimaryKey
 	return client, nil
 }
 
-func (stg *Postgres) UpdateClient(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
+func (stg *clientRepo) Update(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "clients" SET `
 
 	if entity.Longitude != 0 {

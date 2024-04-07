@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -12,6 +12,12 @@ import (
 func (h *Handler) CreateRoleModel(c *gin.Context) {
 	var body models.CreateRoleModel
 	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err := h.Stg.Company().GetById(body.CompanyId)
+	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
@@ -31,7 +37,7 @@ func (h *Handler) CreateRoleModel(c *gin.Context) {
 	// body.CompanyId = *user.CompanyID
 	id := uuid.New()
 
-	err := h.Stg.CreateRoleModel(id.String(), body)
+	err = h.Stg.Role().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -54,13 +60,13 @@ func (h *Handler) GetRolesListByCompany(c *gin.Context) {
 		return
 	}
 
-	_, err = h.Stg.GetUserById(token.UserID)
+	_, err = h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	data, err := h.Stg.GetRolesListByCompany(companyID)
+	data, err := h.Stg.Role().GetListByCompany(companyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -83,7 +89,7 @@ func (h *Handler) GetPermissionsToRole(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Stg.GetUserById(token.UserID)
+	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -91,7 +97,7 @@ func (h *Handler) GetPermissionsToRole(c *gin.Context) {
 
 	body.CompanyID = *user.CompanyID
 
-	err = h.Stg.GetPermissionsToRole(body)
+	err = h.Stg.Role().GetPermissionsToRole(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -107,7 +113,7 @@ func (h *Handler) GetRoleByPrimaryKey(c *gin.Context) {
 		return
 	}
 
-	data, err := h.Stg.GetRoleByPrimaryKey(roleID)
+	data, err := h.Stg.Role().GetByPrimaryKey(roleID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

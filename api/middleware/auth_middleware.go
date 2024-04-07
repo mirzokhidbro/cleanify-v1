@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"bw-erp/api/http"
-	"bw-erp/utils"
+	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
