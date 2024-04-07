@@ -32,10 +32,11 @@ type User struct {
 }
 
 type UpdateUserRequest struct {
-	ID          string `json:"id"`
-	Firstname   string `json:"firstname"`
-	Lastname    string `json:"lastname"`
-	Permissions string `json:"permission"`
+	ID            string   `json:"id" binding:"required"`
+	CompanyID     string   `json:"company_id"`
+	Firstname     string   `json:"firstname"`
+	Lastname      string   `json:"lastname"`
+	PermissionIDs []string `json:"permission_ids"`
 }
 
 type NullString struct {

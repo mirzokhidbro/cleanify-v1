@@ -8,4 +8,4 @@ type UserI interface {
 	GetById(id string) (models.User, error)
 	GetList(companyID string) ([]models.User, error)
 	ChangePassword(userID string, entity models.ChangePasswordRequest) error
-}
+	Edit(companyID string, entity models.UpdateUserRequest) (rowsAffected int64, err error)}

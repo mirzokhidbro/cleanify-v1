@@ -110,7 +110,8 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 								u.firstname, 
 								u.lastname, 
 								u.phone, 
-								c.name
+								c.name,
+								c.id
 								FROM users u 
 								LEFT JOIN companies c ON c.id = u.company_id 
 								WHERE c.id is not null and c.id = $1`, companyID)
@@ -128,7 +129,8 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 			&user.Firstname,
 			&user.Lastname,
 			&user.Phone,
-			&user.Company)
+			&user.Company,
+			&user.CompanyID)
 		if err != nil {
 			return nil, err
 		}
@@ -181,4 +183,45 @@ func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, er
 		return permission, errors.New("permission topilmadi")
 	}
 	return permission, nil
+}
+
+func (stg *userRepo) Edit(companyID string, entity models.UpdateUserRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "users" SET `
+
+	if entity.Firstname != "" {
+		query += `firstname = :firstname,`
+	}
+	if entity.Lastname != "" {
+		query += `lastname = :lastname,`
+	}
+	PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	if PermissionIDs != "{}" {
+		query += `permission_ids = :permission_ids,`
+	}
+
+	query += `updated_at = now()
+			  WHERE id = :id and company_id = :company_id`
+
+	params := map[string]interface{}{
+		"id":             entity.ID,
+		"firstname":      entity.Firstname,
+		"lastname":       entity.Lastname,
+		"permission_ids": PermissionIDs,
+		"company_id":     companyID,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+
+	result, err := stg.db.Exec(query, arr...)
+
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }

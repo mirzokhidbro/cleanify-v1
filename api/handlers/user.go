@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) CreateUser(c *gin.Context) {
+func (h *Handler) Create(c *gin.Context) {
 	var body models.CreateUserModel
 
 	token, err := utils.ExtractTokenID(c)
@@ -42,7 +42,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	h.handleResponse(c, http.OK, id)
 }
 
-func (h *Handler) GetUsersList(c *gin.Context) {
+func (h *Handler) GetList(c *gin.Context) {
 	token, err := utils.ExtractTokenID(c)
 
 	if err != nil {
@@ -61,4 +61,32 @@ func (h *Handler) GetUsersList(c *gin.Context) {
 		return
 	}
 	h.handleResponse(c, http.OK, users)
+}
+
+func (h *Handler) Edit(c *gin.Context) {
+	var body models.UpdateUserRequest
+	companyID := c.Param("company-id")
+	if !utils.IsValidUUID(companyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is the invalid uuid")
+		return
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.ID) {
+		h.handleResponse(c, http.InvalidArgument, "user id is the invalid uuid")
+		return
+	}
+
+	_, err := h.Stg.User().Edit(companyID, body)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, true)
 }

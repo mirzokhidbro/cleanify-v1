@@ -19,8 +19,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	baseRouter := r.Group("/api/v1")
 	{
 		usersRouter := baseRouter.Group("/users")
-		usersRouter.POST("", h.CreateUser)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetUsersList)
+		usersRouter.POST("", h.Create)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
+		usersRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.Edit)
 	}
 
 	{
