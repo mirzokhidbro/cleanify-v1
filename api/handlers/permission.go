@@ -2,27 +2,26 @@ package handlers
 
 import (
 	"bw-erp/api/http"
-	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) GetPermissionList(c *gin.Context) {
-	token, err := utils.ExtractTokenID(c)
+	// token, err := utils.ExtractTokenID(c)
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	user, err := h.Stg.User().GetById(token.UserID)
+	// user, err := h.Stg.User().GetById(token.UserID)
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	data, err := h.Stg.Permission().GetList(*user.Role)
+	data, err := h.Stg.Permission().GetList("company")
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

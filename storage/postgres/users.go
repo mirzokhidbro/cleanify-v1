@@ -31,7 +31,6 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		phone,
 		firstname,
 		lastname,
-		role_id,
 		password,
 		permission_ids,
 		company_id
@@ -42,14 +41,12 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		$4,
 		$5,
 		$6,
-		$7,
-		$8
+		$7
 	)`,
 		id,
 		entity.Phone,
 		entity.Firstname,
 		entity.Lastname,
-		entity.RoleID,
 		password,
 		PermissionIDs,
 		entity.CompanyID,
@@ -79,38 +76,29 @@ func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg userRepo) GetById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, r.name, c.id, r.id  from users u left join roles r on r.id = u.role_id left join companies c on c.id = r.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, c.id, u.permission_ids from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Firstname,
 		&user.Lastname,
 		&user.Phone,
 		&user.Company,
-		&user.Role,
 		&user.CompanyID,
-		&user.RoleID,
+		&user.Permissions,
 	)
 	if err != nil {
 		return user, err
 	}
 
-	if user.RoleID != nil {
-		var roleAndPermission models.RoleAndPermission
-		_ = stg.db.QueryRow(`select role_id, permission_ids from role_and_permissions where role_id = $1`, user.RoleID).Scan(
-			&roleAndPermission.RoleID,
-			&roleAndPermission.PermissionIDs,
-		)
-		if roleAndPermission.PermissionIDs != "" {
-			permissionIds := utils.GetArray(roleAndPermission.PermissionIDs)
-			Permission := ""
-			for _, permissionID := range permissionIds {
-				permission, err := stg.GetPermissionByPrimaryKey(permissionID)
-				if err == nil {
-					Permission += "|" + permission.Slug
-				}
+	if user.Permissions != "" {
+		Permissions := utils.GetArray(user.Permissions)
+		Permission := ""
+		for _, permissionID := range Permissions {
+			permission, err := stg.GetPermissionByPrimaryKey(permissionID)
+			if err == nil {
+				Permission += "|" + permission.Slug
 			}
-			user.Permissions = strings.TrimPrefix(Permission, "|")
 		}
-
+		user.Permissions = strings.TrimPrefix(Permission, "|")
 	}
 
 	return user, nil
@@ -122,11 +110,9 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 								u.firstname, 
 								u.lastname, 
 								u.phone, 
-								c.name, 
-								cr.name  
+								c.name
 								FROM users u 
-								LEFT JOIN roles cr ON cr.id = u.role_id 
-								LEFT JOIN companies c ON c.id = cr.company_id 
+								LEFT JOIN companies c ON c.id = u.company_id 
 								WHERE c.id is not null and c.id = $1`, companyID)
 
 	if err != nil {
@@ -142,8 +128,7 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 			&user.Firstname,
 			&user.Lastname,
 			&user.Phone,
-			&user.Company,
-			&user.Role)
+			&user.Company)
 		if err != nil {
 			return nil, err
 		}
