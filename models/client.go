@@ -57,6 +57,8 @@ type OrderLink struct {
 	ID        int       `json:"id"`
 	Count     int       `json:"count"`
 	Slug      string    `json:"slug"`
+	Square    float64   `json:"square"`
+	Price     float64   `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

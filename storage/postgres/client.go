@@ -155,16 +155,25 @@ func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResp
 		return client, errors.New("client not found")
 	}
 
-	rows, err := stg.db.Query(`select id, count, slug, created_at from orders where client_id = $1`, ID)
+	rows, err := stg.db.Query(`select 
+									o.id, 
+									o.count, 
+									o.slug, 
+									o.created_at,
+									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
+									round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
+								from orders as o 
+								left join order_items oi on o.id = oi.order_id
+								where client_id = $1 group by o.id, o.count, o.slug, o.created_at`, ID)
 	if err != nil {
-		return client, errors.New("error happened there 3")
+		return client, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var item models.OrderLink
-		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt); err != nil {
-			return client, errors.New("error happened there 3")
+		if err := rows.Scan(&item.ID, &item.Count, &item.Slug, &item.CreatedAt, &item.Price, &item.Square); err != nil {
+			return client, err
 		}
 		client.Orders = append(client.Orders, item)
 	}
