@@ -54,7 +54,7 @@ func (stg *orderItemTypeRepo) GetByCompany(CompanyID string) ([]models.OrderItem
 					c.name,
 					c.id
 					from order_item_types o inner join companies c on c.id = o.company_id 
-					where o.company_id = $1`, CompanyID)
+					where o.company_id = $1 order by o.price`, CompanyID)
 	if err != nil {
 		return nil, err
 	}
