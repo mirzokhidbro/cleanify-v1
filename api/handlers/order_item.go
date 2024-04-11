@@ -27,6 +27,17 @@ func (h *Handler) CreateOrderItemModel(c *gin.Context) {
 	}
 	body.Price = orderItemType.Price
 	body.ItemType = orderItemType.Name
+	body.IsCountable = orderItemType.IsCountable
+
+	if body.IsCountable && body.Count == 0 {
+		h.handleResponse(c, http.BadRequest, "order count is required")
+		return
+	}
+
+	if !body.IsCountable && (body.Width == 0 && body.Height == 0) {
+		h.handleResponse(c, http.BadRequest, "width and height is required")
+		return
+	}
 
 	err = h.Stg.OrderItem().Create(body)
 	if err != nil {

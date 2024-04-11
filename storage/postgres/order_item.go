@@ -24,14 +24,18 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 		price,
 		width,
 		height,
-		description
+		description,
+		is_countable,
+		count
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7,
+		$8
 	)`,
 		entity.OrderID,
 		entity.ItemType,
@@ -39,6 +43,8 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 		entity.Width,
 		entity.Height,
 		entity.Description,
+		entity.IsCountable,
+		entity.Count,
 	)
 
 	if err != nil {
