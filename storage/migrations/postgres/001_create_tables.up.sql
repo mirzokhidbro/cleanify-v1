@@ -167,3 +167,11 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
 ALTER TABLE "users"
 ADD COLUMN "permission_ids" VARCHAR[],
 ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
+
+ALTER TABLE "order_items"
+ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE,
+ADD COLUMN "count" INTEGER;
+
+
+ALTER TABLE "order_item_types"
+ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;

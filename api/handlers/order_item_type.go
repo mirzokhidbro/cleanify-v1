@@ -17,12 +17,12 @@ func (h *Handler) CreateOrderItemTypeModel(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidUUID(body.CopmanyID) {
+	if !utils.IsValidUUID(body.CompanyID) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
 
-	_, err := h.Stg.Company().GetById(body.CopmanyID)
+	_, err := h.Stg.Company().GetById(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
