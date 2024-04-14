@@ -169,8 +169,7 @@ ADD COLUMN "permission_ids" VARCHAR[],
 ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
 
 ALTER TABLE "order_items"
-ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE,
-ADD COLUMN "count" INTEGER;
+ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
 
 
 ALTER TABLE "order_item_types"

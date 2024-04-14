@@ -241,7 +241,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
-	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, is_countable, COALESCE(count, 0), description from order_items where order_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, is_countable, description from order_items where order_id = $1`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -249,7 +249,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	for rows.Next() {
 		var item models.OrderItem
-		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.IsCountable, &item.Count, &item.Description); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.IsCountable, &item.Description); err != nil {
 			return order, err
 		}
 		order.OrderItems = append(order.OrderItems, item)
