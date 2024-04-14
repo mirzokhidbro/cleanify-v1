@@ -21,6 +21,7 @@ type StorageI interface {
 	TelegramGroup() repo.TelegramGroupI
 	TelegramSession() repo.TelegramSessionI
 	User() repo.UserI
+	OrderStatus() repo.OrderStatusI
 }
 
 type storagePg struct {
@@ -38,6 +39,7 @@ type storagePg struct {
 	telegramGroup   repo.TelegramGroupI
 	telegramSession repo.TelegramSessionI
 	telegramBot     repo.TelegramBotI
+	orderStatus     repo.OrderStatusI
 }
 
 func NewStoragePg(db *sqlx.DB) StorageI {
@@ -55,6 +57,7 @@ func NewStoragePg(db *sqlx.DB) StorageI {
 		statistics:      postgres.NewStatisticsRepo(db),
 		telegramGroup:   postgres.NewTelegramGroupRepo(db),
 		telegramSession: postgres.NewTelegramSessionRepo(db),
+		orderStatus:     postgres.NewOrderStatusRepo(db),
 	}
 }
 
@@ -108,4 +111,8 @@ func (s storagePg) TelegramSession() repo.TelegramSessionI {
 
 func (s storagePg) User() repo.UserI {
 	return s.user
+}
+
+func (s storagePg) OrderStatus() repo.OrderStatusI {
+	return s.orderStatus
 }
