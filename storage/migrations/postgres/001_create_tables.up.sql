@@ -175,3 +175,14 @@ ADD COLUMN "count" INTEGER;
 
 ALTER TABLE "order_item_types"
 ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS "order_statuses" (
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id"),
+    "name"  VARCHAR,
+    "color" VARCHAR,
+    "number" INTEGER,
+    "description" TEXT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
