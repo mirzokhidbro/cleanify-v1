@@ -115,6 +115,50 @@ func (h *Handler) GetClientByPrimaryKey(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
+func (h *Handler) UpdateClient(c *gin.Context) {
+	var body models.UpdateClientRequest
+	companyID := c.Param("company-id")
+
+	if !utils.IsValidUUID(companyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+		return
+	}
+
+	_, err := h.Stg.Company().GetById(companyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "company not found")
+		return
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	// token, err := utils.ExtractTokenID(c)
+
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	// body.CompanyID = *user.CompanyID
+
+	_, err = h.Stg.Client().Update(companyID, body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, "Edited successfully!")
+}
+
 func (h *Handler) SetLocation(c *gin.Context) {
 	clientID := c.Param("client-id")
 	clientId, err := strconv.Atoi(clientID)
