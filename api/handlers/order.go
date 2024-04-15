@@ -235,3 +235,20 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	h.handleResponse(c, http.OK, rowsAffected)
 
 }
+
+func (h *Handler) DeleteOrder(c *gin.Context) {
+	var body models.DeleteOrderRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err := h.Stg.Order().Delete(body)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "Deleted successfully!")
+}

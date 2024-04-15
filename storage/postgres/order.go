@@ -403,3 +403,16 @@ func (stg *orderRepo) GetLocation(ID int) (models.Order, error) {
 
 	return order, nil
 }
+
+func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
+	_, err := stg.db.Exec(`delete from order_items where order_id = $1`, entity.ID)
+	if err != nil {
+		return err
+	}
+
+	_, err = stg.db.Exec(`delete from orders where id = $1 and company_id = $2`, entity.ID, entity.CompanyID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

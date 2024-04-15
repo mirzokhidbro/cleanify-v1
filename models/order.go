@@ -95,3 +95,8 @@ func (ns NullFloat) MarshalJSONFloat() ([]byte, error) {
 	}
 	return json.Marshal(nil)
 }
+
+type DeleteOrderRequest struct {
+	ID        int    `json:"id" binding:"required"`
+	CompanyID string `json:"company_id" binding:"required"`
+}

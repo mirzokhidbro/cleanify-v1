@@ -97,3 +97,12 @@ func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffec
 
 	return rowsAffected, nil
 }
+
+func (stg *orderItemRepo) DeleteByID(ID int) error {
+	_, err := stg.db.Exec(`delete from order_items where id = $1`, ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
