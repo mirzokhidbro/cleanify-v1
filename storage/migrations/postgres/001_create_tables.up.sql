@@ -185,3 +185,12 @@ CREATE TABLE IF NOT EXISTS "order_statuses" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+
+ALTER TABLE "order_items"
+ADD COLUMN "order_item_type_id" UUID REFERENCES "order_item_types"("id");
+
+UPDATE order_items oi
+SET order_item_type_id = oit.id
+FROM order_item_types oit
+WHERE oi.type = oit.name;
