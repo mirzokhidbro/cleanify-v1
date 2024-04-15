@@ -94,6 +94,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetClientsList)
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/set-location/:client-id", h.SetLocation)
+		clientRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.UpdateClient)
 	}
 
 	return

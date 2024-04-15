@@ -63,7 +63,12 @@ type OrderLink struct {
 }
 
 type UpdateClientRequest struct {
-	ID        int     `json:"id"`
-	Latitute  float64 `json:"latitute"`
-	Longitude float64 `json:"longitude"`
+	ID                    int     `json:"id" binding:"required"`
+	FullName              string  `json:"full_name"`
+	PhoneNumber           string  `json:"phone_number"`
+	AdditionalPhoneNumber string  `json:"additional_phone_number"`
+	WorkNumber            string  `json:"work_number"`
+	Address               string  `json:"address"`
+	Latitute              float64 `json:"latitute"`
+	Longitude             float64 `json:"longitude"`
 }
