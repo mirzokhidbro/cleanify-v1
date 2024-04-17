@@ -181,7 +181,7 @@ func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResp
 	return client, nil
 }
 
-func (stg *clientRepo) Update(entity *models.UpdateClientRequest) (rowsAffected int64, err error) {
+func (stg *clientRepo) Update(companyID string, entity models.UpdateClientRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "clients" SET `
 
 	if entity.Longitude != 0 {
@@ -190,15 +190,36 @@ func (stg *clientRepo) Update(entity *models.UpdateClientRequest) (rowsAffected 
 	if entity.Latitute != 0 {
 		query += `latitute = :latitute,`
 	}
+	if entity.FullName != "" {
+		query += `full_name = :full_name,`
+	}
+	if entity.PhoneNumber != "" {
+		query += `phone_number = :phone_number,`
+	}
+	if entity.AdditionalPhoneNumber != "" {
+		query += `additional_phone_number = :additional_phone_number,`
+	}
+	if entity.WorkNumber != "" {
+		query += `work_number = :work_number,`
+	}
+	if entity.Address != "" {
+		query += `address = :address,`
+	}
 
 	query += `updated_at = now()
 			  WHERE
-					id = :id`
+					id = :id and company_id = :company_id`
 
 	params := map[string]interface{}{
-		"id":        entity.ID,
-		"longitude": entity.Longitude,
-		"latitute":  entity.Latitute,
+		"id":                      entity.ID,
+		"longitude":               entity.Longitude,
+		"latitute":                entity.Latitute,
+		"full_name":               entity.FullName,
+		"phone_number":            entity.PhoneNumber,
+		"additional_phone_number": entity.AdditionalPhoneNumber,
+		"work_number":             entity.WorkNumber,
+		"company_id":              companyID,
+		"address":                 entity.Address,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

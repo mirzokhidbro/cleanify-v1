@@ -167,3 +167,30 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
 ALTER TABLE "users"
 ADD COLUMN "permission_ids" VARCHAR[],
 ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
+
+ALTER TABLE "order_items"
+ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
+
+
+ALTER TABLE "order_item_types"
+ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS "order_statuses" (
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id"),
+    "name"  VARCHAR,
+    "color" VARCHAR,
+    "number" INTEGER,
+    "description" TEXT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE "order_items"
+ADD COLUMN "order_item_type_id" UUID REFERENCES "order_item_types"("id");
+
+UPDATE order_items oi
+SET order_item_type_id = oit.id
+FROM order_item_types oit
+WHERE oi.type = oit.name;

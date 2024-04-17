@@ -27,17 +27,20 @@ func (stg *orderItemTypeRepo) Create(id string, entity models.OrderItemTypeModel
 		id,
 		name,
 		company_id,
-		price
+		price,
+		is_countable
 	) VALUES (
 		$1,
 		$2,
 		$3,
-		$4
+		$4,
+		$5
 	)`,
 		id,
 		entity.Name,
-		entity.CopmanyID,
+		entity.CompanyID,
 		entity.Price,
+		entity.IsCountable,
 	)
 
 	if err != nil {
@@ -51,6 +54,7 @@ func (stg *orderItemTypeRepo) GetByCompany(CompanyID string) ([]models.OrderItem
 					o.id,
 					o.name, 
 					o.price,
+					o.is_countable,
 					c.name,
 					c.id
 					from order_item_types o inner join companies c on c.id = o.company_id 
@@ -66,6 +70,7 @@ func (stg *orderItemTypeRepo) GetByCompany(CompanyID string) ([]models.OrderItem
 			&orderItemType.ID,
 			&orderItemType.Name,
 			&orderItemType.Price,
+			&orderItemType.IsCountable,
 			&orderItemType.CopmanyName,
 			&orderItemType.CopmanyID,
 		)
@@ -80,10 +85,11 @@ func (stg *orderItemTypeRepo) GetByCompany(CompanyID string) ([]models.OrderItem
 
 func (stg *orderItemTypeRepo) GetById(orderItemTypeId string) (models.OrderItemByCompany, error) {
 	var orderItemType models.OrderItemByCompany
-	err := stg.db.QueryRow(`select o.id, o.name, o.price, c.name, c.id  from order_item_types o inner join companies c on c.id = o.company_id where o.id = $1`, orderItemTypeId).Scan(
+	err := stg.db.QueryRow(`select o.id, o.name, o.price, o.is_countable, c.name, c.id  from order_item_types o inner join companies c on c.id = o.company_id where o.id = $1`, orderItemTypeId).Scan(
 		&orderItemType.ID,
 		&orderItemType.Name,
 		&orderItemType.Price,
+		&orderItemType.IsCountable,
 		&orderItemType.CopmanyName,
 		&orderItemType.CopmanyID,
 	)

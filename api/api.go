@@ -52,12 +52,20 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
+		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
+	}
+
+	{
+		orderStatuses := baseRouter.Group("order-statuses")
+		orderStatuses.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderStatusesList)
+		orderStatuses.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderStatusModel)
 	}
 
 	{
 		orderItemRouter := baseRouter.Group("order-items")
 		orderItemRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemModel)
 		orderItemRouter.Use(middleware.AuthMiddleware()).POST("edit", h.UpdateOrderItemModel)
+		orderItemRouter.Use(middleware.AuthMiddleware()).DELETE("/:id", h.DeleteOrderItemByID)
 	}
 
 	{
@@ -88,6 +96,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetClientsList)
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/set-location/:client-id", h.SetLocation)
+		clientRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.UpdateClient)
 	}
 
 	return

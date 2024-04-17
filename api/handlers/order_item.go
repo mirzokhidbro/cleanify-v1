@@ -3,6 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,8 +26,13 @@ func (h *Handler) CreateOrderItemModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	body.Price = orderItemType.Price
 	body.ItemType = orderItemType.Name
+	body.IsCountable = orderItemType.IsCountable
+
+	if !body.IsCountable && (body.Width == 0 && body.Height == 0) {
+		h.handleResponse(c, http.BadRequest, "width and height is required")
+		return
+	}
 
 	err = h.Stg.OrderItem().Create(body)
 	if err != nil {
@@ -43,11 +49,38 @@ func (h *Handler) UpdateOrderItemModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	_, err := h.Stg.OrderItem().Update(body)
+
+	orderItemType, err := h.Stg.OrderItemType().GetById(body.OrderItemTypeID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	body.ItemType = orderItemType.Name
+	body.IsCountable = orderItemType.IsCountable
+
+	_, err = h.Stg.OrderItem().Update(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
 	h.handleResponse(c, http.OK, "Update successfully!")
+}
+
+func (h *Handler) DeleteOrderItemByID(c *gin.Context) {
+	ID := c.Param("id")
+	orderItemID, err := strconv.Atoi(ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err = h.Stg.OrderItem().DeleteByID(orderItemID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "Deleted successfully!")
 }

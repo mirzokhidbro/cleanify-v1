@@ -24,14 +24,18 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 		price,
 		width,
 		height,
-		description
+		description,
+		is_countable,
+		order_item_type_id
 	) VALUES (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-		$6
+		$6,
+		$7,
+		$8
 	)`,
 		entity.OrderID,
 		entity.ItemType,
@@ -39,6 +43,8 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 		entity.Width,
 		entity.Height,
 		entity.Description,
+		entity.IsCountable,
+		entity.OrderItemTypeID,
 	)
 
 	if err != nil {
@@ -63,21 +69,22 @@ func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffec
 	if entity.Description != "" {
 		query += `description = :description,`
 	}
-	if entity.Type != "" {
-		query += `type = :type,`
-	}
+	// if entity.ItemType != "" {
+	// 	query += `type = :type,`
+	// }
 
-	query += `updated_at = now()
+	query += `type = :type, is_countable = :is_countable, updated_at = now()
 			  WHERE
 					id = :id`
 
 	params := map[string]interface{}{
-		"id":          entity.ID,
-		"price":       entity.Price,
-		"width":       entity.Width,
-		"height":      entity.Height,
-		"description": entity.Description,
-		"type":        entity.Type,
+		"id":           entity.ID,
+		"price":        entity.Price,
+		"width":        entity.Width,
+		"height":       entity.Height,
+		"description":  entity.Description,
+		"type":         entity.ItemType,
+		"is_countable": entity.IsCountable,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -92,4 +99,13 @@ func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffec
 	}
 
 	return rowsAffected, nil
+}
+
+func (stg *orderItemRepo) DeleteByID(ID int) error {
+	_, err := stg.db.Exec(`delete from order_items where id = $1`, ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

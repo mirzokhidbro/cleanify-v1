@@ -241,7 +241,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
-	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, description from order_items where order_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, is_countable, description, order_item_type_id from order_items where order_id = $1`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -249,7 +249,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	for rows.Next() {
 		var item models.OrderItem
-		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.Description); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.IsCountable, &item.Description, &item.OrderItemTypeID); err != nil {
 			return order, err
 		}
 		order.OrderItems = append(order.OrderItems, item)
@@ -402,4 +402,17 @@ func (stg *orderRepo) GetLocation(ID int) (models.Order, error) {
 	}
 
 	return order, nil
+}
+
+func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
+	_, err := stg.db.Exec(`delete from order_items where order_id = $1`, entity.ID)
+	if err != nil {
+		return err
+	}
+
+	_, err = stg.db.Exec(`delete from orders where id = $1 and company_id = $2`, entity.ID, entity.CompanyID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
