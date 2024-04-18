@@ -106,5 +106,5 @@ func (h *Handler) GetById(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.BadRequest, user)
+	h.handleResponse(c, http.OK, user)
 }
