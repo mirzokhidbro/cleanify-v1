@@ -22,6 +22,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
 		usersRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.Edit)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
 	}
 
 	{

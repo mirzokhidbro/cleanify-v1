@@ -90,3 +90,21 @@ func (h *Handler) Edit(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, true)
 }
+
+func (h *Handler) GetById(c *gin.Context) {
+	userID := c.Param("user-id")
+
+	if !utils.IsValidUUID(userID) {
+		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+		return
+	}
+
+	user, err := h.Stg.User().GetById(userID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.BadRequest, user)
+}
