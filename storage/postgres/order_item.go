@@ -18,6 +18,11 @@ func NewOrderItemRepo(db *sqlx.DB) repo.OrderItemI {
 
 func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 
+	if entity.IsCountable {
+		entity.Height = 1
+		entity.Width = 1
+	}
+
 	_, err := stg.db.Exec(`INSERT INTO order_items(
 		order_id,
 		type,
@@ -55,6 +60,12 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 }
 
 func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffected int64, err error) {
+
+	if entity.IsCountable {
+		entity.Height = 1
+		entity.Width = 1
+	}
+
 	query := `UPDATE "order_items" SET `
 
 	if entity.Price != 0 {

@@ -178,14 +178,18 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
+	order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	if body.Status != 0 {
+	if body.Status != 0 && order.Status != body.Status {
 		BotToken := h.Cfg.BotToken
 		if BotToken != "" {
 			go func() {
@@ -195,7 +199,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
 				if group.ChatID != 0 {
 					var Notification = ""
-					order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
+					// order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
 					b, _ := bot.New(BotToken, opts...)
 					if err == nil {
 						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
