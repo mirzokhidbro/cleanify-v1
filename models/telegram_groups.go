@@ -19,3 +19,7 @@ type CreateTelegramGroupRequest struct {
 	Code   int
 	Name   string
 }
+
+type GroupVerificationRequest struct {
+	Code int `json:"code" binding:"required"`
+}

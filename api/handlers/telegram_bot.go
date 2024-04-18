@@ -5,7 +5,6 @@ import (
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
 	"context"
-	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -70,11 +69,11 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 }
 
 func (h *Handler) BotStart(c *gin.Context) {
-	bots, err := h.Stg.TelegramBot().GetOrderBot()
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// bots, err := h.Stg.TelegramBot().GetOrderBot()
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	go func() {
 		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -82,25 +81,25 @@ func (h *Handler) BotStart(c *gin.Context) {
 
 		var wg sync.WaitGroup
 
-		for _, bot_config := range bots {
+		// for _, bot_config := range bots {
 
-			opts := []bot.Option{
-				bot.WithDefaultHandler(h.Handler),
-			}
-
-			b, err := bot.New(bot_config.BotToken, opts...)
-			if err != nil {
-				panic(err)
-			}
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
-				b.RegisterHandler(bot.HandlerTypeMessageText, "/code", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
-				b.Start(ctx)
-			}()
+		opts := []bot.Option{
+			bot.WithDefaultHandler(h.Handler),
 		}
+
+		b, err := bot.New(h.Cfg.BotToken, opts...)
+		if err != nil {
+			panic(err)
+		}
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
+			b.RegisterHandler(bot.HandlerTypeMessageText, "/code", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
+			b.Start(ctx)
+		}()
+		// }
 
 		wg.Wait()
 	}()
@@ -113,10 +112,10 @@ func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.B
 	if update.Message.Chat.ID < 0 {
 		rand.Seed(time.Now().UnixNano())
 		randomNumber := rand.Intn(900000) + 100000
-		fmt.Print(update.Message.Chat.FirstName)
+
 		err := h.Stg.TelegramGroup().Create(models.CreateTelegramGroupRequest{
 			ChatID: int(update.Message.Chat.ID),
-			Name:   update.Message.Chat.FirstName,
+			Name:   update.Message.Chat.Title,
 			Code:   randomNumber,
 		})
 		if err != nil {

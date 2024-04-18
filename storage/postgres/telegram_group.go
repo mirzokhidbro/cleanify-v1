@@ -1,8 +1,10 @@
 package postgres
 
 import (
+	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -47,5 +49,42 @@ func (stg *telegramGroupRepo) GetNotificationGroup(CompanyID string, Status int)
 	if err != nil {
 		return group, err
 	}
+	return group, nil
+}
+
+func (stg *telegramGroupRepo) Verification(Code int, companyID string) (models.TelegramGroup, error) {
+	var group models.TelegramGroup
+	query := `select chat_id, code from telegram_groups where code = $1 and company_id is null`
+
+	err := stg.db.QueryRow(query, Code).Scan(
+		&group.ChatID,
+		&group.Code,
+	)
+	if err != nil {
+		return group, err
+	}
+
+	if group.Code == 0 {
+		return group, errors.New("guruh topilmadi")
+	}
+
+	query = `UPDATE "telegram_groups" SET updated_at = now(), company_id = :company_id where code = :code`
+
+	params := map[string]interface{}{
+		"code":       Code,
+		"company_id": companyID,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return group, err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		return group, err
+	}
+
 	return group, nil
 }
