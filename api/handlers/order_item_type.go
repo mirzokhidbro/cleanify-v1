@@ -71,7 +71,6 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 func (h *Handler) UpdateOrderItemType(c *gin.Context) {
 	token, err := utils.ExtractTokenID(c)
 	var body models.EditOrderItemTypeRequest
-
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

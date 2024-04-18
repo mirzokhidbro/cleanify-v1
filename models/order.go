@@ -58,7 +58,7 @@ type Order struct {
 	WorkNumber            string    `json:"work_number"`
 	Count                 int       `json:"count"`
 	Slug                  string    `json:"slug"`
-	Status                int16     `json:"status"`
+	Status                int8     `json:"status"`
 	Description           string    `json:"description"`
 	CreatedAt             time.Time `json:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at"`
@@ -76,7 +76,7 @@ type OrderSendLocationRequest struct {
 type UpdateOrderRequest struct {
 	ID          int     `json:"id" binding:"required"`
 	Slug        string  `json:"slug"`
-	Status      int16   `json:"status"`
+	Status      int8    `json:"status"`
 	Phone       string  `json:"phone"`
 	ChatID      int64   `json:"chat_id"`
 	Description string  `json:"description"`

@@ -22,6 +22,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
 		usersRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.Edit)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
 	}
 
 	{
@@ -97,6 +98,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetClientsList)
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/set-location/:client-id", h.SetLocation)
 		clientRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.UpdateClient)
+	}
+
+	{
+		telegramGroup := baseRouter.Group("/telegram-group")
+		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification/:company-id", h.VerificationGroup)
 	}
 
 	return
