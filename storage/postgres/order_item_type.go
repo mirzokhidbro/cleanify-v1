@@ -101,16 +101,25 @@ func (stg *orderItemTypeRepo) GetById(orderItemTypeId string) (models.OrderItemB
 }
 
 func (stg *orderItemTypeRepo) Update(entity models.EditOrderItemTypeRequest) (rowsAffected int64, err error) {
+
+	var isCountable bool
+	if entity.IsCountable == 0 {
+		isCountable = false
+	} else {
+		isCountable = true
+	}
+
 	query := `UPDATE 
 					"order_item_types" 
-						SET price = :price,updated_at = now()
+						SET price = :price, is_countable = :is_countable, updated_at = now()
 					WHERE
 		  				id = :id and company_id = :company_id`
 
 	params := map[string]interface{}{
-		"id":         entity.ID,
-		"price":      entity.Price,
-		"company_id": entity.CopmanyID,
+		"id":           entity.ID,
+		"price":        entity.Price,
+		"company_id":   entity.CopmanyID,
+		"is_countable": isCountable,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

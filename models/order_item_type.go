@@ -20,5 +20,5 @@ type EditOrderItemTypeRequest struct {
 	CopmanyID   string  `json:"company_id" binding:"required"`
 	ID          string  `json:"id" binding:"required"`
 	Price       float32 `json:"price" binding:"required"`
-	IsCountable bool    `json:"is_countable" binding:"required"`
+	IsCountable int8    `json:"is_countable" binding:"oneof=0 1"`
 }
