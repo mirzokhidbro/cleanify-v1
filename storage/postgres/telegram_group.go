@@ -88,3 +88,27 @@ func (stg *telegramGroupRepo) Verification(Code int, companyID string) (models.T
 
 	return group, nil
 }
+
+func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupGetListResponse, error) {
+	var groups []models.TelegramGroupGetListResponse
+	rows, err := stg.db.Query(`select id, company_id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where company_id = $1`, companyId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var group models.TelegramGroupGetListResponse
+		err = rows.Scan(&group.ID, &group.CompanyID, &group.Name, &group.NotificationStatuses, &group.WithLocation, &group.CreatedAt, &group.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, group)
+
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return groups, nil
+}

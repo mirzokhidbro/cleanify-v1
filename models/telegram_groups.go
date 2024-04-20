@@ -14,6 +14,16 @@ type TelegramGroup struct {
 	UpdatedAt            time.Time
 }
 
+type TelegramGroupGetListResponse struct {
+	ID                   int
+	CompanyID            string
+	Name                 string
+	NotificationStatuses *[]int8
+	WithLocation         *bool
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
 type CreateTelegramGroupRequest struct {
 	ChatID int
 	Code   int
