@@ -37,3 +37,27 @@ func (h *Handler) VerificationGroup(c *gin.Context) {
 
 	h.handleResponse(c, http.Created, "Success!")
 }
+
+func (h *Handler) GetTelegramGroupList(c *gin.Context) {
+	companyID := c.Param("company-id")
+
+	if !utils.IsValidUUID(companyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+		return
+	}
+
+	_, err := h.Stg.Company().GetById(companyID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "company not found")
+		return
+	}
+
+	data, err := h.Stg.TelegramGroup().GetList(companyID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, data)
+}
