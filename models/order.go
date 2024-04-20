@@ -58,7 +58,7 @@ type Order struct {
 	WorkNumber            string    `json:"work_number"`
 	Count                 int       `json:"count"`
 	Slug                  string    `json:"slug"`
-	Status                int8     `json:"status"`
+	Status                int8      `json:"status"`
 	Description           string    `json:"description"`
 	CreatedAt             time.Time `json:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at"`
