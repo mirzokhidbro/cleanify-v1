@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -167,6 +168,12 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
+	order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	rowsAffected, err := h.Stg.Order().Update(&body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -178,11 +185,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+
 	user, err := h.Stg.User().GetById(token.UserID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

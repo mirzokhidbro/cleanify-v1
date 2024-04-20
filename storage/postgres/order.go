@@ -267,6 +267,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 									COALESCE(c.work_number, ''), 
 									o.count, 
 									o.slug, 
+									o.status,
 									o.description, 
 									c.latitute, 
 									c.longitude, 
@@ -280,7 +281,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 								left join clients c on o.client_id = c.id 
 								left join order_items oi on o.id = oi.order_id
 								where o.id = $1 group by o.id, 	o.company_id, c.phone_number, c.additional_phone_number, c.work_number, o.count,o.slug, o.description, 
-								c.latitute, c.longitude, o.client_id, o.address,o.created_at,o.updated_at`, ID).Scan(
+								c.latitute, c.longitude, o.client_id, o.status, o.address,o.created_at,o.updated_at`, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.PhoneNumber,
@@ -288,6 +289,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 		&order.WorkNumber,
 		&order.Count,
 		&order.Slug,
+		&order.Status,
 		&order.Description,
 		&order.Latitute,
 		&order.Longitude,
