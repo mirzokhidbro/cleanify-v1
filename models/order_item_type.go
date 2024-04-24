@@ -4,7 +4,7 @@ type OrderItemTypeModel struct {
 	Name        string  `json:"name" binding:"required,min=2,max=255"`
 	Price       float32 `json:"price" binding:"required"`
 	CompanyID   string  `json:"company_id" binding:"required"`
-	IsCountable bool    `json:"is_countable"`
+	IsCountable *bool   `json:"is_countable" binding:"required"`
 }
 
 type OrderItemByCompany struct {
@@ -20,5 +20,5 @@ type EditOrderItemTypeRequest struct {
 	CopmanyID   string  `json:"company_id" binding:"required"`
 	ID          string  `json:"id" binding:"required"`
 	Price       float32 `json:"price" binding:"required"`
-	IsCountable int8    `json:"is_countable" binding:"oneof=0 1"`
+	IsCountable *bool   `json:"is_countable" binding:"required"`
 }
