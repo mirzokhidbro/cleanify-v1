@@ -22,13 +22,14 @@ type AuthUserModel struct {
 }
 
 type User struct {
-	ID          string  `json:"id"`
-	Firstname   string  `json:"firstname"`
-	Lastname    string  `json:"lastname"`
-	Phone       string  `json:"phone"`
-	Company     *string `json:"company"`
-	CompanyID   *string `json:"company_id"`
-	Permissions string  `json:"permissions"`
+	ID            string   `json:"id"`
+	Firstname     string   `json:"firstname"`
+	Lastname      string   `json:"lastname"`
+	Phone         string   `json:"phone"`
+	Company       *string  `json:"company"`
+	CompanyID     *string  `json:"company_id"`
+	PermissionIDs []string `json:"permission_ids"`
+	Can           string   `json:"can"`
 }
 
 type UpdateUserRequest struct {

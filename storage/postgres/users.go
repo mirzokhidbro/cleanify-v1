@@ -83,14 +83,14 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 		&user.Phone,
 		&user.Company,
 		&user.CompanyID,
-		&user.Permissions,
+		&user.Can,
 	)
 	if err != nil {
 		return user, err
 	}
 
-	if user.Permissions != "" {
-		Permissions := utils.GetArray(user.Permissions)
+	if user.Can != "" {
+		Permissions := utils.GetArray(user.Can)
 		Permission := ""
 		for _, permissionID := range Permissions {
 			permission, err := stg.GetPermissionByPrimaryKey(permissionID)
@@ -98,7 +98,8 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 				Permission += "|" + permission.Slug
 			}
 		}
-		user.Permissions = strings.TrimPrefix(Permission, "|")
+		user.Can = strings.TrimPrefix(Permission, "|")
+		user.PermissionIDs = Permissions
 	}
 
 	return user, nil
