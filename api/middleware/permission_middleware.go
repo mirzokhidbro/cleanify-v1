@@ -33,7 +33,7 @@ func PermissionMiddleware(h handlers.Handler, permission string) gin.HandlerFunc
 			return
 		}
 
-		parts := strings.Split(user.Permissions, "|")
+		parts := strings.Split(user.Can, "|")
 		exist := false
 		for _, part := range parts {
 			if part == permission {
