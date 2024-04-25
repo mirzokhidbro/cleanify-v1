@@ -16,8 +16,8 @@ func NewOrderStatusRepo(db *sqlx.DB) repo.OrderStatusI {
 	return &orderStatusRepo{db: db}
 }
 
-func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatusListResponse, err error) {
-	var orderStatuses []models.OrderStatusListResponse
+func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus, err error) {
+	var orderStatuses []models.OrderStatus
 	var arr []interface{}
 	params := make(map[string]interface{})
 
@@ -39,7 +39,7 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatusL
 	defer rows.Close()
 
 	for rows.Next() {
-		var orderStatus models.OrderStatusListResponse
+		var orderStatus models.OrderStatus
 		err = rows.Scan(
 			&orderStatus.ID,
 			&orderStatus.Number,
@@ -91,4 +91,20 @@ func (stg orderStatusRepo) Update(entity models.UpdateOrderStatusRequest) (rowsA
 	}
 
 	return rowsAffected, nil
+}
+
+func (stg orderStatusRepo) GetById(id int) (models.OrderStatus, error) {
+	var order_status models.OrderStatus
+	err := stg.db.QueryRow(`select id, number, name, color, description from order_statuses where id = $1`, id).Scan(
+		&order_status.ID,
+		&order_status.Number,
+		&order_status.Name,
+		&order_status.Color,
+		&order_status.Description,
+	)
+	if err != nil {
+		return order_status, err
+	}
+
+	return order_status, nil
 }
