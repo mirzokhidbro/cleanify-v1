@@ -106,6 +106,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification/:company-id", h.VerificationGroup)
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetTelegramGroupList)
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
+		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
 	}
 
 	return

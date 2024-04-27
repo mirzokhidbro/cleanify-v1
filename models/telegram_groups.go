@@ -42,3 +42,8 @@ type CreateTelegramGroupRequest struct {
 type GroupVerificationRequest struct {
 	Code int `json:"code" binding:"required"`
 }
+
+type TelegramGroupEditRequest struct {
+	WithLocation         *bool  `json:"with_location" binding:"required"`
+	NotificationStatuses []int8 `json:"notification_statuses" binding:"required"`
+}

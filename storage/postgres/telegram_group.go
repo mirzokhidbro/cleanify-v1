@@ -129,3 +129,25 @@ func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetBy
 
 	return telegram_group, nil
 }
+
+func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "telegram_groups" SET with_location = :with_location WHERE	id = :id`
+
+	params := map[string]interface{}{
+		"id":            ID,
+		"with_location": entity.WithLocation,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
