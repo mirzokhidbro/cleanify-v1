@@ -112,3 +112,20 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 	return groups, nil
 }
+
+func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetByPrimayKeyResponse, error) {
+	var telegram_group models.TelegramGroupGetByPrimayKeyResponse
+	err := stg.db.QueryRow(`select id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where id = $1`, id).Scan(
+		&telegram_group.ID,
+		&telegram_group.Name,
+		&telegram_group.NotificationStatuses,
+		&telegram_group.WithLocation,
+		&telegram_group.CreatedAt,
+		&telegram_group.UpdatedAt,
+	)
+	if err != nil {
+		return telegram_group, err
+	}
+
+	return telegram_group, nil
+}
