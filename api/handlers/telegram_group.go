@@ -80,3 +80,27 @@ func (h *Handler) GetTelegramGroupByPrimaryKey(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, data)
 }
+
+func (h *Handler) UpdateTelegramGroup(c *gin.Context) {
+	ID := c.Param("id")
+	var body models.TelegramGroupEditRequest
+	groupID, err := strconv.Atoi(ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	data, err := h.Stg.TelegramGroup().Update(groupID, body)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, data)
+}
