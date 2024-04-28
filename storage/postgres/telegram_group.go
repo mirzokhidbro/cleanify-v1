@@ -112,3 +112,42 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 	return groups, nil
 }
+
+func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetByPrimayKeyResponse, error) {
+	var telegram_group models.TelegramGroupGetByPrimayKeyResponse
+	err := stg.db.QueryRow(`select id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where id = $1`, id).Scan(
+		&telegram_group.ID,
+		&telegram_group.Name,
+		&telegram_group.NotificationStatuses,
+		&telegram_group.WithLocation,
+		&telegram_group.CreatedAt,
+		&telegram_group.UpdatedAt,
+	)
+	if err != nil {
+		return telegram_group, err
+	}
+
+	return telegram_group, nil
+}
+
+func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "telegram_groups" SET with_location = :with_location WHERE	id = :id`
+
+	params := map[string]interface{}{
+		"id":            ID,
+		"with_location": entity.WithLocation,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}

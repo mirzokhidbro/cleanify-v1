@@ -24,6 +24,15 @@ type TelegramGroupGetListResponse struct {
 	UpdatedAt            time.Time
 }
 
+type TelegramGroupGetByPrimayKeyResponse struct {
+	ID                   int       `json:"id"`
+	Name                 string    `json:"name"`
+	NotificationStatuses *[]int8   `json:"notification_statuses"`
+	WithLocation         *bool     `json:"with_location"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
+}
+
 type CreateTelegramGroupRequest struct {
 	ChatID int
 	Code   int
@@ -32,4 +41,9 @@ type CreateTelegramGroupRequest struct {
 
 type GroupVerificationRequest struct {
 	Code int `json:"code" binding:"required"`
+}
+
+type TelegramGroupEditRequest struct {
+	WithLocation         *bool  `json:"with_location" binding:"required"`
+	NotificationStatuses []int8 `json:"notification_statuses" binding:"required"`
 }

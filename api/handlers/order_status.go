@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,4 +39,22 @@ func (h *Handler) UpdateOrderStatusModel(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, "Update successfully!")
+}
+
+func (h *Handler) GetOrderStatusById(c *gin.Context) {
+	ID := c.Param("id")
+	statusID, err := strconv.Atoi(ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	data, err := h.Stg.OrderStatus().GetById(statusID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, data)
 }

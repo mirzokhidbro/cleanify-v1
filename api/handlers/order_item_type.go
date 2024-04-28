@@ -68,6 +68,22 @@ func (h *Handler) GetOrderItemTypesByCompany(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
+func (h *Handler) GetOrderItemTypeByID(c *gin.Context) {
+	ID := c.Param("id")
+	if !utils.IsValidUUID(ID) {
+		h.handleResponse(c, http.InvalidArgument, "id is an invalid uuid")
+		return
+	}
+
+	data, err := h.Stg.OrderItemType().GetById(ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, data)
+}
+
 func (h *Handler) UpdateOrderItemType(c *gin.Context) {
 	token, err := utils.ExtractTokenID(c)
 	var body models.EditOrderItemTypeRequest

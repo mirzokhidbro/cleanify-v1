@@ -4,7 +4,12 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	newHttp "net/http"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-telegram/bot"
@@ -192,50 +197,42 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	}
 
 	if body.Status != 0 && order.Status != body.Status {
-		BotToken := h.Cfg.BotToken
-		if BotToken != "" {
+
+		go func() {
+			var wg sync.WaitGroup
+			wg.Add(1)
 			go func() {
-				opts := []bot.Option{
-					bot.WithDefaultHandler(h.Handler),
+				requestBody := map[string]interface{}{
+					"order_id":   order.ID,
+					"status":     body.Status,
+					"company_id": user.CompanyID,
 				}
-				group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
-				if group.ChatID != 0 {
-					var Notification = ""
-					// order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
-					b, _ := bot.New(BotToken, opts...)
-					if err == nil {
-						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
-							if body.Status == 3 || body.Status == 4 {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-							} else {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-							}
-							b.SendLocation(c, &bot.SendLocationParams{
-								ChatID:    group.ChatID,
-								Latitude:  *order.Latitute,
-								Longitude: *order.Longitude,
-							})
-							b.SendMessage(c, &bot.SendMessageParams{
-								ChatID:    group.ChatID,
-								Text:      Notification,
-								ParseMode: tgmodels.ParseModeHTML,
-							})
-						} else {
-							if body.Status == 3 || body.Status == 4 {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-							} else {
-								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-							}
-							b.SendMessage(c, &bot.SendMessageParams{
-								ChatID:    group.ChatID,
-								Text:      Notification,
-								ParseMode: tgmodels.ParseModeHTML,
-							})
-						}
-					}
+				requestBodyJson, err := json.Marshal(requestBody)
+		
+				if err != nil {
+					h.handleResponse(c, http.InternalServerError, err.Error())
+					return
 				}
+		
+				url := "http://127.0.0.1:8001/api/ping"
+				req, err := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				req.Header.Set("Content-Type", "application/json")
+		
+				if err != nil {
+					fmt.Print(err)
+				}
+		
+				client := &newHttp.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+				defer wg.Done()
 			}()
-		}
+
+			wg.Wait()
+		}()
 	}
 
 	h.handleResponse(c, http.OK, rowsAffected)

@@ -1,6 +1,6 @@
 package models
 
-type OrderStatusListResponse struct {
+type OrderStatus struct {
 	ID          int    `json:"id"`
 	Number      int    `json:"number"`
 	Name        string `json:"name"`
