@@ -21,11 +21,11 @@ jobs:
         run: find /home/bwerp_dev/www/backend/bw-erp -type f ! -name '.env' -delete
 
       - name: Copy project
-        run: cp -r /home/bwerp_dev/actions-runner/_work/bw-erp/bw-erp/* /home/bwerp_dev/www/backend/bw-erp
+        run: cp -r /home/bwerp_dev/actions-runner/_work/bw-erp/bw-erp/* /home/bwerp_dev/www/backend/bwerp-dev
 
       - name: Build Go application
         run: |
-          cd /home/bwerp_dev/www/backend/bw-erp
+          cd /home/bwerp_dev/www/backend/bwerp-dev
           go build -o main ./cmd/main.go
 
       - name: Deploy
