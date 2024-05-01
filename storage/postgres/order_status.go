@@ -95,7 +95,7 @@ func (stg orderStatusRepo) Update(entity models.UpdateOrderStatusRequest) (rowsA
 
 func (stg orderStatusRepo) GetById(id int) (models.OrderStatus, error) {
 	var order_status models.OrderStatus
-	err := stg.db.QueryRow(`select id, number, name, color, description from order_statuses where id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select id, number, name, coalesce(color, ''), description from order_statuses where id = $1`, id).Scan(
 		&order_status.ID,
 		&order_status.Number,
 		&order_status.Name,
