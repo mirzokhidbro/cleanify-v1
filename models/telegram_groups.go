@@ -18,7 +18,7 @@ type TelegramGroupGetListResponse struct {
 	ID                   int
 	CompanyID            string
 	Name                 string
-	NotificationStatuses *[]int8
+	NotificationStatuses []int8
 	WithLocation         *bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
