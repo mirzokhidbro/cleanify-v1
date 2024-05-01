@@ -18,42 +18,42 @@ func NewRoleRepo(db *sqlx.DB) repo.RoleI {
 }
 
 func (stg *roleRepo) Create(id string, entity models.CreateRoleModel) error {
-	_, _ = stg.db.Exec(`INSERT INTO roles(
-		id,
-		name,
-		company_id
-	) VALUES (
-		$1,
-		$2,
-		$3
-	)`,
-		id,
-		entity.Name,
-		entity.CompanyId,
-	)
+	// _, _ = stg.db.Exec(`INSERT INTO roles(
+	// 	id,
+	// 	name,
+	// 	company_id
+	// ) VALUES (
+	// 	$1,
+	// 	$2,
+	// 	$3
+	// )`,
+	// 	id,
+	// 	entity.Name,
+	// 	entity.CompanyId,
+	// )
 
-	query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
+	// query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
 
-	_, err := stg.db.Exec(query, id)
-	if err != nil {
-		return err
-	}
+	// _, err := stg.db.Exec(query, id)
+	// if err != nil {
+	// 	return err
+	// }
 
-	PermissionIDs := utils.SetArray(entity.PermissionIDs)
-	_, err = stg.db.Exec(`INSERT INTO role_and_permissions(
-		role_id,
-		permission_ids
-	) VALUES (
-		$1,
-		$2
-	)`,
-		id,
-		PermissionIDs,
-	)
+	// PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	// _, err = stg.db.Exec(`INSERT INTO role_and_permissions(
+	// 	role_id,
+	// 	permission_ids
+	// ) VALUES (
+	// 	$1,
+	// 	$2
+	// )`,
+	// 	id,
+	// 	PermissionIDs,
+	// )
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -82,54 +82,54 @@ func (stg *roleRepo) GetListByCompany(companyID string) ([]models.RoleListByComp
 }
 
 func (stg *roleRepo) GetByPrimaryKey(roleID string) (models.RoleByPrimaryKey, error) {
-	var model models.GetRoleByPrimaryKey
+	// var model models.GetRoleByPrimaryKey
 	var response models.RoleByPrimaryKey
-	err := stg.db.QueryRow(`select r.id, r.name, rp.permission_ids from roles r left join role_and_permissions rp on r.id::text = rp.role_id where r.id::text = $1`, roleID).Scan(
-		&model.ID,
-		&model.Name,
-		&model.PermissionIDs,
-	)
-	if err != nil {
-		return response, err
-	}
-	if *model.PermissionIDs != "" {
-		permissionIds := utils.GetArray(*model.PermissionIDs)
-		response.PermissionIDs = &permissionIds
-	}
-	response.ID = model.ID
-	response.Name = model.Name
+	// err := stg.db.QueryRow(`select r.id, r.name, rp.permission_ids from roles r left join role_and_permissions rp on r.id::text = rp.role_id where r.id::text = $1`, roleID).Scan(
+	// 	&model.ID,
+	// 	&model.Name,
+	// 	&model.PermissionIDs,
+	// )
+	// if err != nil {
+	// 	return response, err
+	// }
+	// if *model.PermissionIDs != "" {
+	// 	permissionIds := utils.GetArray(*model.PermissionIDs)
+	// 	response.PermissionIDs = &permissionIds
+	// }
+	// response.ID = model.ID
+	// response.Name = model.Name
 
 	return response, nil
 }
 
 func (stg *roleRepo) GetPermissionsToRole(entity models.GetPermissionToRoleRequest) error {
-	for _, permission_id := range entity.PermissionIDs {
-		_, err := stg.GetPermissionByPrimaryKey(permission_id)
-		if err != nil {
-			return err
-		}
-	}
-	query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
+	// for _, permission_id := range entity.PermissionIDs {
+	// 	_, err := stg.GetPermissionByPrimaryKey(permission_id)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+	// query := `DELETE FROM "role_and_permissions" WHERE role_id = $1`
 
-	_, err := stg.db.Exec(query, entity.RoleID)
-	if err != nil {
-		return err
-	}
-	PermissionIDs := utils.SetArray(entity.PermissionIDs)
-	_, err = stg.db.Exec(`INSERT INTO role_and_permissions(
-		role_id,
-		permission_ids
-	) VALUES (
-		$1,
-		$2
-	)`,
-		entity.RoleID,
-		PermissionIDs,
-	)
+	// _, err := stg.db.Exec(query, entity.RoleID)
+	// if err != nil {
+	// 	return err
+	// }
+	// PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	// _, err = stg.db.Exec(`INSERT INTO role_and_permissions(
+	// 	role_id,
+	// 	permission_ids
+	// ) VALUES (
+	// 	$1,
+	// 	$2
+	// )`,
+	// 	entity.RoleID,
+	// 	PermissionIDs,
+	// )
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

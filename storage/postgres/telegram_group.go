@@ -3,6 +3,7 @@ package postgres
 import (
 	"bw-erp/helper"
 	"bw-erp/models"
+	"bw-erp/pkg/utils"
 	"bw-erp/storage/repo"
 	"errors"
 
@@ -91,6 +92,7 @@ func (stg *telegramGroupRepo) Verification(Code int, companyID string) (models.T
 
 func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupGetListResponse, error) {
 	var groups []models.TelegramGroupGetListResponse
+	var notificationStatuses string
 	rows, err := stg.db.Query(`select id, company_id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where company_id = $1`, companyId)
 	if err != nil {
 		return nil, err
@@ -99,13 +101,15 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 	for rows.Next() {
 		var group models.TelegramGroupGetListResponse
-		err = rows.Scan(&group.ID, &group.CompanyID, &group.Name, &group.NotificationStatuses, &group.WithLocation, &group.CreatedAt, &group.UpdatedAt)
+		err = rows.Scan(&group.ID, &group.CompanyID, &group.Name, &notificationStatuses, &group.WithLocation, &group.CreatedAt, &group.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
+
 		groups = append(groups, group)
 
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
@@ -115,10 +119,12 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetByPrimayKeyResponse, error) {
 	var telegram_group models.TelegramGroupGetByPrimayKeyResponse
+	var status []uint8
+
 	err := stg.db.QueryRow(`select id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where id = $1`, id).Scan(
 		&telegram_group.ID,
 		&telegram_group.Name,
-		&telegram_group.NotificationStatuses,
+		&status,
 		&telegram_group.WithLocation,
 		&telegram_group.CreatedAt,
 		&telegram_group.UpdatedAt,
@@ -131,11 +137,14 @@ func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetBy
 }
 
 func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequest) (rowsAffected int64, err error) {
-	query := `UPDATE "telegram_groups" SET with_location = :with_location WHERE	id = :id`
+	query := `UPDATE "telegram_groups" SET with_location = :with_location, notification_statuses = :notification_statuses WHERE	id = :id`
+
+	notifiationStatuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
 
 	params := map[string]interface{}{
-		"id":            ID,
-		"with_location": entity.WithLocation,
+		"id":                    ID,
+		"with_location":         entity.WithLocation,
+		"notification_statuses": notifiationStatuses,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

@@ -24,7 +24,7 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		return errors.New("confirmation password is not the same with password")
 	}
 	password, _ := utils.HashPassword(entity.Password)
-	PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	PermissionIDs := utils.SetArray(utils.StringSliceToInterface(entity.PermissionIDs))
 
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
@@ -93,13 +93,13 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 		Permissions := utils.GetArray(user.Can)
 		Permission := ""
 		for _, permissionID := range Permissions {
-			permission, err := stg.GetPermissionByPrimaryKey(permissionID)
+			permission, err := stg.GetPermissionByPrimaryKey(permissionID.(string))
 			if err == nil {
 				Permission += "|" + permission.Slug
 			}
 		}
 		user.Can = strings.TrimPrefix(Permission, "|")
-		user.PermissionIDs = Permissions
+		user.PermissionIDs = utils.InterfaceSliceToString(Permissions)
 	}
 
 	return user, nil
@@ -195,7 +195,7 @@ func (stg *userRepo) Edit(companyID string, entity models.UpdateUserRequest) (ro
 	if entity.Lastname != "" {
 		query += `lastname = :lastname,`
 	}
-	PermissionIDs := utils.SetArray(entity.PermissionIDs)
+	PermissionIDs := utils.SetArray(utils.StringSliceToInterface(entity.PermissionIDs))
 	if PermissionIDs != "{}" {
 		query += `permission_ids = :permission_ids,`
 	}
