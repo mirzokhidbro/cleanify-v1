@@ -60,7 +60,7 @@ func (h *Handler) GetTelegramGroupList(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.Created, data)
+	h.handleResponse(c, http.OK, data)
 }
 
 func (h *Handler) GetTelegramGroupByPrimaryKey(c *gin.Context) {
