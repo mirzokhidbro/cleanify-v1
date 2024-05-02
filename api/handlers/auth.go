@@ -58,6 +58,7 @@ func (h *Handler) CurrentUser(c *gin.Context) {
 	h.handleResponse(c, http.OK, user)
 }
 
+
 func (h *Handler) ChangePassword(c *gin.Context) {
 	var payload models.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&payload); err != nil {
