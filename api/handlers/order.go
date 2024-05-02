@@ -69,7 +69,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			opts := []bot.Option{
 				bot.WithDefaultHandler(h.Handler),
 			}
-			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 83)
+			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
 				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
@@ -191,7 +191,6 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
-
 	// go func() {
 	// 	var wg sync.WaitGroup
 	// 	wg.Add(1)
@@ -227,8 +226,6 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	// 	wg.Wait()
 	// }()
-
-
 
 	if body.Status != 0 && order.Status != body.Status {
 

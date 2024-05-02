@@ -24,6 +24,7 @@ func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error)
 		slug,
 		description,
 		address,
+		status,
 		client_id
 	) VALUES (
 		$1,
@@ -32,7 +33,8 @@ func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error)
 		$4,
 		$5,
 		$6,
-		$7
+		$7,
+		$8
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
@@ -40,6 +42,7 @@ func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error)
 		entity.Slug,
 		entity.Description,
 		entity.Address,
+		1,
 		entity.ClientID,
 	).Scan(&id)
 

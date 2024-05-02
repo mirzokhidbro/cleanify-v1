@@ -106,6 +106,23 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 			return nil, err
 		}
 
+		notificationStatuses := utils.GetArray(notificationStatuses)
+
+		// for i, v := range notificationStatuses {
+		// 	floatNum, ok := v.(float64)
+		// 	if ok {
+		// 		intNum := int8(floatNum)
+		// 		fmt.Print(intNum)
+		// 		group.NotificationStatuses[i] = intNum
+		// 	}
+		// }
+
+		// fmt.Print("\n")
+		// fmt.Print(group.NotificationStatuses)
+		// fmt.Print("\n")
+
+		group.NotificationStatuses = notificationStatuses
+
 		groups = append(groups, group)
 
 	}
