@@ -16,7 +16,16 @@ func NewOrderRepo(db *sqlx.DB) repo.OrderI {
 	return &orderRepo{db: db}
 }
 
-func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error) {
+func (stg *orderRepo) Create(userID string, entity models.CreateOrderModel) (id int, err error) {
+
+	var status int8
+
+	if entity.Status == 0 {
+		status = 1
+	} else {
+		status = entity.Status
+	}
+
 	err = stg.db.QueryRow(`INSERT INTO orders(
 		company_id,
 		phone,
@@ -42,13 +51,30 @@ func (stg *orderRepo) Create(entity models.CreateOrderModel) (id int, err error)
 		entity.Slug,
 		entity.Description,
 		entity.Address,
-		1,
+		status,
 		entity.ClientID,
 	).Scan(&id)
 
 	if err != nil {
 		return 0, err
 	}
+
+	stg.db.QueryRow(`INSERT INTO status_change_histories(
+		historyable_id,
+		historyable_type,
+		user_id,
+		status
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4
+	) RETURNING id`,
+		id,
+		"orders",
+		userID,
+		status,
+	).Scan()
 
 	return id, nil
 }
@@ -258,6 +284,20 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.OrderItems = append(order.OrderItems, item)
 	}
 
+	rows, err = stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'orders' and historyable_id = $1`, ID)
+	if err != nil {
+		return order, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var history models.StatusChangeHistory
+		if err := rows.Scan(&history.Status, &history.Firstname, &history.Lastname, &history.CreatedAt); err != nil {
+			return order, err
+		}
+		order.StatusChangeHistory = append(order.StatusChangeHistory, history)
+	}
+
 	return order, nil
 }
 
@@ -310,7 +350,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 	return order, nil
 }
 
-func (stg *orderRepo) Update(entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
+func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "orders" SET `
 
 	if entity.Slug != "" {
@@ -367,6 +407,25 @@ func (stg *orderRepo) Update(entity *models.UpdateOrderRequest) (rowsAffected in
 	rowsAffected, err = result.RowsAffected()
 	if err != nil {
 		return 0, err
+	}
+
+	if entity.Status != 0 {
+		stg.db.QueryRow(`INSERT INTO status_change_histories(
+			historyable_id,
+			historyable_type,
+			user_id,
+			status
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4
+		) RETURNING id`,
+			entity.ID,
+			"orders",
+			userID,
+			entity.Status,
+		).Scan()
 	}
 
 	return rowsAffected, nil
