@@ -190,7 +190,12 @@ CREATE TABLE IF NOT EXISTS "order_statuses" (
 ALTER TABLE "order_items"
 ADD COLUMN "order_item_type_id" UUID REFERENCES "order_item_types"("id");
 
-UPDATE order_items oi
-SET order_item_type_id = oit.id
-FROM order_item_types oit
-WHERE oi.type = oit.name;
+CREATE TABLE IF NOT EXISTS "status_change_histories" (
+    "id"                SERIAL PRIMARY KEY,
+    "historyable_type"  VARCHAR,
+    "historyable_id"    VARCHAR,
+    "status"            INTEGER,
+    "user_id"           UUID REFERENCES "users"("id"),
+    "created_at"        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at"        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
