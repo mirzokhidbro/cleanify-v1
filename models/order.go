@@ -12,6 +12,7 @@ type CreateOrderModel struct {
 	Phone       string  `json:"phone" binding:"required"`
 	Count       int     `json:"count"`
 	Slug        string  `json:"slug"`
+	Status      int8    `json:"status"`
 	Description string  `json:"description"`
 	ChatID      int64   `json:"chat_id"`
 	Address     string  `json:"address" binding:"required"`
@@ -50,23 +51,24 @@ type OrderShowResponse struct {
 }
 
 type Order struct {
-	ID                    int       `json:"id"`
-	CompanyID             string    `json:"company_id"`
-	ClientID              int       `json:"client_id"`
-	PhoneNumber           string    `json:"phone_number"`
-	AdditionalPhoneNumber string    `json:"additional_phone_number"`
-	WorkNumber            string    `json:"work_number"`
-	Count                 int       `json:"count"`
-	Slug                  string    `json:"slug"`
-	Status                int8      `json:"status"`
-	Description           string    `json:"description"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
-	Latitute              *float64  `json:"latitute"`
-	Longitude             *float64  `json:"longitude"`
-	Address               *string   `json:"address"`
-	Square                float64   `json:"square"`
-	Price                 float64   `json:"price"`
+	ID                    int                   `json:"id"`
+	CompanyID             string                `json:"company_id"`
+	ClientID              int                   `json:"client_id"`
+	PhoneNumber           string                `json:"phone_number"`
+	AdditionalPhoneNumber string                `json:"additional_phone_number"`
+	WorkNumber            string                `json:"work_number"`
+	Count                 int                   `json:"count"`
+	Slug                  string                `json:"slug"`
+	Status                int8                  `json:"status"`
+	Description           string                `json:"description"`
+	CreatedAt             time.Time             `json:"created_at"`
+	UpdatedAt             time.Time             `json:"updated_at"`
+	Latitute              *float64              `json:"latitute"`
+	Longitude             *float64              `json:"longitude"`
+	Address               *string               `json:"address"`
+	Square                float64               `json:"square"`
+	Price                 float64               `json:"price"`
+	StatusChangeHistory   []StatusChangeHistory `json:"status_change_history"`
 }
 
 type OrderSendLocationRequest struct {

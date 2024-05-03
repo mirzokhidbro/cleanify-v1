@@ -57,7 +57,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	orderID, err := h.Stg.Order().Create(body)
+	orderID, err := h.Stg.Order().Create(user.ID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -87,11 +87,6 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
-	// companyID := c.Param("company-id")
-	// if !utils.IsValidUUID(companyID) {
-	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
-	// 	return
-	// }
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -167,17 +162,6 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
-	order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	rowsAffected, err := h.Stg.Order().Update(&body)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
 	token, err := utils.ExtractTokenID(c)
 
 	if err != nil {
@@ -186,6 +170,18 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	}
 
 	user, err := h.Stg.User().GetById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	rowsAffected, err := h.Stg.Order().Update(user.ID, &body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -238,7 +234,6 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 					group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
 					if group.ChatID != 0 {
 						var Notification = ""
-						// order, err := h.Stg.Order().GetByPrimaryKey(body.ID)
 						b, _ := bot.New(BotToken, opts...)
 						if err == nil {
 							if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
