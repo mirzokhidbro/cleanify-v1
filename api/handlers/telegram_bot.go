@@ -23,7 +23,6 @@ var kb = &tgmodels.ReplyKeyboardMarkup{
 	Keyboard: [][]tgmodels.KeyboardButton{
 		{
 			{Text: "Zayavkalar"},
-			// {Text: "Tanlanganlar"},
 		},
 	},
 	ResizeKeyboard:  true,
@@ -69,19 +68,12 @@ func (h *Handler) CreateCompanyBotModel(c *gin.Context) {
 }
 
 func (h *Handler) BotStart(c *gin.Context) {
-	// bots, err := h.Stg.TelegramBot().GetOrderBot()
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
 
 	go func() {
 		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 		defer cancel()
 
 		var wg sync.WaitGroup
-
-		// for _, bot_config := range bots {
 
 		opts := []bot.Option{
 			bot.WithDefaultHandler(h.Handler),
@@ -95,11 +87,9 @@ func (h *Handler) BotStart(c *gin.Context) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			// b.RegisterHandler(bot.HandlerTypeMessageText, "/olishkerak", bot.MatchTypeExact, h.newApplicationHandler)
 			b.RegisterHandler(bot.HandlerTypeMessageText, "/code", bot.MatchTypeExact, h.telegramGroupVerificationHandler)
 			b.Start(ctx)
 		}()
-		// }
 
 		wg.Wait()
 	}()
@@ -108,7 +98,6 @@ func (h *Handler) BotStart(c *gin.Context) {
 }
 
 func (h *Handler) telegramGroupVerificationHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
-	// botData, _ := b.GetMe(ctx)
 	if update.Message.Chat.ID < 0 {
 		rand.Seed(time.Now().UnixNano())
 		randomNumber := rand.Intn(900000) + 100000
@@ -272,8 +261,6 @@ func (h *Handler) Handler(ctx context.Context, b *bot.Bot, update *tgmodels.Upda
 				h.RegistrationPage(ctx, b, update, botID)
 			case "Order":
 				h.OrderPage(ctx, b, update, user)
-				// case "SetLocation":
-				// 	h.SetClientLocation(ctx, b, update, user)
 			}
 		}
 	}
