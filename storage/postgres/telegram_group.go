@@ -121,7 +121,7 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 		// fmt.Print(group.NotificationStatuses)
 		// fmt.Print("\n")
 
-		group.NotificationStatuses = notificationStatuses
+		group.NotificationStatuses = &notificationStatuses
 
 		groups = append(groups, group)
 
