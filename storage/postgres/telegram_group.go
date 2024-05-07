@@ -6,6 +6,7 @@ import (
 	"bw-erp/pkg/utils"
 	"bw-erp/storage/repo"
 	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -106,9 +107,12 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 			return nil, err
 		}
 
-		notificationStatuses := utils.GetArray(notificationStatuses)
+		if notificationStatuses != nil {
+			notificationStatuses := utils.GetArray(*notificationStatuses)
+	
+			group.NotificationStatuses = &notificationStatuses
+		}
 
-		group.NotificationStatuses = &notificationStatuses
 
 		groups = append(groups, group)
 
@@ -143,12 +147,14 @@ func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetBy
 func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "telegram_groups" SET with_location = :with_location, notification_statuses = :notification_statuses WHERE	id = :id`
 
-	notifiationStatuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
-
+	notification_statuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
+	
+	fmt.Print(notification_statuses)
+	
 	params := map[string]interface{}{
 		"id":                    ID,
 		"with_location":         entity.WithLocation,
-		"notification_statuses": notifiationStatuses,
+		"notification_statuses": notification_statuses,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
