@@ -92,7 +92,7 @@ func (stg *telegramGroupRepo) Verification(Code int, companyID string) (models.T
 
 func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupGetListResponse, error) {
 	var groups []models.TelegramGroupGetListResponse
-	var notificationStatuses string
+	var notificationStatuses *string
 	rows, err := stg.db.Query(`select id, company_id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where company_id = $1`, companyId)
 	if err != nil {
 		return nil, err
@@ -107,19 +107,6 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 		}
 
 		notificationStatuses := utils.GetArray(notificationStatuses)
-
-		// for i, v := range notificationStatuses {
-		// 	floatNum, ok := v.(float64)
-		// 	if ok {
-		// 		intNum := int8(floatNum)
-		// 		fmt.Print(intNum)
-		// 		group.NotificationStatuses[i] = intNum
-		// 	}
-		// }
-
-		// fmt.Print("\n")
-		// fmt.Print(group.NotificationStatuses)
-		// fmt.Print("\n")
 
 		group.NotificationStatuses = &notificationStatuses
 
