@@ -109,10 +109,9 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 		if notificationStatuses != nil {
 			notificationStatuses := utils.GetArray(*notificationStatuses)
-	
+
 			group.NotificationStatuses = &notificationStatuses
 		}
-
 
 		groups = append(groups, group)
 
@@ -127,7 +126,7 @@ func (stg *telegramGroupRepo) GetList(companyId string) ([]models.TelegramGroupG
 
 func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetByPrimayKeyResponse, error) {
 	var telegram_group models.TelegramGroupGetByPrimayKeyResponse
-	var status []uint8
+	var status *string
 
 	err := stg.db.QueryRow(`select id, name, notification_statuses, with_location, created_at, updated_at from telegram_groups where id = $1`, id).Scan(
 		&telegram_group.ID,
@@ -141,6 +140,12 @@ func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetBy
 		return telegram_group, err
 	}
 
+	if status != nil {
+		notificationStatuses := utils.GetArray(*status)
+
+		telegram_group.NotificationStatuses = &notificationStatuses
+	}
+
 	return telegram_group, nil
 }
 
@@ -148,9 +153,9 @@ func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequ
 	query := `UPDATE "telegram_groups" SET with_location = :with_location, notification_statuses = :notification_statuses WHERE	id = :id`
 
 	notification_statuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
-	
+
 	fmt.Print(notification_statuses)
-	
+
 	params := map[string]interface{}{
 		"id":                    ID,
 		"with_location":         entity.WithLocation,

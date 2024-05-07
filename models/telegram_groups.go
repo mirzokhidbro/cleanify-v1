@@ -27,7 +27,7 @@ type TelegramGroupGetListResponse struct {
 type TelegramGroupGetByPrimayKeyResponse struct {
 	ID                   int       `json:"id"`
 	Name                 string    `json:"name"`
-	NotificationStatuses *[]int8   `json:"notification_statuses"`
+	NotificationStatuses *[]interface{}   `json:"notification_statuses"`
 	WithLocation         *bool     `json:"with_location"`
 	CreatedAt            time.Time `json:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
