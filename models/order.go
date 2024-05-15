@@ -24,6 +24,7 @@ type CreateOrderModel struct {
 type OrderList struct {
 	ID        int       `json:"id"`
 	Slug      string    `json:"slug"`
+	Phone     string    `json:"phone"`
 	Address   *string   `json:"address"`
 	Status    int16     `json:"status"`
 	Square    float64   `json:"square"`
@@ -40,7 +41,8 @@ type OrdersListRequest struct {
 	Limit    int32     `json:"limit"`
 	Offset   int32     `json:"offset"`
 	Status   int       `json:"status,omitempty"`
-	ID       int       `json:"slug,omitempty"`
+	Phone    string    `json:"phone"`
+	ID       string    `json:"slug,omitempty"`
 	DateFrom time.Time `json:"date_from"`
 	DateTo   time.Time `json:"date_to"`
 }
