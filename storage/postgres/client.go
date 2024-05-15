@@ -77,7 +77,7 @@ func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListReq
 	params["company_id"] = companyID
 	filter += " and (company_id = :company_id)"
 
-	if len(queryParam.Phone) > 0 {
+	if len(queryParam.Phone) > 3 {
 		params["phone"] = queryParam.Phone
 		filter += " AND ((phone_number || ' ' || additional_phone_number || ' ' || work_number) ILIKE ('%' || :phone || '%'))"
 	}

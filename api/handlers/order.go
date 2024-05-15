@@ -118,16 +118,19 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 		return
 	}
 	orderID := c.Query("id")
-	ID := 0
-	if len(orderID) > 0 {
-		ID, err = strconv.Atoi(orderID)
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
-			return
-		}
-	}
+	Phone := c.Query("phone")
+	// ID := 0
+	// if len(orderID) > 0 {
+	// 	ID, err = strconv.Atoi(orderID)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.BadRequest, err.Error())
+	// 		return
+	// 	}
+	// }
+
 	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
-		ID:     ID,
+		ID:     orderID,
+		Phone:  Phone,
 		Status: status,
 		Limit:  int32(limit),
 		Offset: int32(offset),
