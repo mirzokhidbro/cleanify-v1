@@ -4,7 +4,6 @@ import (
 	"bw-erp/models"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -14,17 +13,17 @@ import (
 
 func GenerateToken(user_id string, phone string) (string, error) {
 
-	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
+	// token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
-	if err != nil {
-		return "", err
-	}
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = user_id
 	claims["phone"] = phone
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(token_lifespan)).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(720)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
