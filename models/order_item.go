@@ -37,13 +37,15 @@ type UpdateOrderItemStatusRequest struct {
 }
 
 type OrderItem struct {
-	ID              int     `json:"id"`
-	OrderID         int     `json:"order_id"`
-	Type            string  `json:"type"`
-	Price           float32 `json:"price"`
-	Width           float32 `json:"width"`
-	Height          float32 `json:"height"`
-	IsCountable     bool    `json:"is_countable"`
-	Description     string  `json:"description"`
-	OrderItemTypeID string  `json:"order_item_type_id"`
+	ID                  int                   `json:"id"`
+	OrderID             int                   `json:"order_id"`
+	Type                string                `json:"type"`
+	Price               float32               `json:"price"`
+	Width               float32               `json:"width"`
+	Height              float32               `json:"height"`
+	OrderItemStatus     OrderItemStatus       `json:"status"`
+	IsCountable         bool                  `json:"is_countable"`
+	Description         string                `json:"description"`
+	OrderItemTypeID     string                `json:"order_item_type_id"`
+	StatusChangeHistory []StatusChangeHistory `json:"status_change_history"`
 }
