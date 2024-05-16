@@ -171,6 +171,8 @@ ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
 ALTER TABLE "order_items"
 ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
 
+ALTER TABLE "order_items"
+ADD COLUMN "status" INTEGER DEFAULT 1;
 
 ALTER TABLE "order_item_types"
 ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;

@@ -16,19 +16,21 @@ func NewOrderItemRepo(db *sqlx.DB) repo.OrderItemI {
 	return &orderItemRepo{db: db}
 }
 
-func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
+func (stg orderItemRepo) Create(userID string, entity models.CreateOrderItemModel) error {
+	var id int
 
 	if entity.IsCountable {
 		entity.Height = 1
 		entity.Width = 1
 	}
 
-	_, err := stg.db.Exec(`INSERT INTO order_items(
+	err := stg.db.QueryRow(`INSERT INTO order_items(
 		order_id,
 		type,
 		price,
 		width,
 		height,
+		status,
 		description,
 		is_countable,
 		order_item_type_id
@@ -40,21 +42,40 @@ func (stg orderItemRepo) Create(entity models.CreateOrderItemModel) error {
 		$5,
 		$6,
 		$7,
-		$8
-	)`,
+		$8,
+		$9
+	) RETURNING id`,
 		entity.OrderID,
 		entity.ItemType,
 		entity.Price,
 		entity.Width,
 		entity.Height,
+		entity.OrderItemStatus,
 		entity.Description,
 		entity.IsCountable,
 		entity.OrderItemTypeID,
-	)
+	).Scan(&id)
 
 	if err != nil {
 		return err
 	}
+
+	stg.db.QueryRow(`INSERT INTO status_change_histories(
+		historyable_id,
+		historyable_type,
+		user_id,
+		status
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4
+	) RETURNING id`,
+		id,
+		"order_items",
+		userID,
+		entity.OrderItemStatus,
+	).Scan()
 
 	return nil
 }
@@ -80,9 +101,6 @@ func (stg orderItemRepo) Update(entity models.UpdateOrderItemRequest) (rowsAffec
 	if entity.Description != "" {
 		query += `description = :description,`
 	}
-	// if entity.ItemType != "" {
-	// 	query += `type = :type,`
-	// }
 
 	query += `type = :type, is_countable = :is_countable, updated_at = now()
 			  WHERE
@@ -119,4 +137,45 @@ func (stg *orderItemRepo) DeleteByID(ID int) error {
 	}
 
 	return nil
+}
+
+func (stg *orderItemRepo) UpdateStatus(userID string, entity models.UpdateOrderItemStatusRequest) (rowsAffected int64, err error) {
+	query := `UPDATE "order_items" SET `
+
+	query += `status = :status WHERE id = :id`
+
+	params := map[string]interface{}{
+		"id":     entity.ID,
+		"status": entity.OrderItemStatus,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	stg.db.QueryRow(`INSERT INTO status_change_histories(
+		historyable_id,
+		historyable_type,
+		user_id,
+		status
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4
+	) RETURNING id`,
+		entity.ID,
+		"order_items",
+		userID,
+		entity.OrderItemStatus,
+	).Scan()
+
+	return rowsAffected, nil
 }
