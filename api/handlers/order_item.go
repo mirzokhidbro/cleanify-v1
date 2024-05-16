@@ -3,6 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
+	"bw-erp/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,20 @@ func (h *Handler) CreateOrderItemModel(c *gin.Context) {
 		return
 	}
 
-	err = h.Stg.OrderItem().Create(body)
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err = h.Stg.OrderItem().Create(user.ID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -83,4 +97,33 @@ func (h *Handler) DeleteOrderItemByID(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, "Deleted successfully!")
+}
+
+func (h *Handler) UpdateOrderItemStatus(c *gin.Context) {
+	var body models.UpdateOrderItemStatusRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	_, err = h.Stg.OrderItem().UpdateStatus(user.ID, body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "Update successfully!")
 }
