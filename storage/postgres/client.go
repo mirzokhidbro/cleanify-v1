@@ -61,7 +61,7 @@ func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListReq
 	query := `SELECT 
 		id, 
 		address, 
-		full_name, 
+		COALESCE(full_name, ''), 
 		phone_number,
 		additional_phone_number,
 		work_number,
@@ -141,7 +141,7 @@ func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListReq
 
 func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResponse, error) {
 	var client models.GetClientByPrimaryKeyResponse
-	err := stg.db.QueryRow(`select id, address, full_name, phone_number, additional_phone_number, work_number, latitute, longitude from clients where id = $1`, ID).Scan(
+	err := stg.db.QueryRow(`select id, address, COALESCE(full_name, ''), phone_number, COALESCE(additional_phone_number, ''), COALESCE(work_number, ''), latitute, longitude from clients where id = $1`, ID).Scan(
 		&client.ID,
 		&client.Address,
 		&client.FullName,
