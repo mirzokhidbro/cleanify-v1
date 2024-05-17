@@ -63,8 +63,8 @@ func (stg *clientRepo) GetList(companyID string, queryParam models.ClientListReq
 		address, 
 		COALESCE(full_name, ''), 
 		phone_number,
-		additional_phone_number,
-		work_number,
+		COALESCE(additional_phone_number, ''),
+		COALESCE(work_number, ''),
 		created_at 
 		FROM "clients"`
 
