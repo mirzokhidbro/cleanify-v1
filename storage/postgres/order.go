@@ -85,7 +85,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	params := make(map[string]interface{})
 	query := `SELECT 
 		o.id, 
-		o.slug, 
+		COALESCE(o.slug, ''), 
 		o.status, 
 		o.address,
 		o.created_at,
@@ -241,7 +241,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									COALESCE(c.additional_phone_number, ''), 
 									COALESCE(c.work_number, ''), 
 									o.count, 
-									o.slug, 
+									COALESCE(o.slug, ''), 
 									o.description, 
 									c.latitute, 
 									c.longitude, 
