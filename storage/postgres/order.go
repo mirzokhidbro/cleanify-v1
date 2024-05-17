@@ -273,7 +273,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
-	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, is_countable, description, order_item_type_id from order_items where order_id = $1`, ID)
+	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, status, is_countable, description, order_item_type_id from order_items where order_id = $1`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -281,8 +281,21 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	for rows.Next() {
 		var item models.OrderItem
-		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.IsCountable, &item.Description, &item.OrderItemTypeID); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.OrderItemStatus, &item.IsCountable, &item.Description, &item.OrderItemTypeID); err != nil {
 			return order, err
+		}
+		data, err := stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'order_items' and historyable_id = $1`, item.ID)
+		if err != nil {
+			return order, err
+		}
+		defer data.Close()
+
+		for data.Next() {
+			var history models.StatusChangeHistory
+			if err := data.Scan(&history.Status, &history.Firstname, &history.Lastname, &history.CreatedAt); err != nil {
+				return order, err
+			}
+			item.StatusChangeHistory = append(item.StatusChangeHistory, history)
 		}
 		order.OrderItems = append(order.OrderItems, item)
 	}

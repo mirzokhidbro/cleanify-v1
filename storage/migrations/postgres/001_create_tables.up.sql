@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS "users" (
     "firstname" VARCHAR,
     "lastname" VARCHAR,
     "password" VARCHAR(1000),
+    "permission_ids" VARCHAR[],
+    "company_id" UUID REFERENCES "companies"("id"),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -16,13 +18,6 @@ CREATE TABLE IF NOT EXISTS "companies" (
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "roles" (
-    "id" UUID PRIMARY KEY,
-    "name" VARCHAR,
-    "company_id" UUID REFERENCES "companies"("id"),
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS "telegram_bots" (
     "id" UUID PRIMARY KEY,
@@ -35,12 +30,18 @@ CREATE TABLE IF NOT EXISTS "telegram_bots" (
 CREATE TABLE IF NOT EXISTS "bot_users" (
     "id" SERIAL PRIMARY KEY,
     "user_id" VARCHAR,
-    "chat_id" BIGINT NOT NULL,
+    "chat_id" BIGINT UNIQUE,
     "status" VARCHAR,
-    "page" VARCHAR,
     "role" VARCHAR,
+    "page" VARCHAR,
     "dialog_step" VARCHAR,
-    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id")
+    "firstname" VARCHAR,
+    "lastname" VARCHAR,
+    "username" VARCHAR,
+    "company_id" UUID REFERENCES "companies"("id"),
+    "bot_id" BIGINT REFERENCES "telegram_bots"("bot_id"),
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "orders" (
@@ -58,15 +59,13 @@ CREATE TABLE IF NOT EXISTS "orders" (
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-ALTER TABLE "users"
-ADD "role_id" UUID NULL REFERENCES "roles"("id");
 
 ALTER TABLE "orders"
 ALTER COLUMN "chat_id" SET DATA TYPE BIGINT
 USING chat_id::BIGINT;
 
 ALTER TABLE "orders"
-ALTER COLUMN "status" SET DEFAULT 83;
+ALTER COLUMN "status" SET DEFAULT 1;
 
 CREATE TABLE IF NOT EXISTS "order_items" (
     "id" SERIAL PRIMARY KEY,
@@ -93,8 +92,6 @@ CREATE TABLE IF NOT EXISTS "order_item_types" (
 ALTER TABLE "telegram_bots"
 ADD UNIQUE (bot_id);
 
-ALTER TABLE "bot_users"
-ADD UNIQUE (chat_id);
 
 ALTER TABLE "telegram_bots"
 ADD "firstname" VARCHAR,
@@ -126,11 +123,6 @@ CREATE TABLE IF NOT EXISTS "role_and_permissions" (
 ALTER TABLE "orders"
 ADD "address" VARCHAR;
 
-ALTER TABLE "bot_users"
-ADD "firstname" VARCHAR,
-ADD "lastname" VARCHAR,
-ADD "username" VARCHAR,
-ADD "company_id" UUID REFERENCES "companies"("id");
 
 CREATE TABLE IF NOT EXISTS "clients" (
     "id" SERIAL PRIMARY KEY,
@@ -163,10 +155,6 @@ CREATE TABLE IF NOT EXISTS "telegram_groups" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
-
-ALTER TABLE "users"
-ADD COLUMN "permission_ids" VARCHAR[],
-ADD COLUMN "company_id" UUID REFERENCES "companies"("id");
 
 ALTER TABLE "order_items"
 ADD COLUMN "is_countable" BOOLEAN DEFAULT FALSE;
