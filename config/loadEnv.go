@@ -18,6 +18,8 @@ type Config struct {
 	DefaultLimit   string
 	API_SECRET     string
 	BotToken       string
+	Release_Mode   string
+	WEBHOOK_URL    string
 }
 
 func LoadConfig() (config Config, err error) {
@@ -37,6 +39,8 @@ func LoadConfig() (config Config, err error) {
 		DefaultLimit:   cast.ToString(os.Getenv("DEFAULT_LIMIT")),
 		API_SECRET:     cast.ToString(os.Getenv("API_SECRET")),
 		BotToken:       cast.ToString(os.Getenv("BOT_TOKEN")),
+		Release_Mode:   cast.ToString(os.Getenv("RELEASE_MODE")),
+		WEBHOOK_URL:    cast.ToString(os.Getenv("WEBHOOK_URL")),
 	}
 
 	return
