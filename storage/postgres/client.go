@@ -158,7 +158,7 @@ func (stg *clientRepo) GetByPrimaryKey(ID int) (models.GetClientByPrimaryKeyResp
 	rows, err := stg.db.Query(`select 
 									o.id, 
 									o.count, 
-									o.slug, 
+									coalesce(o.slug, ''), 
 									o.created_at,
 									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
 									round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
