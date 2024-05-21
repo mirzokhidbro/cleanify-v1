@@ -76,7 +76,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
-				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
+				Notification := "#zayavka\n ID: " + strconv.Itoa(orderID) + "Manzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
 				b.SendMessage(c, &bot.SendMessageParams{
 					ChatID:    group.ChatID,
 					Text:      Notification,
@@ -194,19 +194,24 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
+	order, _ = h.Stg.Order().GetByPrimaryKey(body.ID)
+
+	// [TODO: logikani ko'rib chiqish kerak!!!]
+
 	go func() {
 		var wg sync.WaitGroup
 		wg.Add(1)
 		go func() {
 			requestBody := map[string]interface{}{
 				"order_id":   order.ID,
-				"status":     body.Status,
+				"status":     order.Status,
 				"company_id": user.CompanyID,
 				"flag":       h.Cfg.Release_Mode,
 			}
 			requestBodyJson, _ := json.Marshal(requestBody)
 
 			url := h.Cfg.WEBHOOK_URL
+
 			req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
 			req.Header.Set("Content-Type", "application/json")
 

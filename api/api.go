@@ -82,7 +82,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		companyBotRouter := baseRouter.Group("company-bot")
 		companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
-		companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
+		// companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
 	}
 	{
 		statistics := baseRouter.Group("statistics")
