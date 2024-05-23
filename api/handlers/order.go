@@ -11,8 +11,6 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-telegram/bot"
-	tgmodels "github.com/go-telegram/bot/models"
 )
 
 func (h *Handler) CreateOrderModel(c *gin.Context) {
@@ -67,24 +65,61 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	BotToken := h.Cfg.BotToken
-	if BotToken != "" {
-		go func() {
-			opts := []bot.Option{
-				bot.WithDefaultHandler(h.Handler),
-			}
-			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
-			if err == nil {
-				b, _ := bot.New(BotToken, opts...)
-				Notification := "#zayavka\n ID: " + strconv.Itoa(orderID) + "Manzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
-				b.SendMessage(c, &bot.SendMessageParams{
-					ChatID:    group.ChatID,
-					Text:      Notification,
-					ParseMode: tgmodels.ParseModeHTML,
-				})
-			}
-		}()
+	var status int8
+
+	if body.Status == 0 {
+		status = 1
+	} else {
+		status = body.Status
 	}
+
+	go func() {
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			requestBody := map[string]interface{}{
+				"order_id":   orderID,
+				"status":     status,
+				"company_id": user.CompanyID,
+				"flag":       h.Cfg.Release_Mode,
+			}
+			requestBodyJson, _ := json.Marshal(requestBody)
+
+			url := h.Cfg.WEBHOOK_URL
+
+			req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+			req.Header.Set("Content-Type", "application/json")
+
+			client := &newHttp.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			defer resp.Body.Close()
+			defer wg.Done()
+		}()
+
+		wg.Wait()
+	}()
+
+	// BotToken := h.Cfg.BotToken
+	// if BotToken != "" {
+	// 	go func() {
+	// 		opts := []bot.Option{
+	// 			bot.WithDefaultHandler(h.Handler),
+	// 		}
+	// 		group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
+	// 		if err == nil {
+	// 			b, _ := bot.New(BotToken, opts...)
+	// 			Notification := "#zayavka\n ID: " + strconv.Itoa(orderID) + "Manzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
+	// 			b.SendMessage(c, &bot.SendMessageParams{
+	// 				ChatID:    group.ChatID,
+	// 				Text:      Notification,
+	// 				ParseMode: tgmodels.ParseModeHTML,
+	// 			})
+	// 		}
+	// 	}()
+	// }
 
 	h.handleResponse(c, http.Created, "Created successfully!")
 
@@ -227,56 +262,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		wg.Wait()
 	}()
 
-	// if body.Status != 0 && order.Status != body.Status {
-
-	// 	if body.Status != 0 && order.Status != body.Status {
-	// 		BotToken := h.Cfg.BotToken
-	// 		if BotToken != "" {
-	// 			go func() {
-	// 				opts := []bot.Option{
-	// 					bot.WithDefaultHandler(h.Handler)}
-	// 				group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
-	// 				if group.ChatID != 0 {
-	// 					var Notification = ""
-	// 					b, _ := bot.New(BotToken, opts...)
-	// 					if err == nil {
-	// 						if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
-	// 							if body.Status == 4 || body.Status == 5 {
-	// 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-	// 							} else {
-	// 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-	// 							}
-	// 							b.SendLocation(c, &bot.SendLocationParams{
-	// 								ChatID:    group.ChatID,
-	// 								Latitude:  *order.Latitute,
-	// 								Longitude: *order.Longitude,
-	// 							})
-	// 							b.SendMessage(c, &bot.SendMessageParams{
-	// 								ChatID:    group.ChatID,
-	// 								Text:      Notification,
-	// 								ParseMode: tgmodels.ParseModeHTML,
-	// 							})
-	// 						} else {
-	// 							if body.Status == 4 || body.Status == 5 {
-	// 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-	// 							} else {
-	// 								Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-	// 							}
-	// 							b.SendMessage(c, &bot.SendMessageParams{
-	// 								ChatID:    group.ChatID,
-	// 								Text:      Notification,
-	// 								ParseMode: tgmodels.ParseModeHTML,
-	// 							})
-	// 						}
-	// 					}
-	// 				}
-	// 			}()
-	// 		}
-	// 	}
-
 	h.handleResponse(c, http.OK, rowsAffected)
-
-	// }
 
 }
 
