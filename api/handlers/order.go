@@ -204,6 +204,8 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
+	oldOrderStatus := order.Status
+
 	rowsAffected, err := h.Stg.Order().Update(user.ID, &body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -214,34 +216,36 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	// [TODO: logikani ko'rib chiqish kerak!!!]
 
-	go func() {
-		var wg sync.WaitGroup
-		wg.Add(1)
+	if body.Status != 0 && oldOrderStatus != order.Status {
 		go func() {
-			requestBody := map[string]interface{}{
-				"order_id":   order.ID,
-				"status":     order.Status,
-				"company_id": user.CompanyID,
-				"flag":       h.Cfg.Release_Mode,
-			}
-			requestBodyJson, _ := json.Marshal(requestBody)
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				requestBody := map[string]interface{}{
+					"order_id":   order.ID,
+					"status":     order.Status,
+					"company_id": user.CompanyID,
+					"flag":       h.Cfg.Release_Mode,
+				}
+				requestBodyJson, _ := json.Marshal(requestBody)
 
-			url := h.Cfg.WEBHOOK_URL
+				url := h.Cfg.WEBHOOK_URL
 
-			req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
-			req.Header.Set("Content-Type", "application/json")
+				req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				req.Header.Set("Content-Type", "application/json")
 
-			client := &newHttp.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				panic(err)
-			}
-			defer resp.Body.Close()
-			defer wg.Done()
+				client := &newHttp.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+				defer wg.Done()
+			}()
+
+			wg.Wait()
 		}()
-
-		wg.Wait()
-	}()
+	}
 
 	h.handleResponse(c, http.OK, rowsAffected)
 
