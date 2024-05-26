@@ -102,25 +102,6 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		wg.Wait()
 	}()
 
-	// BotToken := h.Cfg.BotToken
-	// if BotToken != "" {
-	// 	go func() {
-	// 		opts := []bot.Option{
-	// 			bot.WithDefaultHandler(h.Handler),
-	// 		}
-	// 		group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
-	// 		if err == nil {
-	// 			b, _ := bot.New(BotToken, opts...)
-	// 			Notification := "#zayavka\n ID: " + strconv.Itoa(orderID) + "Manzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
-	// 			b.SendMessage(c, &bot.SendMessageParams{
-	// 				ChatID:    group.ChatID,
-	// 				Text:      Notification,
-	// 				ParseMode: tgmodels.ParseModeHTML,
-	// 			})
-	// 		}
-	// 	}()
-	// }
-
 	h.handleResponse(c, http.Created, "Created successfully!")
 
 }
