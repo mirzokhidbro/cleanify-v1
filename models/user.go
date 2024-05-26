@@ -22,12 +22,17 @@ type AuthUserModel struct {
 }
 
 type User struct {
-	ID            string   `json:"id"`
-	Firstname     string   `json:"firstname"`
-	Lastname      string   `json:"lastname"`
-	Phone         string   `json:"phone"`
-	Company       *string  `json:"company"`
-	CompanyID     *string  `json:"company_id"`
+	ID                      string                    `json:"id"`
+	Firstname               string                    `json:"firstname"`
+	Lastname                string                    `json:"lastname"`
+	Phone                   string                    `json:"phone"`
+	CompanyID               *string                   `json:"company_id"`
+	UserPermissionByCompany []UserPermissionByCompany `json:"user_permissions_by_company"`
+}
+
+type UserPermissionByCompany struct {
+	CompanyID     string   `json:"company_id"`
+	CompanyName   string   `json:"company_name"`
 	PermissionIDs []string `json:"permission_ids"`
 	Can           string   `json:"can"`
 }

@@ -76,30 +76,45 @@ func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg userRepo) GetById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.name, c.id, u.permission_ids from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.id from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Firstname,
 		&user.Lastname,
 		&user.Phone,
-		&user.Company,
 		&user.CompanyID,
-		&user.Can,
 	)
 	if err != nil {
 		return user, err
 	}
 
-	if user.Can != "" {
-		Permissions := utils.GetArray(user.Can)
-		Permission := ""
-		for _, permissionID := range Permissions {
-			permission, err := stg.GetPermissionByPrimaryKey(permissionID.(string))
-			if err == nil {
-				Permission += "|" + permission.Slug
-			}
+	rows, err := stg.db.Query(`select c.id, c.name, up.permission_ids from user_permissions up 
+									inner join companies c on c.id = up.company_id 
+									where up.user_id = $1`, user.ID)
+	if err != nil {
+		return user, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var permissions models.UserPermissionByCompany
+		if err := rows.Scan(&permissions.CompanyID, &permissions.CompanyName, &permissions.Can); err != nil {
+			return user, err
 		}
-		user.Can = strings.TrimPrefix(Permission, "|")
-		user.PermissionIDs = utils.InterfaceSliceToString(Permissions)
+
+		if permissions.Can != "" {
+			Permissions := utils.GetArray(permissions.Can)
+			Permission := ""
+			for _, permissionID := range Permissions {
+				permission, err := stg.GetPermissionByPrimaryKey(permissionID.(string))
+				if err == nil {
+					Permission += "|" + permission.Slug
+				}
+			}
+			permissions.Can = strings.TrimPrefix(Permission, "|")
+			permissions.PermissionIDs = utils.InterfaceSliceToString(Permissions)
+		}
+
+		user.UserPermissionByCompany = append(user.UserPermissionByCompany, permissions)
 	}
 
 	return user, nil
@@ -130,7 +145,6 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 			&user.Firstname,
 			&user.Lastname,
 			&user.Phone,
-			&user.Company,
 			&user.CompanyID)
 		if err != nil {
 			return nil, err

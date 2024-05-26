@@ -189,3 +189,13 @@ CREATE TABLE IF NOT EXISTS "status_change_histories" (
     "created_at"        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at"        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+
+CREATE TABLE IF NOT EXISTS "user_permissions" (
+    "id"             SERIAL PRIMARY KEY,
+    "permission_ids" VARCHAR[],
+    "company_id"     UUID REFERENCES "companies"("id") NOT NULL,
+    "user_id"        UUID REFERENCES "users"("id") NOT NULL,
+    "created_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
