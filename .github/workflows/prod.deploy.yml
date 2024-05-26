@@ -21,7 +21,7 @@ jobs:
         run: find /home/cleanify_backend/www/core-service/project -type f ! -name '.env' -delete
 
       - name: Copy project
-        run: cp -r /home/cleanify_backend/www/core-service/project/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_backend/www/core-service/project
+        run: cp -r /home/cleanify_backend/www/core-service/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_backend/www/core-service/project
 
       - name: Build Go application
         run: |
