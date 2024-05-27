@@ -125,8 +125,7 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 								u.id, 
 								u.firstname, 
 								u.lastname, 
-								u.phone, 
-								c.name,
+								u.phone,
 								c.id
 								FROM users u 
 								LEFT JOIN companies c ON c.id = u.company_id 
