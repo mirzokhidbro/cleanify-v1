@@ -21,7 +21,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter := baseRouter.Group("/users")
 		usersRouter.POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.Edit)
+		usersRouter.Use(middleware.AuthMiddleware()).PUT("/", h.Edit) //
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
 	}
 
@@ -49,7 +49,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderRouter := baseRouter.Group("orders")
 		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList)
+		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)

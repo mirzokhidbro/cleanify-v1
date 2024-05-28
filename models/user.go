@@ -39,7 +39,7 @@ type UserPermissionByCompany struct {
 
 type UpdateUserRequest struct {
 	ID            string   `json:"id" binding:"required"`
-	CompanyID     string   `json:"company_id"`
+	CompanyID     string   `json:"company_id" binding:"required"`
 	Firstname     string   `json:"firstname"`
 	Lastname      string   `json:"lastname"`
 	PermissionIDs []string `json:"permission_ids"`

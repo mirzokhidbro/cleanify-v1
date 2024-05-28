@@ -87,54 +87,26 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
-	limit, err := h.getLimitParam(c)
-	if err != nil {
+	var body models.OrdersListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// token, err := utils.ExtractTokenID(c)
 
-	token, err := utils.ExtractTokenID(c)
-
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	status, err := h.getStatusParam(c)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-	orderID := c.Query("id")
-	Phone := c.Query("phone")
-	// ID := 0
-	// if len(orderID) > 0 {
-	// 	ID, err = strconv.Atoi(orderID)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.BadRequest, err.Error())
-	// 		return
-	// 	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
 	// }
 
-	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
-		ID:     orderID,
-		Phone:  Phone,
-		Status: status,
-		Limit:  int32(limit),
-		Offset: int32(offset),
-	})
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	data, err := h.Stg.Order().GetList(body.CompanyID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

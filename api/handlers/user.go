@@ -65,14 +65,14 @@ func (h *Handler) GetList(c *gin.Context) {
 
 func (h *Handler) Edit(c *gin.Context) {
 	var body models.UpdateUserRequest
-	companyID := c.Param("company-id")
-	if !utils.IsValidUUID(companyID) {
-		h.handleResponse(c, http.InvalidArgument, "company id is the invalid uuid")
-		return
-	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is the invalid uuid")
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *Handler) Edit(c *gin.Context) {
 		return
 	}
 
-	_, err := h.Stg.User().Edit(companyID, body)
+	_, err := h.Stg.User().Edit(body.CompanyID, body)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
