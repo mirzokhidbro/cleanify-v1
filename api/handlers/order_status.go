@@ -10,13 +10,18 @@ import (
 )
 
 func (h *Handler) GetOrderStatusesList(c *gin.Context) {
-	companyID := c.Param("company-id")
-	if !utils.IsValidUUID(companyID) {
+	var body models.GetOrderStatusListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
 
-	statuses, err := h.Stg.OrderStatus().GetList(companyID)
+	statuses, err := h.Stg.OrderStatus().GetList(body.CompanyID)
 
 	if err != nil {
 		h.handleResponse(c, http.OK, err.Error())

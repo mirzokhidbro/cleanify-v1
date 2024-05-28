@@ -22,3 +22,7 @@ type EditOrderItemTypeRequest struct {
 	Price       float32 `json:"price" binding:"required"`
 	IsCountable *bool   `json:"is_countable" binding:"required"`
 }
+
+type GetOrderItemTypeByCompany struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+}

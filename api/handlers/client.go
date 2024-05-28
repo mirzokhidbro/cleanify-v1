@@ -13,21 +13,19 @@ import (
 
 func (h *Handler) CreateClientModel(c *gin.Context) {
 	var body models.CreateClientModel
-	companyID := c.Param("company-id")
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 
-	if !utils.IsValidUUID(companyID) {
+	if !utils.IsValidUUID(body.CompanyID) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
 
-	_, err := h.Stg.Company().GetById(companyID)
+	_, err := h.Stg.Company().GetById(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, "company not found")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&body); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
@@ -56,42 +54,26 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 }
 
 func (h *Handler) GetClientsList(c *gin.Context) {
-	companyID := c.Param("company-id")
-	if !utils.IsValidUUID(companyID) {
-		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
-		return
-	}
-	limit, err := h.getLimitParam(c)
-	if err != nil {
+	var body models.ClientListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// token, err := utils.ExtractTokenID(c)
 
-	token, err := utils.ExtractTokenID(c)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	data, err := h.Stg.Client().GetList(*user.CompanyID, models.ClientListRequest{
-		Phone:   c.Query("phone"),
-		Address: c.Query("address"),
-		Limit:   int32(limit),
-		Offset:  int32(offset),
-	})
+	data, err := h.Stg.Client().GetList(body.CompanyID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -117,14 +99,18 @@ func (h *Handler) GetClientByPrimaryKey(c *gin.Context) {
 
 func (h *Handler) UpdateClient(c *gin.Context) {
 	var body models.UpdateClientRequest
-	companyID := c.Param("company-id")
 
-	if !utils.IsValidUUID(companyID) {
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
 
-	_, err := h.Stg.Company().GetById(companyID)
+	_, err := h.Stg.Company().GetById(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, "company not found")
 		return
@@ -150,7 +136,7 @@ func (h *Handler) UpdateClient(c *gin.Context) {
 
 	// body.CompanyID = *user.CompanyID
 
-	_, err = h.Stg.Client().Update(companyID, body)
+	_, err = h.Stg.Client().Update(body.CompanyID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
