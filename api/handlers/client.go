@@ -29,20 +29,20 @@ func (h *Handler) CreateClientModel(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.ExtractTokenID(c)
+	// token, err := utils.ExtractTokenID(c)
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	body.CompanyID = *user.CompanyID
+	// body.CompanyID = *user.CompanyID
 
 	_, err = h.Stg.Client().Create(body)
 	if err != nil {

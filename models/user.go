@@ -10,7 +10,7 @@ type CreateUserModel struct {
 	Lastname             string   `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
 	Phone                string   `json:"phone" binding:"required" example:"991234567"`
 	Password             string   `json:"password" binding:"required"`
-	CompanyID            string   `json:"company_id"`
+	CompanyID            string   `json:"company_id" binding:"required"`
 	PermissionIDs        []string `json:"permission_ids" binding:"required"`
 	ConfirmationPassword string   `json:"confirmation_password" binding:"required"`
 }
@@ -43,6 +43,10 @@ type UpdateUserRequest struct {
 	Firstname     string   `json:"firstname"`
 	Lastname      string   `json:"lastname"`
 	PermissionIDs []string `json:"permission_ids"`
+}
+
+type GetUserListRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 }
 
 type NullString struct {

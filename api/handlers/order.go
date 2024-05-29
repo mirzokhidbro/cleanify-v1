@@ -37,7 +37,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	body.CompanyID = *user.CompanyID
+	// body.CompanyID = *user.CompanyID
 
 	if body.IsNewClient {
 		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
@@ -69,7 +69,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			opts := []bot.Option{
 				bot.WithDefaultHandler(h.Handler),
 			}
-			group, err := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, 1)
+			group, err := h.Stg.TelegramGroup().GetNotificationGroup(body.CompanyID, 1)
 			if err == nil {
 				b, _ := bot.New(BotToken, opts...)
 				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
@@ -169,7 +169,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	// 		requestBody := map[string]interface{}{
 	// 			"order_id":   order.ID,
 	// 			"status":     body.Status,
-	// 			"company_id": user.CompanyID,
+	// 			"company_id": body.CompanyID,
 	// 		}
 	// 		requestBodyJson, err := json.Marshal(requestBody)
 
@@ -206,7 +206,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				go func() {
 					opts := []bot.Option{
 						bot.WithDefaultHandler(h.Handler)}
-					group, _ := h.Stg.TelegramGroup().GetNotificationGroup(*user.CompanyID, int(body.Status))
+					group, _ := h.Stg.TelegramGroup().GetNotificationGroup(body.CompanyID, int(body.Status))
 					if group.ChatID != 0 {
 						var Notification = ""
 						b, _ := bot.New(BotToken, opts...)

@@ -80,6 +80,7 @@ type OrderSendLocationRequest struct {
 
 type UpdateOrderRequest struct {
 	ID          int     `json:"id" binding:"required"`
+	CompanyID   string  `json:"company_id" binding:"required"`
 	Slug        string  `json:"slug"`
 	Status      int8    `json:"status"`
 	Phone       string  `json:"phone"`

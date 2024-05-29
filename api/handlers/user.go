@@ -12,20 +12,18 @@ import (
 func (h *Handler) Create(c *gin.Context) {
 	var body models.CreateUserModel
 
-	token, err := utils.ExtractTokenID(c)
+	// token, err := utils.ExtractTokenID(c)
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	body.CompanyID = *user.CompanyID
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -33,7 +31,7 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 	id := uuid.New()
 
-	err = h.Stg.User().Create(id.String(), body)
+	err := h.Stg.User().Create(id.String(), body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -43,19 +41,24 @@ func (h *Handler) Create(c *gin.Context) {
 }
 
 func (h *Handler) GetList(c *gin.Context) {
-	token, err := utils.ExtractTokenID(c)
-
-	if err != nil {
+	var body models.GetUserListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+	// token, err := utils.ExtractTokenID(c)
 
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-	users, err := h.Stg.User().GetList(*user.CompanyID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
+	users, err := h.Stg.User().GetList(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
