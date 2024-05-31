@@ -36,11 +36,11 @@ func (h *Handler) AuthUser(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.OK, response)
+	h.handleResponse(c, http.OK, response.AccessToken)
 }
 
-func (h *Handler) RefreshToken(c *gin.Context){
-	
+func (h *Handler) RefreshToken(c *gin.Context) {
+
 }
 
 func (h *Handler) CurrentUser(c *gin.Context) {
