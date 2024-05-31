@@ -107,6 +107,12 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
+	var body models.OrdersListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	limit, err := h.getLimitParam(c)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -119,18 +125,18 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.ExtractTokenID(c)
+	// token, err := utils.ExtractTokenID(c)
 
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
+	// user, err := h.Stg.User().GetById(token.UserID)
+	// if err != nil {
+	// 	h.handleResponse(c, http.BadRequest, err.Error())
+	// 	return
+	// }
 
 	status, err := h.getStatusParam(c)
 	if err != nil {
@@ -148,7 +154,7 @@ func (h *Handler) GetOrdersList(c *gin.Context) {
 	// 	}
 	// }
 
-	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
+	data, err := h.Stg.Order().GetList(body.CompanyID, models.OrdersListRequest{
 		ID:     orderID,
 		Phone:  Phone,
 		Status: status,
