@@ -80,7 +80,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			requestBody := map[string]interface{}{
 				"order_id":   orderID,
 				"status":     status,
-				"company_id": user.CompanyID,
+				"company_id": body.CompanyID,
 				"flag":       h.Cfg.Release_Mode,
 			}
 			requestBodyJson, _ := json.Marshal(requestBody)
