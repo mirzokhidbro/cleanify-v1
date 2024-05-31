@@ -242,7 +242,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									COALESCE(c.work_number, ''), 
 									o.count, 
 									COALESCE(o.slug, ''), 
-									o.description, 
+									COALESCE(o.description, ''), 
 									c.latitute, 
 									c.longitude, 
 									COALESCE(o.client_id, 0), 
@@ -273,7 +273,9 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
+
 	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, status, is_countable, description, order_item_type_id from order_items where order_id = $1 order by created_at`, ID)
+
 	if err != nil {
 		return order, err
 	}
@@ -325,9 +327,9 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 									COALESCE(c.additional_phone_number, ''), 
 									COALESCE(c.work_number, ''), 
 									o.count, 
-									o.slug, 
+									coalesce(o.slug, ''), 
 									o.status,
-									o.description, 
+									coalesce(o.description, ''), 
 									c.latitute, 
 									c.longitude, 
 									COALESCE(o.client_id, 0), 

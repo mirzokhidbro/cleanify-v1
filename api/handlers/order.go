@@ -4,11 +4,13 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"bytes"
+	"encoding/json"
+	newHttp "net/http"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-telegram/bot"
-	tgmodels "github.com/go-telegram/bot/models"
 )
 
 func (h *Handler) CreateOrderModel(c *gin.Context) {
@@ -37,7 +39,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	// body.CompanyID = *user.CompanyID
+	body.CompanyID = *user.CompanyID
 
 	if body.IsNewClient {
 		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
@@ -63,50 +65,96 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	BotToken := h.Cfg.BotToken
-	if BotToken != "" {
-		go func() {
-			opts := []bot.Option{
-				bot.WithDefaultHandler(h.Handler),
-			}
-			group, err := h.Stg.TelegramGroup().GetNotificationGroup(body.CompanyID, 1)
-			if err == nil {
-				b, _ := bot.New(BotToken, opts...)
-				Notification := "#zayavka\nManzil: " + body.Address + "\nTel: " + body.Phone + "\nIzoh:" + body.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(orderID) + "'>Batafsil</a>"
-				b.SendMessage(c, &bot.SendMessageParams{
-					ChatID:    group.ChatID,
-					Text:      Notification,
-					ParseMode: tgmodels.ParseModeHTML,
-				})
-			}
-		}()
+	var status int8
+
+	if body.Status == 0 {
+		status = 1
+	} else {
+		status = body.Status
 	}
+
+	go func() {
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			requestBody := map[string]interface{}{
+				"order_id":   orderID,
+				"status":     status,
+				"company_id": user.CompanyID,
+				"flag":       h.Cfg.Release_Mode,
+			}
+			requestBodyJson, _ := json.Marshal(requestBody)
+
+			url := h.Cfg.WEBHOOK_URL
+
+			req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+			req.Header.Set("Content-Type", "application/json")
+
+			client := &newHttp.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			defer resp.Body.Close()
+			defer wg.Done()
+		}()
+
+		wg.Wait()
+	}()
 
 	h.handleResponse(c, http.Created, "Created successfully!")
 
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
-	var body models.OrdersListRequest
-	if err := c.ShouldBindQuery(&body); err != nil {
+	limit, err := h.getLimitParam(c)
+	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	// token, err := utils.ExtractTokenID(c)
+	offset, err := h.getOffsetParam(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
 
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	status, err := h.getStatusParam(c)
+	if err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+	orderID := c.Query("id")
+	Phone := c.Query("phone")
+	// ID := 0
+	// if len(orderID) > 0 {
+	// 	ID, err = strconv.Atoi(orderID)
+	// 	if err != nil {
+	// 		h.handleResponse(c, http.BadRequest, err.Error())
+	// 		return
+	// 	}
 	// }
 
-	// user, err := h.Stg.User().GetById(token.UserID)
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	data, err := h.Stg.Order().GetList(body.CompanyID, body)
+	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
+		ID:     orderID,
+		Phone:  Phone,
+		Status: status,
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -156,98 +204,50 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		return
 	}
 
+	oldOrderStatus := order.Status
+
 	rowsAffected, err := h.Stg.Order().Update(user.ID, &body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	// go func() {
-	// 	var wg sync.WaitGroup
-	// 	wg.Add(1)
-	// 	go func() {
-	// 		requestBody := map[string]interface{}{
-	// 			"order_id":   order.ID,
-	// 			"status":     body.Status,
-	// 			"company_id": body.CompanyID,
-	// 		}
-	// 		requestBodyJson, err := json.Marshal(requestBody)
+	order, _ = h.Stg.Order().GetByPrimaryKey(body.ID)
 
-	// 		if err != nil {
-	// 			h.handleResponse(c, http.InternalServerError, err.Error())
-	// 			return
-	// 		}
+	// [TODO: logikani ko'rib chiqish kerak!!!]
 
-	// 		url := "http://127.0.0.1:8001/api/ping"
-	// 		req, err := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
-	// 		req.Header.Set("Content-Type", "application/json")
+	if body.Status != 0 && oldOrderStatus != order.Status {
+		go func() {
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				requestBody := map[string]interface{}{
+					"order_id":   order.ID,
+					"status":     order.Status,
+					"company_id": user.CompanyID,
+					"flag":       h.Cfg.Release_Mode,
+				}
+				requestBodyJson, _ := json.Marshal(requestBody)
 
-	// 		if err != nil {
-	// 			fmt.Print(err)
-	// 		}
+				url := h.Cfg.WEBHOOK_URL
 
-	// 		client := &newHttp.Client{}
-	// 		resp, err := client.Do(req)
-	// 		if err != nil {
-	// 			panic(err)
-	// 		}
-	// 		defer resp.Body.Close()
-	// 		defer wg.Done()
-	// 	}()
+				req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				req.Header.Set("Content-Type", "application/json")
 
-	// 	wg.Wait()
-	// }()
+				client := &newHttp.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+				defer wg.Done()
+			}()
 
-	if body.Status != 0 && order.Status != body.Status {
-
-		if body.Status != 0 && order.Status != body.Status {
-			BotToken := h.Cfg.BotToken
-			if BotToken != "" {
-				go func() {
-					opts := []bot.Option{
-						bot.WithDefaultHandler(h.Handler)}
-					group, _ := h.Stg.TelegramGroup().GetNotificationGroup(body.CompanyID, int(body.Status))
-					if group.ChatID != 0 {
-						var Notification = ""
-						b, _ := bot.New(BotToken, opts...)
-						if err == nil {
-							if group.WithLocation && (order.Latitute != nil || order.Longitude != nil) && (*order.Longitude != 0 || *order.Latitute != 0) {
-								if body.Status == 4 || body.Status == 5 {
-									Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-								} else {
-									Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-								}
-								b.SendLocation(c, &bot.SendLocationParams{
-									ChatID:    group.ChatID,
-									Latitude:  *order.Latitute,
-									Longitude: *order.Longitude,
-								})
-								b.SendMessage(c, &bot.SendMessageParams{
-									ChatID:    group.ChatID,
-									Text:      Notification,
-									ParseMode: tgmodels.ParseModeHTML,
-								})
-							} else {
-								if body.Status == 4 || body.Status == 5 {
-									Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nSumma: " + strconv.FormatFloat(order.Price, 'f', -1, 64) + "\nKvadrat: " + strconv.FormatFloat(order.Square, 'f', -1, 64) + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-								} else {
-									Notification = "Manzil: " + *order.Address + "\nTel: " + order.PhoneNumber + "\nIzoh: " + order.Description + "\n<a href='https://prod.yangidunyo.group/orders/" + strconv.Itoa(body.ID) + "'>Batafsil</a>"
-								}
-								b.SendMessage(c, &bot.SendMessageParams{
-									ChatID:    group.ChatID,
-									Text:      Notification,
-									ParseMode: tgmodels.ParseModeHTML,
-								})
-							}
-						}
-					}
-				}()
-			}
-		}
-
-		h.handleResponse(c, http.OK, rowsAffected)
-
+			wg.Wait()
+		}()
 	}
+
+	h.handleResponse(c, http.OK, rowsAffected)
 
 }
 
