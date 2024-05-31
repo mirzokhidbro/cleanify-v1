@@ -230,7 +230,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 				requestBody := map[string]interface{}{
 					"order_id":   order.ID,
 					"status":     order.Status,
-					"company_id": user.CompanyID,
+					"company_id": body.CompanyID,
 					"flag":       h.Cfg.Release_Mode,
 				}
 				requestBodyJson, _ := json.Marshal(requestBody)
