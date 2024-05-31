@@ -26,14 +26,21 @@ func (h *Handler) AuthUser(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, "Parol noto'g'ri")
 		return
 	}
+	var response models.AuthorizationResponse
 
-	token, err := utils.GenerateToken(user.ID, payload.Phone)
+	accessToken, refreshToken, err := utils.GenerateToken(user.ID, payload.Phone)
+	response.AccessToken = accessToken
+	response.RefreshToken = refreshToken
 	if err != err {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, token)
+	h.handleResponse(c, http.OK, response)
+}
+
+func (h *Handler) RefreshToken(c *gin.Context){
+	
 }
 
 func (h *Handler) CurrentUser(c *gin.Context) {
@@ -57,7 +64,6 @@ func (h *Handler) CurrentUser(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, user)
 }
-
 
 func (h *Handler) ChangePassword(c *gin.Context) {
 	var payload models.ChangePasswordRequest

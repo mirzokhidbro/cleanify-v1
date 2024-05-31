@@ -11,14 +11,18 @@ import (
 
 func (h *Handler) VerificationGroup(c *gin.Context) {
 	var body models.GroupVerificationRequest
-	companyID := c.Param("company-id")
 
-	if !utils.IsValidUUID(companyID) {
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
 		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
 		return
 	}
 
-	_, err := h.Stg.Company().GetById(companyID)
+	_, err := h.Stg.Company().GetById(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, "company not found")
 		return
@@ -29,7 +33,7 @@ func (h *Handler) VerificationGroup(c *gin.Context) {
 		return
 	}
 
-	_, err = h.Stg.TelegramGroup().Verification(body.Code, companyID)
+	_, err = h.Stg.TelegramGroup().Verification(body.Code, body.CompanyID)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -40,20 +44,26 @@ func (h *Handler) VerificationGroup(c *gin.Context) {
 }
 
 func (h *Handler) GetTelegramGroupList(c *gin.Context) {
-	companyID := c.Param("company-id")
-
-	if !utils.IsValidUUID(companyID) {
-		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	var body models.GetTelegramGroupListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	_, err := h.Stg.Company().GetById(companyID)
+	// companyID := c.Param("company-id")
+
+	// if !utils.IsValidUUID(companyID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+	// 	return
+	// }
+
+	_, err := h.Stg.Company().GetById(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, "company not found")
 		return
 	}
 
-	data, err := h.Stg.TelegramGroup().GetList(companyID)
+	data, err := h.Stg.TelegramGroup().GetList(body.CompanyID)
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

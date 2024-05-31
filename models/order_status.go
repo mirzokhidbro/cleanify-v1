@@ -14,3 +14,7 @@ type UpdateOrderStatusRequest struct {
 	Name      string `json:"name"`
 	Color     string `json:"color"`
 }
+
+type GetOrderStatusListRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+}

@@ -12,3 +12,7 @@ type WorkVolumeListRequest struct {
 	WashedAtFrom time.Time `json:"status,omitempty"`
 	WashedAtTo   time.Time `json:"slug,omitempty"`
 }
+
+type GetWorkVolumeListRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+}

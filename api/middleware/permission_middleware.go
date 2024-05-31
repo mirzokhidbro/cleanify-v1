@@ -1,57 +1,48 @@
 package middleware
 
-import (
-	"bw-erp/api/handlers"
-	"bw-erp/api/http"
-	"bw-erp/pkg/utils"
-	"strings"
+// func PermissionMiddleware(h handlers.Handler, permission string) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		jwtData, err := utils.ExtractTokenID(c)
+// 		if err != nil {
+// 			c.JSON(http.Forbidden.Code, http.Response{
+// 				Status:      "Forbidden",
+// 				Description: err.Error(),
+// 				Data:        nil,
+// 			})
+// 			c.Abort()
+// 			return
+// 		}
 
-	"github.com/gin-gonic/gin"
-)
+// 		user, err := h.Stg.User().GetById(jwtData.UserID)
+// 		if err != nil {
+// 			c.JSON(http.Forbidden.Code, http.Response{
+// 				Status:      "Forbidden",
+// 				Description: err.Error(),
+// 				Data:        nil,
+// 			})
+// 			c.Abort()
+// 			return
+// 		}
 
-func PermissionMiddleware(h handlers.Handler, permission string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		jwtData, err := utils.ExtractTokenID(c)
-		if err != nil {
-			c.JSON(http.Forbidden.Code, http.Response{
-				Status:      "Forbidden",
-				Description: err.Error(),
-				Data:        nil,
-			})
-			c.Abort()
-			return
-		}
+// 		parts := strings.Split(user.Can, "|")
+// 		exist := false
+// 		for _, part := range parts {
+// 			if part == permission {
+// 				exist = true
+// 			}
+// 		}
 
-		user, err := h.Stg.User().GetById(jwtData.UserID)
-		if err != nil {
-			c.JSON(http.Forbidden.Code, http.Response{
-				Status:      "Forbidden",
-				Description: err.Error(),
-				Data:        nil,
-			})
-			c.Abort()
-			return
-		}
+// 		if exist {
+// 			c.Next()
+// 		} else {
+// 			c.JSON(http.Forbidden.Code, http.Response{
+// 				Status:      "Forbidden",
+// 				Description: "Permission denied",
+// 				Data:        nil,
+// 			})
+// 			c.Abort()
+// 			return
+// 		}
 
-		parts := strings.Split(user.Can, "|")
-		exist := false
-		for _, part := range parts {
-			if part == permission {
-				exist = true
-			}
-		}
-
-		if exist {
-			c.Next()
-		} else {
-			c.JSON(http.Forbidden.Code, http.Response{
-				Status:      "Forbidden",
-				Description: "Permission denied",
-				Data:        nil,
-			})
-			c.Abort()
-			return
-		}
-
-	}
-}
+// 	}
+// }

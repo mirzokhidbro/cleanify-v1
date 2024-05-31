@@ -10,7 +10,7 @@ type CreateUserModel struct {
 	Lastname             string   `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
 	Phone                string   `json:"phone" binding:"required" example:"991234567"`
 	Password             string   `json:"password" binding:"required"`
-	CompanyID            string   `json:"company_id"`
+	CompanyID            string   `json:"company_id" binding:"required"`
 	PermissionIDs        []string `json:"permission_ids" binding:"required"`
 	ConfirmationPassword string   `json:"confirmation_password" binding:"required"`
 }
@@ -22,22 +22,31 @@ type AuthUserModel struct {
 }
 
 type User struct {
-	ID            string   `json:"id"`
-	Firstname     string   `json:"firstname"`
-	Lastname      string   `json:"lastname"`
-	Phone         string   `json:"phone"`
-	Company       *string  `json:"company"`
-	CompanyID     *string  `json:"company_id"`
+	ID                      string                    `json:"id"`
+	Firstname               string                    `json:"firstname"`
+	Lastname                string                    `json:"lastname"`
+	Phone                   string                    `json:"phone"`
+	CompanyID               *string                   `json:"company_id"`
+	UserPermissionByCompany []UserPermissionByCompany `json:"user_permissions_by_company"`
+}
+
+type UserPermissionByCompany struct {
+	CompanyID     string   `json:"company_id"`
+	CompanyName   string   `json:"company_name"`
 	PermissionIDs []string `json:"permission_ids"`
 	Can           string   `json:"can"`
 }
 
 type UpdateUserRequest struct {
 	ID            string   `json:"id" binding:"required"`
-	CompanyID     string   `json:"company_id"`
+	CompanyID     string   `json:"company_id" binding:"required"`
 	Firstname     string   `json:"firstname"`
 	Lastname      string   `json:"lastname"`
 	PermissionIDs []string `json:"permission_ids"`
+}
+
+type GetUserListRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 }
 
 type NullString struct {

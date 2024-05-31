@@ -21,7 +21,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter := baseRouter.Group("/users")
 		usersRouter.POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.Edit)
+		usersRouter.Use(middleware.AuthMiddleware()).PUT("/", h.Edit) //
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
 	}
 
@@ -49,7 +49,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderRouter := baseRouter.Group("orders")
 		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("/company/:company-id", h.GetOrdersList)
+		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
@@ -58,7 +58,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 	{
 		orderStatuses := baseRouter.Group("order-statuses")
-		orderStatuses.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderStatusesList)
+		orderStatuses.Use(middleware.AuthMiddleware()).GET("", h.GetOrderStatusesList) //
 		orderStatuses.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderStatusModel)
 		orderStatuses.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetOrderStatusById)
 	}
@@ -74,7 +74,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		orderItemTypeRouter := baseRouter.Group("order-item-type")
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetOrderItemTypesByCompany)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrderItemTypesByCompany) //
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemType)
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
 	}
@@ -86,7 +86,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 	{
 		statistics := baseRouter.Group("statistics")
-		statistics.Use(middleware.AuthMiddleware()).GET("work-volume/:company-id", h.GetWorkVolumeList) //
+		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
 	}
 	{
 		statistics := baseRouter.Group("permissions")
@@ -95,17 +95,17 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 	{
 		clientRouter := baseRouter.Group("/client")
-		clientRouter.Use(middleware.AuthMiddleware()).POST("/:company-id", h.CreateClientModel)
+		clientRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateClientModel) //
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
-		clientRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetClientsList)
+		clientRouter.Use(middleware.AuthMiddleware()).GET("", h.GetClientsList) //
 		clientRouter.Use(middleware.AuthMiddleware()).GET("/set-location/:client-id", h.SetLocation)
-		clientRouter.Use(middleware.AuthMiddleware()).PUT("/:company-id", h.UpdateClient)
+		clientRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateClient) //
 	}
 
 	{
 		telegramGroup := baseRouter.Group("/telegram-group")
-		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification/:company-id", h.VerificationGroup)
-		telegramGroup.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetTelegramGroupList)
+		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification", h.VerificationGroup) //
+		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList) //
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
 		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
 	}

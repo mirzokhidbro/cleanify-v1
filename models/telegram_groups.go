@@ -25,12 +25,12 @@ type TelegramGroupGetListResponse struct {
 }
 
 type TelegramGroupGetByPrimayKeyResponse struct {
-	ID                   int       `json:"id"`
-	Name                 string    `json:"name"`
-	NotificationStatuses *[]interface{}   `json:"notification_statuses"`
-	WithLocation         *bool     `json:"with_location"`
-	CreatedAt            time.Time `json:"created_at"`
-	UpdatedAt            time.Time `json:"updated_at"`
+	ID                   int            `json:"id"`
+	Name                 string         `json:"name"`
+	NotificationStatuses *[]interface{} `json:"notification_statuses"`
+	WithLocation         *bool          `json:"with_location"`
+	CreatedAt            time.Time      `json:"created_at"`
+	UpdatedAt            time.Time      `json:"updated_at"`
 }
 
 type CreateTelegramGroupRequest struct {
@@ -40,10 +40,15 @@ type CreateTelegramGroupRequest struct {
 }
 
 type GroupVerificationRequest struct {
-	Code int `json:"code" binding:"required"`
+	Code      int    `json:"code" binding:"required"`
+	CompanyID string `json:"company_id" binding:"required"`
 }
 
 type TelegramGroupEditRequest struct {
 	WithLocation         *bool  `json:"with_location" binding:"required"`
 	NotificationStatuses []int8 `json:"notification_statuses" binding:"required"`
+}
+
+type GetTelegramGroupListRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type CreateClientModel struct {
-	CompanyID             string  `json:"company_id"`
+	CompanyID             string  `json:"company_id" binding:"required"`
 	Address               string  `json:"address" binding:"required" minLength:"2" maxLength:"255"`
 	FullName              string  `json:"full_name"`
 	PhoneNumber           string  `json:"phone_number" binding:"required"`
@@ -16,10 +16,11 @@ type CreateClientModel struct {
 }
 
 type ClientListRequest struct {
-	Limit   int32  `json:"limit"`
-	Offset  int32  `json:"offset"`
-	Phone   string `json:"status,omitempty"`
-	Address string `json:"slug,omitempty"`
+	Limit     int32  `json:"limit" form:"limit"`
+	Offset    int32  `json:"offset" form:"offset"`
+	Phone     string `json:"status,omitempty" form:"phone"`
+	Address   string `json:"slug,omitempty" form:"address"`
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 }
 
 type ClientList struct {
@@ -64,6 +65,7 @@ type OrderLink struct {
 
 type UpdateClientRequest struct {
 	ID                    int     `json:"id" binding:"required"`
+	CompanyID             string  `json:"company_id" binding:"required"`
 	FullName              string  `json:"full_name"`
 	PhoneNumber           string  `json:"phone_number"`
 	AdditionalPhoneNumber string  `json:"additional_phone_number"`
