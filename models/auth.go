@@ -7,6 +7,11 @@ type ChangePasswordRequest struct {
 }
 
 type JWTData struct {
-	Phone string
+	Phone  string
 	UserID string
+}
+
+type AuthorizationResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
