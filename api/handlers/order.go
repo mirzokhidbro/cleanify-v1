@@ -39,7 +39,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	body.CompanyID = *user.CompanyID
+	// body.CompanyID = *user.CompanyID
 
 	if body.IsNewClient {
 		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
