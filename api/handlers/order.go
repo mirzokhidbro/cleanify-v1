@@ -6,6 +6,8 @@ import (
 	"bw-erp/pkg/utils"
 	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	newHttp "net/http"
 	"strconv"
 	"sync"
@@ -227,26 +229,42 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
+				defer wg.Done()
+
 				requestBody := map[string]interface{}{
 					"order_id":   order.ID,
 					"status":     order.Status,
-					"company_id": body.CompanyID,
+					"company_id": order.CompanyID,
 					"flag":       h.Cfg.Release_Mode,
 				}
-				requestBodyJson, _ := json.Marshal(requestBody)
+				requestBodyJson, err := json.Marshal(requestBody)
+				if err != nil {
+					log.Printf("Error marshalling request body: %v", err)
+					return
+				}
 
 				url := h.Cfg.WEBHOOK_URL
 
-				req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				req, err := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				if err != nil {
+					log.Printf("Error creating new request: %v", err)
+					return
+				}
 				req.Header.Set("Content-Type", "application/json")
 
 				client := &newHttp.Client{}
 				resp, err := client.Do(req)
 				if err != nil {
-					panic(err)
+					log.Printf("Error sending request: %v", err)
+					return
 				}
 				defer resp.Body.Close()
-				defer wg.Done()
+
+				if resp.StatusCode != newHttp.StatusOK {
+					bodyBytes, _ := io.ReadAll(resp.Body)
+					bodyString := string(bodyBytes)
+					log.Printf("Received non-200 response: %d, body: %s", resp.StatusCode, bodyString)
+				}
 			}()
 
 			wg.Wait()
