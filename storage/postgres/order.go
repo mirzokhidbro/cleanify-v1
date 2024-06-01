@@ -273,7 +273,6 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
-
 	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, status, is_countable, description, order_item_type_id from order_items where order_id = $1 order by created_at`, ID)
 
 	if err != nil {
