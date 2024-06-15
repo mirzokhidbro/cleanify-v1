@@ -12,7 +12,7 @@ import (
 )
 
 func GenerateToken(user_id string, phone string) (string, string, error) {
-	accessToken, err := createToken(user_id, phone, 1) // 1 hour lifespan for access token
+	accessToken, err := createToken(user_id, phone, 720) // 1 hour lifespan for access token
 	if err != nil {
 		return "", "", err
 	}

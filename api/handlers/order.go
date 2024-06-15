@@ -6,6 +6,8 @@ import (
 	"bw-erp/pkg/utils"
 	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	newHttp "net/http"
 	"strconv"
 	"sync"
@@ -39,24 +41,31 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	body.CompanyID = *user.CompanyID
-
-	if body.IsNewClient {
-		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
-			CompanyID:   body.CompanyID,
-			PhoneNumber: body.Phone,
-			Address:     body.Address,
-			Longitude:   body.Longitude,
-			Latitute:    body.Latitute,
-		})
-		body.ClientID = clientID
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
+	if body.ClientID != 0 {
+		client, _ := h.Stg.Client().GetByPrimaryKey(body.ClientID)
+		if client.ID == 0 {
+			h.handleResponse(c, http.BadRequest, "client not found")
 			return
 		}
-	} else if body.ClientID == 0 {
-		h.handleResponse(c, http.BadRequest, "client id is required")
-		return
+	} else {
+		client, _ := h.Stg.Client().GetByPhoneNumber(body.Phone)
+
+		if client.ID == 0 {
+			clientID, err := h.Stg.Client().Create(models.CreateClientModel{
+				CompanyID:   body.CompanyID,
+				PhoneNumber: body.Phone,
+				Address:     body.Address,
+				Longitude:   body.Longitude,
+				Latitute:    body.Latitute,
+			})
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+			body.ClientID = clientID
+		} else {
+			body.ClientID = client.ID
+		}
 	}
 
 	orderID, err := h.Stg.Order().Create(user.ID, body)
@@ -80,7 +89,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			requestBody := map[string]interface{}{
 				"order_id":   orderID,
 				"status":     status,
-				"company_id": user.CompanyID,
+				"company_id": body.CompanyID,
 				"flag":       h.Cfg.Release_Mode,
 			}
 			requestBodyJson, _ := json.Marshal(requestBody)
@@ -107,54 +116,13 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 }
 
 func (h *Handler) GetOrdersList(c *gin.Context) {
-	limit, err := h.getLimitParam(c)
-	if err != nil {
+	var body models.OrdersListRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	offset, err := h.getOffsetParam(c)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	token, err := utils.ExtractTokenID(c)
-
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	user, err := h.Stg.User().GetById(token.UserID)
-	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
-	status, err := h.getStatusParam(c)
-	if err != nil {
-		h.handleResponse(c, http.InvalidArgument, err.Error())
-		return
-	}
-	orderID := c.Query("id")
-	Phone := c.Query("phone")
-	// ID := 0
-	// if len(orderID) > 0 {
-	// 	ID, err = strconv.Atoi(orderID)
-	// 	if err != nil {
-	// 		h.handleResponse(c, http.BadRequest, err.Error())
-	// 		return
-	// 	}
-	// }
-
-	data, err := h.Stg.Order().GetList(*user.CompanyID, models.OrdersListRequest{
-		ID:     orderID,
-		Phone:  Phone,
-		Status: status,
-		Limit:  int32(limit),
-		Offset: int32(offset),
-	})
+	data, err := h.Stg.Order().GetList(body.CompanyID, body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -221,26 +189,42 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
+				defer wg.Done()
+
 				requestBody := map[string]interface{}{
 					"order_id":   order.ID,
 					"status":     order.Status,
-					"company_id": user.CompanyID,
+					"company_id": order.CompanyID,
 					"flag":       h.Cfg.Release_Mode,
 				}
-				requestBodyJson, _ := json.Marshal(requestBody)
+				requestBodyJson, err := json.Marshal(requestBody)
+				if err != nil {
+					log.Printf("Error marshalling request body: %v", err)
+					return
+				}
 
 				url := h.Cfg.WEBHOOK_URL
 
-				req, _ := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				req, err := newHttp.NewRequest("POST", url, bytes.NewBuffer(requestBodyJson))
+				if err != nil {
+					log.Printf("Error creating new request: %v", err)
+					return
+				}
 				req.Header.Set("Content-Type", "application/json")
 
 				client := &newHttp.Client{}
 				resp, err := client.Do(req)
 				if err != nil {
-					panic(err)
+					log.Printf("Error sending request: %v", err)
+					return
 				}
 				defer resp.Body.Close()
-				defer wg.Done()
+
+				if resp.StatusCode != newHttp.StatusOK {
+					bodyBytes, _ := io.ReadAll(resp.Body)
+					bodyString := string(bodyBytes)
+					log.Printf("Received non-200 response: %d, body: %s", resp.StatusCode, bodyString)
+				}
 			}()
 
 			wg.Wait()

@@ -273,7 +273,6 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		return order, err
 	}
 
-
 	rows, err := stg.db.Query(`select id, order_id, type, price, width, height, status, is_countable, description, order_item_type_id from order_items where order_id = $1 order by created_at`, ID)
 
 	if err != nil {
@@ -302,7 +301,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.OrderItems = append(order.OrderItems, item)
 	}
 
-	rows, err = stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'orders' and historyable_id = $1`, ID)
+	rows, err = stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'orders' and historyable_id = $1 order by created_at asc`, ID)
 	if err != nil {
 		return order, err
 	}

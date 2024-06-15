@@ -235,3 +235,22 @@ func (stg *clientRepo) Update(companyID string, entity models.UpdateClientReques
 
 	return rowsAffected, nil
 }
+
+func (stg *clientRepo) GetByPhoneNumber(Phone string) (models.Client, error) {
+	var client models.Client
+	err := stg.db.QueryRow(`select id, address, COALESCE(full_name, ''), phone_number, COALESCE(additional_phone_number, ''), COALESCE(work_number, ''), latitute, longitude from clients where phone_number = $1`, Phone).Scan(
+		&client.ID,
+		&client.Address,
+		&client.FullName,
+		&client.PhoneNumber,
+		&client.AdditionalPhoneNumber,
+		&client.WorkNumber,
+		&client.Latitute,
+		&client.Longitude,
+	)
+	if err != nil {
+		return client, errors.New("client not found")
+	}
+
+	return client, nil
+}
