@@ -40,9 +40,9 @@ type ClientListResponse struct {
 
 type Client struct {
 	ID                    int      `json:"id"`
-	Address               string   `json:"address" binding:"required" minLength:"2" maxLength:"255"`
+	Address               string   `json:"address"`
 	FullName              string   `json:"full_name"`
-	PhoneNumber           string   `json:"phone_number" binding:"required"`
+	PhoneNumber           string   `json:"phone_number"`
 	AdditionalPhoneNumber string   `json:"additional_phone_number"`
 	WorkNumber            string   `json:"work_number"`
 	Latitute              *float64 `json:"latitute"`
