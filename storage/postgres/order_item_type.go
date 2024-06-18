@@ -104,7 +104,7 @@ func (stg *orderItemTypeRepo) Update(entity models.EditOrderItemTypeRequest) (ro
 
 	query := `UPDATE 
 					"order_item_types" 
-						SET price = :price, is_countable = :is_countable, name = :name updated_at = now()
+						SET price = :price, is_countable = :is_countable, name = :name, updated_at = now()
 					WHERE
 		  				id = :id and company_id = :company_id`
 
