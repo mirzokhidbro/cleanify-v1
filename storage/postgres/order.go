@@ -394,25 +394,32 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `address = :address,`
 	}
 
+	if entity.Latitute != 0 {
+		query += `latitute = :latitute,`
+	}
+
+	if entity.Longitude != 0 {
+		query += `longitude = :longitude,`
+	}
+
 	query += `updated_at = now()
 			  WHERE
 					id = :id`
 
 	order, _ := stg.GetByPrimaryKey(entity.ID)
 	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
-		updateOrderQuery := `UPDATE "clients" SET longitude = :longitude, latitute = :latitute, adsress =: address WHERE id = :clientId`
-		clientParams := map[string]interface{}{
-			"clientId":  order.ClientID,
-			"longitude": entity.Longitude,
-			"latitute":  entity.Latitute,
-			"address":   entity.Address,
+		updateOrderQuery := `UPDATE "clients" SET longitude = $1, latitute = $2, address = $3 WHERE id = $4`
+		clientParams := []interface{}{
+			entity.Longitude,
+			entity.Latitute,
+			entity.Address,
+			order.ClientID,
 		}
-		updateOrderQuery, arr := helper.ReplaceQueryParams(updateOrderQuery, clientParams)
-		_, err := stg.db.Exec(updateOrderQuery, arr...)
+
+		_, err := stg.db.Exec(updateOrderQuery, clientParams...)
 		if err != nil {
 			return 0, err
 		}
-
 	}
 
 	params := map[string]interface{}{
@@ -422,6 +429,9 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		"phone":       entity.Phone,
 		"description": entity.Description,
 		"count":       entity.Count,
+		"address":     entity.Address,
+		"latitute":    entity.Latitute,
+		"longitude":   entity.Longitude,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
