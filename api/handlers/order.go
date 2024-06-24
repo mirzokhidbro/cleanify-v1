@@ -41,22 +41,31 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 		return
 	}
 
-	if body.IsNewClient {
-		clientID, err := h.Stg.Client().Create(models.CreateClientModel{
-			CompanyID:   body.CompanyID,
-			PhoneNumber: body.Phone,
-			Address:     body.Address,
-			Longitude:   body.Longitude,
-			Latitute:    body.Latitute,
-		})
-		body.ClientID = clientID
-		if err != nil {
-			h.handleResponse(c, http.BadRequest, err.Error())
+	if body.ClientID != 0 {
+		client, _ := h.Stg.Client().GetByPrimaryKey(body.ClientID)
+		if client.ID == 0 {
+			h.handleResponse(c, http.BadRequest, "client not found")
 			return
 		}
-	} else if body.ClientID == 0 {
-		h.handleResponse(c, http.BadRequest, "client id is required")
-		return
+	} else {
+		client, _ := h.Stg.Client().GetByPhoneNumber(body.Phone)
+
+		if client.ID == 0 {
+			clientID, err := h.Stg.Client().Create(models.CreateClientModel{
+				CompanyID:   body.CompanyID,
+				PhoneNumber: body.Phone,
+				Address:     body.Address,
+				Longitude:   body.Longitude,
+				Latitute:    body.Latitute,
+			})
+			if err != nil {
+				h.handleResponse(c, http.BadRequest, err.Error())
+				return
+			}
+			body.ClientID = clientID
+		} else {
+			body.ClientID = client.ID
+		}
 	}
 
 	orderID, err := h.Stg.Order().Create(user.ID, body)

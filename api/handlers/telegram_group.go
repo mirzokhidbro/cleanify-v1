@@ -28,11 +28,6 @@ func (h *Handler) VerificationGroup(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
 	_, err = h.Stg.TelegramGroup().Verification(body.Code, body.CompanyID)
 
 	if err != nil {
