@@ -182,10 +182,15 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	order, _ = h.Stg.Order().GetByPrimaryKey(body.ID)
 
-	// [TODO: logikani ko'rib chiqish kerak!!!]
-
 	if body.Status != 0 && oldOrderStatus != order.Status {
 		go func() {
+			h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
+				HistoryableType: "order",
+				HistoryableID:   order.ID,
+				Status:          int(body.Status),
+				UserID:          user.ID,
+			})
+
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {

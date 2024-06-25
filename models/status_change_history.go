@@ -8,3 +8,10 @@ type StatusChangeHistory struct {
 	Lastname  string    `json:"lastname"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type CreateStatusChangeHistoryModel struct {
+	HistoryableType string
+	HistoryableID   int
+	UserID          string
+	Status          int
+}
