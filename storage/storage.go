@@ -22,42 +22,45 @@ type StorageI interface {
 	TelegramSession() repo.TelegramSessionI
 	User() repo.UserI
 	OrderStatus() repo.OrderStatusI
+	StatusChangeHistory() repo.StatusChangeHistoryI
 }
 
 type storagePg struct {
-	db              *sqlx.DB
-	client          repo.ClientStorageI
-	botUser         repo.BotUserI
-	user            repo.UserI
-	company         repo.CompanyStorageI
-	orderItemType   repo.OrderItemTypeI
-	order           repo.OrderI
-	orderItem       repo.OrderItemI
-	permission      repo.PermissionI
-	role            repo.RoleI
-	statistics      repo.StatisticsI
-	telegramGroup   repo.TelegramGroupI
-	telegramSession repo.TelegramSessionI
-	telegramBot     repo.TelegramBotI
-	orderStatus     repo.OrderStatusI
+	db                  *sqlx.DB
+	client              repo.ClientStorageI
+	botUser             repo.BotUserI
+	user                repo.UserI
+	company             repo.CompanyStorageI
+	orderItemType       repo.OrderItemTypeI
+	order               repo.OrderI
+	orderItem           repo.OrderItemI
+	permission          repo.PermissionI
+	role                repo.RoleI
+	statistics          repo.StatisticsI
+	telegramGroup       repo.TelegramGroupI
+	telegramSession     repo.TelegramSessionI
+	telegramBot         repo.TelegramBotI
+	orderStatus         repo.OrderStatusI
+	statusChangeHistory repo.StatusChangeHistoryI
 }
 
 func NewStoragePg(db *sqlx.DB) StorageI {
 	return &storagePg{
-		db:              db,
-		client:          postgres.NewClientRepo(db),
-		botUser:         postgres.NewBotUserRepo(db),
-		user:            postgres.NewUserRepo(db),
-		company:         postgres.NewCompanyRepo(db),
-		orderItemType:   postgres.NewOrderItemTypeRepo(db),
-		order:           postgres.NewOrderRepo(db),
-		orderItem:       postgres.NewOrderItemRepo(db),
-		permission:      postgres.NewPermissionRepo(db),
-		role:            postgres.NewRoleRepo(db),
-		statistics:      postgres.NewStatisticsRepo(db),
-		telegramGroup:   postgres.NewTelegramGroupRepo(db),
-		telegramSession: postgres.NewTelegramSessionRepo(db),
-		orderStatus:     postgres.NewOrderStatusRepo(db),
+		db:                  db,
+		client:              postgres.NewClientRepo(db),
+		botUser:             postgres.NewBotUserRepo(db),
+		user:                postgres.NewUserRepo(db),
+		company:             postgres.NewCompanyRepo(db),
+		orderItemType:       postgres.NewOrderItemTypeRepo(db),
+		order:               postgres.NewOrderRepo(db),
+		orderItem:           postgres.NewOrderItemRepo(db),
+		permission:          postgres.NewPermissionRepo(db),
+		role:                postgres.NewRoleRepo(db),
+		statistics:          postgres.NewStatisticsRepo(db),
+		telegramGroup:       postgres.NewTelegramGroupRepo(db),
+		telegramSession:     postgres.NewTelegramSessionRepo(db),
+		orderStatus:         postgres.NewOrderStatusRepo(db),
+		statusChangeHistory: postgres.NewStatusChangeHistoryRepo(db),
 	}
 }
 
@@ -115,4 +118,8 @@ func (s storagePg) User() repo.UserI {
 
 func (s storagePg) OrderStatus() repo.OrderStatusI {
 	return s.orderStatus
+}
+
+func (s storagePg) StatusChangeHistory() repo.StatusChangeHistoryI {
+	return s.statusChangeHistory
 }
