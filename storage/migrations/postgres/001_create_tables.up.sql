@@ -199,3 +199,6 @@ CREATE TABLE IF NOT EXISTS "user_permissions" (
     "created_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+ALTER TABLE "permissions"
+ADD "group" VARCHAR;

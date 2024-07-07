@@ -26,7 +26,8 @@ func (stg *permissionRepo) GetList(Scope string) ([]models.Permission, error) {
 				id,
 				slug,
 				name,
-				scope
+				scope,
+				"group"
 			 FROM "permissions"`
 
 	filter := " WHERE true"
@@ -36,7 +37,7 @@ func (stg *permissionRepo) GetList(Scope string) ([]models.Permission, error) {
 		filter += " AND (scope = :scope)"
 	}
 
-	q := query + filter
+	q := query + filter + " order by \"group\" "
 
 	q, arr = helper.ReplaceQueryParams(q, params)
 	rows, err := stg.db.Query(q, arr...)
