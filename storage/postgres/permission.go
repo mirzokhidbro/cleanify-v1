@@ -52,7 +52,8 @@ func (stg *permissionRepo) GetList(Scope string) ([]models.Permission, error) {
 			&permission.ID,
 			&permission.Slug,
 			&permission.Name,
-			&permission.Scope)
+			&permission.Scope,
+			&permission.Group)
 		if err != nil {
 			return nil, err
 		}
