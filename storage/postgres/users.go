@@ -208,20 +208,14 @@ func (stg *userRepo) Edit(companyID string, entity models.UpdateUserRequest) (ro
 	if entity.Lastname != "" {
 		query += `lastname = :lastname,`
 	}
-	PermissionIDs := utils.SetArray(utils.StringSliceToInterface(entity.PermissionIDs))
-	if PermissionIDs != "{}" {
-		query += `permission_ids = :permission_ids,`
-	}
 
 	query += `updated_at = now()
-			  WHERE id = :id and company_id = :company_id`
+			  WHERE id = :id `
 
 	params := map[string]interface{}{
-		"id":             entity.ID,
-		"firstname":      entity.Firstname,
-		"lastname":       entity.Lastname,
-		"permission_ids": PermissionIDs,
-		"company_id":     companyID,
+		"id":        entity.ID,
+		"firstname": entity.Firstname,
+		"lastname":  entity.Lastname,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -235,6 +229,53 @@ func (stg *userRepo) Edit(companyID string, entity models.UpdateUserRequest) (ro
 	rowsAffected, err = result.RowsAffected()
 	if err != nil {
 		return 0, err
+	}
+
+	// [TODO: refactoring]
+
+	for _, permission := range entity.Permissions {
+		var UserPermissionByCompany models.UserPermissionByCompany
+		stg.db.QueryRow(`select company_id from user_permissions where company_id = $1 and user_id = $2`, permission.CompanyID, entity.ID).Scan(
+			&UserPermissionByCompany.CompanyID,
+		)
+
+		PermissionIDs := utils.SetArray(utils.StringSliceToInterface(permission.PermissionIDs))
+
+		if len(UserPermissionByCompany.CompanyID) > 0 {
+			query = `UPDATE "user_permissions" SET permission_ids = :permission_ids, updated_at = now() where company_id = :company_id and user_id = :user_id`
+
+			permissionEditParams := map[string]interface{}{
+				"permission_ids": PermissionIDs,
+				"company_id":     permission.CompanyID,
+				"user_id":        entity.ID,
+			}
+
+			query, arr := helper.ReplaceQueryParams(query, permissionEditParams)
+
+			_, err := stg.db.Exec(query, arr...)
+
+			if err != nil {
+				return 0, err
+			}
+		} else {
+			_, err := stg.db.Exec(`INSERT INTO user_permissions(
+				permission_ids,
+				company_id,
+				user_id
+			) VALUES (
+				$1,
+				$2,
+				$3
+			)`,
+				PermissionIDs,
+				permission.CompanyID,
+				entity.ID,
+			)
+
+			if err != nil {
+				return 0, err
+			}
+		}
 	}
 
 	return rowsAffected, nil
