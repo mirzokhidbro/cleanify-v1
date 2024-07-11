@@ -199,7 +199,7 @@ func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, er
 	return permission, nil
 }
 
-func (stg *userRepo) Edit(companyID string, entity models.UpdateUserRequest) (rowsAffected int64, err error) {
+func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "users" SET `
 
 	if entity.Firstname != "" {
