@@ -11,8 +11,12 @@ type CreateUserModel struct {
 	Phone                string   `json:"phone" binding:"required" example:"991234567"`
 	Password             string   `json:"password" binding:"required"`
 	CompanyID            string   `json:"company_id" binding:"required"`
-	PermissionIDs        []string `json:"permission_ids" binding:"required"`
+	// PermissionIDs        []string `json:"permission_ids" binding:"required"`
 	ConfirmationPassword string   `json:"confirmation_password" binding:"required"`
+	Permissions          []struct {
+		CompanyID     string   `json:"company_id"`
+		PermissionIDs []string `json:"permission_ids"`
+	} `json:"permissions"`
 }
 
 type AuthUserModel struct {
@@ -38,7 +42,7 @@ type UserPermissionByCompany struct {
 }
 
 type UpdateUserRequest struct {
-	ID          string `json:"id" binding:"required"`
+	ID string `json:"id" binding:"required"`
 	// CompanyID   string `json:"company_id" binding:"required"`
 	Firstname   string `json:"firstname"`
 	Lastname    string `json:"lastname"`
