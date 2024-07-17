@@ -516,3 +516,27 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 	}
 	return nil
 }
+
+func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
+	query := `UPDATE "orders" SET service_price = :service_price, discount_percentage = :discount_percentage, discounted_price = :discounted_price where id = :id`
+
+	params := map[string]interface{}{
+		"id":                  entity.ID,
+		"service_price":       entity.ServicePrice,
+		"discounted_price":    entity.DiscountPrice,
+		"discount_percentage": entity.DiscountPercentage,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -12,4 +12,5 @@ type OrderI interface {
 	GetByPhone(companyID string, Phone string) (models.Order, error)
 	GetByPrimaryKey(ID int) (models.OrderShowResponse, error)
 	Delete(entity models.DeleteOrderRequest) error
+	SetPrice(entity models.SetOrderPriceRequest) error
 }
