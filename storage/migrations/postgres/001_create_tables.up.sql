@@ -239,4 +239,4 @@ ADD "slug" VARCHAR;
 
 update order_statuses
 set slug = 'change_status_to_1'
-where status = 1
+where number = 1
