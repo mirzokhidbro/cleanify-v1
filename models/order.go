@@ -72,6 +72,10 @@ type Order struct {
 	Square                float64               `json:"square"`
 	Price                 float64               `json:"price"`
 	StatusChangeHistory   []StatusChangeHistory `json:"status_change_history"`
+	PaymentStatus         int16                 `json:"payment_status"`
+	ServicePrice          float64               `json:"service_price"`
+	DiscountPercentage    float64               `json:"discount_percentage"`
+	DiscountPrice         float64               `json:"discount_price"`
 }
 
 type OrderSendLocationRequest struct {
