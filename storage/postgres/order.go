@@ -249,9 +249,9 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									COALESCE(o.address, ''),
 									o.status,
 									COALESCE(o.payment_status, 0),
-									coalesce(o.service_price),
-									coalesce(o.discount_percentage),
-									coalesce(o.discounted_price),
+									coalesce(o.service_price, 0),
+									coalesce(o.discount_percentage, 0),
+									coalesce(o.discounted_price, 0),
 									o.created_at,
 									o.updated_at 
 								from orders o
