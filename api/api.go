@@ -19,9 +19,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	baseRouter := r.Group("/api/v1")
 	{
 		usersRouter := baseRouter.Group("/users")
-		usersRouter.POST("", h.Create)
+		usersRouter.Use(middleware.AuthMiddleware()).POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).PUT("/", h.Edit) //
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit) //
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
 	}
 
@@ -38,13 +38,13 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		// companyRouter.Use(middleware.AuthMiddleware()).GET("/get-by-owner", h.GetCompanyByOwnerId)
 	}
 
-	{
-		roleRouter := baseRouter.Group("/role")
-		roleRouter.POST("", h.CreateRoleModel)
-		roleRouter.Use(middleware.AuthMiddleware()).GET("/show/:role-id", h.GetRoleByPrimaryKey)
-		roleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
-		roleRouter.Use(middleware.AuthMiddleware()).POST("/give-permissions", h.GetPermissionsToRole)
-	}
+	// {
+	// 	roleRouter := baseRouter.Group("/role")
+	// 	roleRouter.POST("", h.CreateRoleModel)
+	// 	roleRouter.Use(middleware.AuthMiddleware()).GET("/show/:role-id", h.GetRoleByPrimaryKey)
+	// 	roleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
+	// 	roleRouter.Use(middleware.AuthMiddleware()).POST("/give-permissions", h.GetPermissionsToRole)
+	// }
 
 	{
 		orderRouter := baseRouter.Group("orders")
@@ -52,6 +52,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
+		orderRouter.Use(middleware.AuthMiddleware()).POST("/set-price", h.SetOrderPrice)
 		// orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
 		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
 	}
@@ -79,11 +80,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
 	}
 
-	{
-		companyBotRouter := baseRouter.Group("company-bot")
-		companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
-		// companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
-	}
+	// {
+	// companyBotRouter := baseRouter.Group("company-bot")
+	// companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
+	// companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
+	// }
 	{
 		statistics := baseRouter.Group("statistics")
 		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
@@ -105,7 +106,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		telegramGroup := baseRouter.Group("/telegram-group")
 		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification", h.VerificationGroup) //
-		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList) //
+		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList)            //
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
 		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
 	}

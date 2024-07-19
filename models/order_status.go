@@ -6,6 +6,7 @@ type OrderStatus struct {
 	Name        string `json:"name"`
 	Color       string `json:"color"`
 	Description string `json:"description"`
+	Slug        string `json:"slug"`
 }
 
 type UpdateOrderStatusRequest struct {

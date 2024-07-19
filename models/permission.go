@@ -5,6 +5,7 @@ type Permission struct {
 	Slug  string `json:"slug"`
 	Name  string `json:"name"`
 	Scope string `json:"scope"`
+	Group string `json:"group"`
 }
 
 type RoleAndPermission struct {

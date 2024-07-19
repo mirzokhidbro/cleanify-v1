@@ -248,6 +248,10 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									COALESCE(o.client_id, 0), 
 									COALESCE(o.address, ''),
 									o.status,
+									COALESCE(o.payment_status, 0),
+									coalesce(o.service_price),
+									coalesce(o.discount_percentage),
+									coalesce(o.discounted_price),
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -266,6 +270,10 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		&order.ClientID,
 		&order.Address,
 		&order.Status,
+		&order.PaymentStatus,
+		&order.ServicePrice,
+		&order.DiscountPercentage,
+		&order.DiscountPrice,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -514,5 +522,29 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
+	query := `UPDATE "orders" SET service_price = :service_price, discount_percentage = :discount_percentage, discounted_price = :discounted_price where id = :id`
+
+	params := map[string]interface{}{
+		"id":                  entity.ID,
+		"service_price":       entity.ServicePrice,
+		"discounted_price":    entity.DiscountPrice,
+		"discount_percentage": entity.DiscountPercentage,
+	}
+
+	query, arr := helper.ReplaceQueryParams(query, params)
+	result, err := stg.db.Exec(query, arr...)
+	if err != nil {
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -72,6 +72,10 @@ type Order struct {
 	Square                float64               `json:"square"`
 	Price                 float64               `json:"price"`
 	StatusChangeHistory   []StatusChangeHistory `json:"status_change_history"`
+	PaymentStatus         int16                 `json:"payment_status"`
+	ServicePrice          float64               `json:"service_price"`
+	DiscountPercentage    float64               `json:"discount_percentage"`
+	DiscountPrice         float64               `json:"discount_price"`
 }
 
 type OrderSendLocationRequest struct {
@@ -106,4 +110,11 @@ func (ns NullFloat) MarshalJSONFloat() ([]byte, error) {
 type DeleteOrderRequest struct {
 	ID        int    `json:"id" binding:"required"`
 	CompanyID string `json:"company_id" binding:"required"`
+}
+
+type SetOrderPriceRequest struct {
+	ID                 int     `json:"id" binding:"required"`
+	ServicePrice       float64 `json:"service_price" binding:"required"`
+	DiscountPercentage float64 `json:"discount_percentage" binding:"required"`
+	DiscountPrice      float64
 }

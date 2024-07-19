@@ -199,3 +199,44 @@ CREATE TABLE IF NOT EXISTS "user_permissions" (
     "created_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+ALTER TABLE "permissions"
+ADD "group" VARCHAR;
+
+
+ALTER TABLE "orders"
+ADD "service_price" FLOAT,
+ADD "discount_percentage" FLOAT,
+ADD "payment_status" INTEGER,
+ADD "discounted_price" FLOAT;
+
+
+
+CREATE TABLE IF NOT EXISTS "transactions" (
+    "id" SERIAL PRIMARY KEY,
+    "receiver_id" VARCHAR,
+    "receiver_type" VARCHAR,
+    "payment_purpose_id" VARCHAR,
+    "payer_id" VARCHAR,
+    "payer_type" VARCHAR,
+    "description" TEXT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+ALTER TABLE "order_statuses"
+ADD "slug" VARCHAR;
+
+"change_status_to_1"
+"change_status_to_2"
+"change_status_to_3"
+"change_status_to_4"
+"change_status_to_5"
+"change_status_to_6"
+"change_status_to_7"
+"change_status_to_8"
+"change_status_to_99"
+
+update order_statuses
+set slug = 'change_status_to_1'
+where number = 1

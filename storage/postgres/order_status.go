@@ -21,7 +21,7 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus,
 	var arr []interface{}
 	params := make(map[string]interface{})
 
-	query := "select id, number, name, coalesce(color, ''), description from order_statuses"
+	query := "select id, number, name, coalesce(color, ''), description, slug from order_statuses"
 	filter := " WHERE true"
 	order := " ORDER BY number"
 
@@ -45,7 +45,8 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus,
 			&orderStatus.Number,
 			&orderStatus.Name,
 			&orderStatus.Color,
-			&orderStatus.Description)
+			&orderStatus.Description,
+			&orderStatus.Slug)
 		if err != nil {
 			return res, err
 		}

@@ -146,6 +146,27 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
+func (h *Handler) SetOrderPrice(c *gin.Context) {
+	var body models.SetOrderPriceRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if body.DiscountPercentage > 100 {
+		h.handleResponse(c, http.BadRequest, "Chegirma foizi qanaqasiga buncha bo'lishi mumkin guvala!!!")
+		return
+	}
+
+	body.DiscountPrice = (body.ServicePrice / 100) * (100 - body.DiscountPercentage)
+	err := h.Stg.Order().SetPrice(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+	h.handleResponse(c, http.OK, "OK!")
+}
+
 func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	var body models.UpdateOrderRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
