@@ -525,13 +525,24 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 	return nil
 }
 
-func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
+func (stg *orderRepo) SetDiscount(entity models.SetOrderPriceRequest) error {
+	var ServicePrice float64
+
+	err := stg.db.QueryRow(`select sum(height*width*price) from order_items where order_id = $1`, entity.ID).Scan(
+		&ServicePrice,
+	)
+	if err != nil {
+		return err
+	}
+
+	DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
+
 	query := `UPDATE "orders" SET service_price = :service_price, discount_percentage = :discount_percentage, discounted_price = :discounted_price where id = :id`
 
 	params := map[string]interface{}{
 		"id":                  entity.ID,
-		"service_price":       entity.ServicePrice,
-		"discounted_price":    entity.DiscountPrice,
+		"service_price":       ServicePrice,
+		"discounted_price":    DiscountPrice,
 		"discount_percentage": entity.DiscountPercentage,
 	}
 
@@ -548,3 +559,9 @@ func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
 
 	return nil
 }
+
+// func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentRequest) error {
+// 	query := `select id from payment_purposes where name = 'Buyurtmadan'`
+
+// 	return nil
+// }

@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	Cach       = "cach"
+	CreditCard = "credit_card"
+)
+
 type CreateOrderModel struct {
 	CompanyID   string  `json:"company_id" binding:"required"`
 	ClientID    int     `json:"client_id"`
@@ -96,6 +101,12 @@ type UpdateOrderRequest struct {
 	Longitude   float64 `json:"longitude"`
 }
 
+type AddOrderPaymentRequest struct {
+	CompanyID string  `json:"company_id" binding:"required"`
+	OrderID   int     `json:"order_id" binding:"required"`
+	Amount    float64 `json:"amount" binding:"required"`
+}
+
 type NullFloat struct {
 	sql.NullFloat64
 }
@@ -113,8 +124,8 @@ type DeleteOrderRequest struct {
 }
 
 type SetOrderPriceRequest struct {
-	ID                 int     `json:"id" binding:"required"`
-	ServicePrice       float64 `json:"service_price" binding:"required"`
+	ID                 int `json:"id" binding:"required"`
+	ServicePrice       float64
 	DiscountPercentage float64 `json:"discount_percentage" binding:"required"`
 	DiscountPrice      float64
 }
