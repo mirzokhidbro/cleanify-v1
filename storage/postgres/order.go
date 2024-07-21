@@ -323,6 +323,23 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.StatusChangeHistory = append(order.StatusChangeHistory, history)
 	}
 
+	transactions, err := stg.db.Query(`select u.firstname || ' ' || u.lastname as fullname, t.payment_type, t.amount, t.created_at from transactions t
+									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id::text
+									where payment_purpose_id = (select id from payment_purposes where name = 'from_order')
+									and payer_type = 'orders' and payer_id::int = $1`, order.ID)
+	if err != nil {
+		return order, err
+	}
+	defer transactions.Close()
+
+	for transactions.Next() {
+		var transaction models.OrderTransaction
+		if err := transactions.Scan(&transaction.ReceiverFullname, &transaction.PaymentType, &transaction.Amount, &transaction.CreatedAt); err != nil {
+			return order, err
+		}
+		order.OrderTransaction = append(order.OrderTransaction, transaction)
+	}
+
 	return order, nil
 }
 

@@ -194,6 +194,10 @@ func (h *Handler) AddOrderPayment(c *gin.Context) {
 	h.handleResponse(c, http.OK, "OK!")
 }
 
+func (h *Handler) GetTransactionByOrder(c *gin.Context) {
+	h.handleResponse(c, http.OK, "ok")
+}
+
 func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	var body models.UpdateOrderRequest
 	if err := c.ShouldBindJSON(&body); err != nil {

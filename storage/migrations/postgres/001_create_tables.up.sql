@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "company_id" UUID REFERENCES "companies"("id") NOT NULL,
     "receiver_id" VARCHAR,
     "receiver_type" VARCHAR,
-    "payment_purpose_id" VARCHAR,
+    "payment_purpose_id" INTEGER,
     "amount" FLOAT,
     "payer_id" VARCHAR,
     "payer_type" VARCHAR,

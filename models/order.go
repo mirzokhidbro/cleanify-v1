@@ -57,7 +57,15 @@ type OrdersListRequest struct {
 
 type OrderShowResponse struct {
 	Order
-	OrderItems []OrderItem `json:"order_items"`
+	OrderItems       []OrderItem        `json:"order_items"`
+	OrderTransaction []OrderTransaction `json:"transactions"`
+}
+
+type OrderTransaction struct {
+	ReceiverFullname string    `json:"receiver_fullname"`
+	PaymentType      string    `json:"payment_type"`
+	Amount           float64   `json:"amount"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 type Order struct {
