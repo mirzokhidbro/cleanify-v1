@@ -13,4 +13,5 @@ type OrderI interface {
 	GetByPrimaryKey(ID int) (models.OrderShowResponse, error)
 	Delete(entity models.DeleteOrderRequest) error
 	SetDiscount(entity models.SetOrderPriceRequest) error
+	AddPayment(userID string, entity models.AddOrderPaymentRequest) error
 }

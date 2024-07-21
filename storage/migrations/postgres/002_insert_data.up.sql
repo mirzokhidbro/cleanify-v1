@@ -54,3 +54,24 @@ VALUES
 ('2287b482-3450-44aa-aa43-8783d016d79b', 'Omborda',        8,  'Buyurtma omborga olindi'),
 ('2287b482-3450-44aa-aa43-8783d016d79b', 'Bekor qilindi',  99, 'Buyurtma bekor qilindi');
 
+"change_status_to_1"
+"change_status_to_2"
+"change_status_to_3"
+"change_status_to_4"
+"change_status_to_5"
+"change_status_to_6"
+"change_status_to_7"
+"change_status_to_8"
+"change_status_to_99"
+
+update order_statuses
+set slug = 'change_status_to_1'
+where number = 1
+
+
+
+INSERT INTO "payment_purposes"("name", "type")
+VALUES
+('from_order', 'income'),
+('give_salary_to_worker', 'outcome'),
+('debt_collection_from_the_employee', 'income');

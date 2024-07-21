@@ -172,6 +172,25 @@ func (h *Handler) AddOrderPayment(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	jwtData, err := utils.ExtractTokenID(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(jwtData.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err = h.Stg.Order().AddPayment(user.ID, body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.OK, "OK!")
 }
 

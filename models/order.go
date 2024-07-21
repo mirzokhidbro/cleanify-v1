@@ -6,9 +6,11 @@ import (
 	"time"
 )
 
+type PaymentType string
+
 const (
-	Cach       = "cach"
-	CreditCard = "credit_card"
+	Cach       PaymentType = "cach"
+	CreditCard PaymentType = "credit_card"
 )
 
 type CreateOrderModel struct {
@@ -102,9 +104,11 @@ type UpdateOrderRequest struct {
 }
 
 type AddOrderPaymentRequest struct {
-	CompanyID string  `json:"company_id" binding:"required"`
-	OrderID   int     `json:"order_id" binding:"required"`
-	Amount    float64 `json:"amount" binding:"required"`
+	CompanyID   string  `json:"company_id" binding:"required"`
+	OrderID     int     `json:"order_id" binding:"required"`
+	Amount      float64 `json:"amount" binding:"required"`
+	PaymentType string  `json:"payment_type" binding:"required,oneof=cach credit_card"`
+	Description string  `json:"description"`
 }
 
 type NullFloat struct {
@@ -124,7 +128,8 @@ type DeleteOrderRequest struct {
 }
 
 type SetOrderPriceRequest struct {
-	ID                 int `json:"id" binding:"required"`
+	ID                 int    `json:"id" binding:"required"`
+	CompanyID          string `json:"company_id" binding:"required"`
 	ServicePrice       float64
 	DiscountPercentage float64 `json:"discount_percentage" binding:"required"`
 	DiscountPrice      float64

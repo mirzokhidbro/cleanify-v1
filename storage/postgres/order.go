@@ -560,8 +560,52 @@ func (stg *orderRepo) SetDiscount(entity models.SetOrderPriceRequest) error {
 	return nil
 }
 
-// func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentRequest) error {
-// 	query := `select id from payment_purposes where name = 'Buyurtmadan'`
+func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentRequest) error {
+	var paymentPurposeId int
 
-// 	return nil
-// }
+	err := stg.db.QueryRow(`select id from payment_purposes where name = 'from_order'`).Scan(
+		&paymentPurposeId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stg.db.Exec(`INSERT INTO transactions(
+		company_id,
+		payer_id,
+		payer_type,
+		amount,
+		receiver_id,
+		receiver_type,
+		payment_type,
+		payment_purpose_id,
+		description
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4,
+		$5,
+		$6,
+		$7,
+		$8,
+		$9
+	)`,
+		entity.CompanyID,
+		entity.OrderID,
+		"orders",
+		entity.Amount,
+		userID,
+		"users",
+		entity.PaymentType,
+		paymentPurposeId,
+		&entity.Description,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
