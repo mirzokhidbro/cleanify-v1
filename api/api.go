@@ -82,11 +82,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
 	}
 
-	// {
-	// companyBotRouter := baseRouter.Group("company-bot")
-	// companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
-	// companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
-	// }
 	{
 		statistics := baseRouter.Group("statistics")
 		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
@@ -111,6 +106,12 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList)            //
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
 		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
+	}
+
+	{
+		telegramGroup := baseRouter.Group("/employee")
+		telegramGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
+		telegramGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
 	}
 
 	return

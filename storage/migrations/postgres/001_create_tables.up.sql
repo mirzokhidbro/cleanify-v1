@@ -233,5 +233,15 @@ CREATE TABLE IF NOT EXISTS "payment_purposes" (
     "name" VARCHAR
 )
 
+CREATE TABLE IF NOT EXISTS "employees"(
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "phone" VARCHAR,
+    "firstname" VARCHAR,
+    "lastname" VARCHAR,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
+
 ALTER TABLE "order_statuses"
 ADD "slug" VARCHAR;

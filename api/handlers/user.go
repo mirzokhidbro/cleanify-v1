@@ -12,19 +12,6 @@ import (
 func (h *Handler) Create(c *gin.Context) {
 	var body models.CreateUserModel
 
-	// token, err := utils.ExtractTokenID(c)
-
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	// user, err := h.Stg.User().GetById(token.UserID)
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
-
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return

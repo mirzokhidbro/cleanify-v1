@@ -23,6 +23,7 @@ type StorageI interface {
 	User() repo.UserI
 	OrderStatus() repo.OrderStatusI
 	StatusChangeHistory() repo.StatusChangeHistoryI
+	Employee() repo.EmployeeI
 }
 
 type storagePg struct {
@@ -42,6 +43,7 @@ type storagePg struct {
 	telegramBot         repo.TelegramBotI
 	orderStatus         repo.OrderStatusI
 	statusChangeHistory repo.StatusChangeHistoryI
+	employee            repo.EmployeeI
 }
 
 func NewStoragePg(db *sqlx.DB) StorageI {
@@ -61,6 +63,7 @@ func NewStoragePg(db *sqlx.DB) StorageI {
 		telegramSession:     postgres.NewTelegramSessionRepo(db),
 		orderStatus:         postgres.NewOrderStatusRepo(db),
 		statusChangeHistory: postgres.NewStatusChangeHistoryRepo(db),
+		employee:            postgres.NewEmployeeRepo(db),
 	}
 }
 
@@ -122,4 +125,8 @@ func (s storagePg) OrderStatus() repo.OrderStatusI {
 
 func (s storagePg) StatusChangeHistory() repo.StatusChangeHistoryI {
 	return s.statusChangeHistory
+}
+
+func (s storagePg) Employee() repo.EmployeeI {
+	return s.employee
 }
