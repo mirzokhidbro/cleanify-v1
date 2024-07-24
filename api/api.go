@@ -109,9 +109,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
-		telegramGroup := baseRouter.Group("/employee")
-		telegramGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
-		telegramGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
+		employeeGroup := baseRouter.Group("/employee")
+		employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
+		employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
+		employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
+
 	}
 
 	return
