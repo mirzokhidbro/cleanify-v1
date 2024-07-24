@@ -83,3 +83,19 @@ func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList
 
 	return employees, nil
 }
+
+func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) (models.ShowEmployeeResponse, error) {
+	var employee models.ShowEmployeeResponse
+	err := stg.db.QueryRow(`select id, company_id, phone, firstname, lastname from employees where company_id=$1 and id=$2`, queryParam.CompanyID, queryParam.EmployeeID).Scan(
+		&employee.ID,
+		&employee.CompanyID,
+		&employee.Phone,
+		&employee.Firstname,
+		&employee.Lastname,
+	)
+	if err != nil {
+		return employee, err
+	}
+
+	return employee, nil
+}

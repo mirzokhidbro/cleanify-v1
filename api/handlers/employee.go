@@ -44,3 +44,19 @@ func (h *Handler) GetEmployeeList(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, data)
 }
+
+func (h *Handler) ShowEmployeeDetailedData(c *gin.Context) {
+	var body models.ShowEmployeeRequest
+	if err := c.ShouldBindQuery(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	data, err := h.Stg.Employee().GetDetailedData(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, data)
+}
