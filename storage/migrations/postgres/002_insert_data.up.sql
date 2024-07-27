@@ -40,6 +40,11 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c34', 'show_telegram_group',             'company',     'Telegram guruh ma''lumotini batafsil ko''rish', 'telegram_groups');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c35', 'edit_telegram_group',        'company',     'Telegram guruhni tahrirlash', 'telegram_groups');
 
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c36', 'get_employees_list',                'company',     'Xodimlar ro''yxatini ko''rish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c37', 'add_employee_group',                'company',     'Xodim qo''shish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c38', 'show_employee_group',               'company',     'Xodim ma''lumotini batafsil ko''rish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c39', 'add_transaction_to_employee_group', 'company',     'Xodimga oylik berish', 'Xodimlar');
+
 
 
 INSERT INTO "order_statuses"("company_id", "name", "number", "description") 

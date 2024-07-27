@@ -109,7 +109,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
-		employeeGroup := baseRouter.Group("/employee")
+		employeeGroup := baseRouter.Group("/emp")
 		employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
 		employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
 		employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
