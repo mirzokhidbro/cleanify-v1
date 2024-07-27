@@ -38,3 +38,11 @@ type ShowEmployeeResponse struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 }
+
+type EmployeeTransactionRequest struct {
+	Salary        float64 `json:"salary"`
+	ReceivedMoney float64 `json:"received_money" binding:"required"`
+	EmployeeID    int     `json:"employee_id" binding:"required"`
+	CompanyID     string  `json:"company_id" binding:"required"`
+	UserID        string
+}

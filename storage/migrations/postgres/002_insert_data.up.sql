@@ -74,4 +74,5 @@ INSERT INTO "payment_purposes"("name", "type")
 VALUES
 ('from_order', 'income'),
 ('give_salary_to_worker', 'outcome'),
-('debt_collection_from_the_employee', 'income');
+('debt_collection_from_the_employee', 'income')
+('employee_loan', 'outcome');

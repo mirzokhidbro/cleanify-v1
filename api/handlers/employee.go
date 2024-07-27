@@ -60,3 +60,50 @@ func (h *Handler) ShowEmployeeDetailedData(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, data)
 }
+
+func (h *Handler) AddTransaction(c *gin.Context) {
+	var body models.EmployeeTransactionRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.InvalidArgument, err.Error())
+		return
+	}
+
+	if body.Salary == 0 && body.ReceivedMoney == 0 {
+		h.handleResponse(c, http.InvalidArgument, "At least one of received money and salary should be sent")
+		return
+	}
+
+	err := utils.TokenValid(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	jwtData, err := utils.ExtractTokenID(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	body.UserID = jwtData.UserID
+
+	employee, _ := h.Stg.Employee().GetDetailedData(models.ShowEmployeeRequest{
+		CompanyID:  body.CompanyID,
+		EmployeeID: body.EmployeeID,
+	})
+
+	if employee.ID == 0 {
+		h.handleResponse(c, http.BadRequest, "Employee not found")
+		return
+	}
+
+	err = h.Stg.Employee().AddTransaction(body)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "OK!")
+
+}
