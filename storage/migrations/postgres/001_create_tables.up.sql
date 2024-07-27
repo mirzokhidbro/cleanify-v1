@@ -247,4 +247,4 @@ ALTER TABLE "order_statuses"
 ADD "slug" VARCHAR;
 
 ALTER TABLE "employees"
-ADD "balance" FLOAT;
+ADD "balance" FLOAT DEFAULT 0;
