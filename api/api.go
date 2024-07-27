@@ -27,6 +27,14 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
+		employeeGroup := baseRouter.Group("/employees")
+		employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
+		employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
+		employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
+		employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
+	}
+
+	{
 		authRouter := baseRouter.Group("/auth")
 		authRouter.POST("/login", h.AuthUser)
 		authRouter.POST("/me", h.CurrentUser)
@@ -107,14 +115,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList)            //
 		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
 		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
-	}
-
-	{
-		employeeGroup := baseRouter.Group("/emp")
-		employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
-		employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
-		employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
-		employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
 	}
 
 	return
