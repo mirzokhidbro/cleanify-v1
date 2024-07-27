@@ -5,6 +5,7 @@ import (
 	"bw-erp/api/middleware"
 	"bw-erp/config"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +13,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r = gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 
-	r.Use(customCORSMiddleware())
+	r.Use(cors.Default())
 
 	r.GET("api/ping", h.Ping)
 
