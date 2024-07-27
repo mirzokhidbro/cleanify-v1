@@ -24,15 +24,20 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit) //
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
+
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees", h.CreateEmployee)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees", h.GetEmployeeList)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees/show", h.ShowEmployeeDetailedData)
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/add-transaction", h.AddTransaction)
 	}
 
-	{
-		employeeGroup := baseRouter.Group("/employees")
-		employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
-		employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
-		employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
-		employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
-	}
+	// {
+	// 	employeeGroup := baseRouter.Group("/employees")
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
+	// }
 
 	{
 		authRouter := baseRouter.Group("/auth")
