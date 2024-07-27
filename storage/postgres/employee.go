@@ -4,7 +4,6 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
-	"math"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -102,9 +101,44 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 }
 
 func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest) error {
-	difference := entity.Salary - entity.ReceivedMoney
+	// difference := entity.Salary - entity.ReceivedMoney
 
-	if difference == 0 {
+	if entity.Salary != 0 {
+		_, err := stg.db.Exec(`INSERT INTO transactions(
+			company_id,
+			payer_id,
+			payer_type,
+			amount,
+			receiver_id,
+			receiver_type,
+			payment_type,
+			payment_purpose_id
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			$7,
+			$8
+		)`,
+			entity.CompanyID,
+			entity.UserID,
+			"users",
+			entity.Salary,
+			entity.EmployeeID,
+			"employees",
+			"cach",
+			models.PaymentPurposeSalaryOfEmployee,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if entity.ReceivedMoney != 0 {
 		_, err := stg.db.Exec(`INSERT INTO transactions(
 			company_id,
 			payer_id,
@@ -131,131 +165,12 @@ func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest
 			entity.EmployeeID,
 			"employees",
 			"cach",
-			models.PaymentPurposeGiveSalaryToWorker,
+			models.PaymentPurposeSalaryOfEmployee,
 		)
 
 		if err != nil {
 			return err
 		}
-	} else if math.Signbit(difference) {
-		stg.db.Exec(`INSERT INTO transactions(
-			company_id,
-			payer_id,
-			payer_type,
-			amount,
-			receiver_id,
-			receiver_type,
-			payment_type,
-			payment_purpose_id
-		) VALUES (
-			$1,
-			$2,
-			$3,
-			$4,
-			$5,
-			$6,
-			$7,
-			$8
-		)`,
-			entity.CompanyID,
-			entity.UserID,
-			"users",
-			entity.Salary,
-			entity.EmployeeID,
-			"employees",
-			"cach",
-			models.PaymentPurposeGiveSalaryToWorker,
-		)
-
-		stg.db.Exec(`INSERT INTO transactions(
-			company_id,
-			payer_id,
-			payer_type,
-			amount,
-			receiver_id,
-			receiver_type,
-			payment_type,
-			payment_purpose_id
-		) VALUES (
-			$1,
-			$2,
-			$3,
-			$4,
-			$5,
-			$6,
-			$7,
-			$8
-		)`,
-			entity.CompanyID,
-			entity.UserID,
-			"users",
-			math.Abs(difference),
-			entity.EmployeeID,
-			"employees",
-			"cach",
-			models.PaymentPurposeEmployeeLoan,
-		)
-
-	} else {
-		stg.db.Exec(`INSERT INTO transactions(
-			company_id,
-			payer_id,
-			payer_type,
-			amount,
-			receiver_id,
-			receiver_type,
-			payment_type,
-			payment_purpose_id
-		) VALUES (
-			$1,
-			$2,
-			$3,
-			$4,
-			$5,
-			$6,
-			$7,
-			$8,
-			$9
-		)`,
-			entity.CompanyID,
-			entity.UserID,
-			"users",
-			entity.Salary,
-			entity.EmployeeID,
-			"employees",
-			"cach",
-			models.PaymentPurposeGiveSalaryToWorker,
-		)
-
-		stg.db.Exec(`INSERT INTO transactions(
-			company_id,
-			payer_id,
-			payer_type,
-			amount,
-			receiver_id,
-			receiver_type,
-			payment_type,
-			payment_purpose_id
-		) VALUES (
-			$1,
-			$2,
-			$3,
-			$4,
-			$5,
-			$6,
-			$7,
-			$8,
-			$9
-		)`,
-			entity.CompanyID,
-			entity.EmployeeID,
-			"employees",
-			difference,
-			entity.UserID,
-			"users",
-			"cach",
-			models.PaymentPurposeDebtCollectionFromTheEmployee,
-		)
 	}
 
 	return nil
