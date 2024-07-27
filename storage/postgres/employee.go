@@ -86,22 +86,39 @@ func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList
 
 func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) (models.ShowEmployeeResponse, error) {
 	var employee models.ShowEmployeeResponse
-	err := stg.db.QueryRow(`select id, company_id, phone, firstname, lastname from employees where company_id=$1 and id=$2`, queryParam.CompanyID, queryParam.EmployeeID).Scan(
+	err := stg.db.QueryRow(`select id, company_id, phone, firstname, lastname, balance from employees where company_id=$1 and id=$2`, queryParam.CompanyID, queryParam.EmployeeID).Scan(
 		&employee.ID,
 		&employee.CompanyID,
 		&employee.Phone,
 		&employee.Firstname,
 		&employee.Lastname,
+		&employee.Balance,
 	)
 	if err != nil {
 		return employee, err
+	}
+
+	rows, err := stg.db.Query(`select amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at`, employee.ID)
+
+	if err != nil {
+		return employee, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var transaction models.EmployeeTransactions
+		if err := rows.Scan(&transaction.Amount, &transaction.Status, &transaction.CreatedAt); err != nil {
+			return employee, err
+		}
+
+		employee.Transaction = append(employee.Transaction, transaction)
 	}
 
 	return employee, nil
 }
 
 func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest) error {
-	// difference := entity.Salary - entity.ReceivedMoney
+	difference := entity.Salary - entity.ReceivedMoney
 
 	if entity.Salary != 0 {
 		_, err := stg.db.Exec(`INSERT INTO transactions(
@@ -165,12 +182,17 @@ func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest
 			entity.EmployeeID,
 			"employees",
 			"cach",
-			models.PaymentPurposeSalaryOfEmployee,
+			models.PaymentPurposeMoneyReceiverByWorker,
 		)
 
 		if err != nil {
 			return err
 		}
+	}
+
+	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, difference, entity.EmployeeID)
+	if err != nil {
+		return err
 	}
 
 	return nil

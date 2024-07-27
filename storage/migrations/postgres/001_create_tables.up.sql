@@ -245,3 +245,6 @@ CREATE TABLE IF NOT EXISTS "employees"(
 
 ALTER TABLE "order_statuses"
 ADD "slug" VARCHAR;
+
+ALTER TABLE "employees"
+ADD "balance" FLOAT;

@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type Employee struct {
 	CompanyID string `json:"company_id"`
 	Phone     string `json:"phone"`
@@ -32,11 +34,19 @@ type GetEmployeeListRequest struct {
 }
 
 type ShowEmployeeResponse struct {
-	ID        int    `json:"id"`
-	CompanyID string `json:"company_id"`
-	Phone     string `json:"phone"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	ID          int                    `json:"id"`
+	CompanyID   string                 `json:"company_id"`
+	Phone       string                 `json:"phone"`
+	Firstname   string                 `json:"firstname"`
+	Lastname    string                 `json:"lastname"`
+	Balance     float64                `json:"balance"`
+	Transaction []EmployeeTransactions `json:"transactions"`
+}
+
+type EmployeeTransactions struct {
+	Amount    float64   `json:"amount"`
+	Status    float64   `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type EmployeeTransactionRequest struct {
