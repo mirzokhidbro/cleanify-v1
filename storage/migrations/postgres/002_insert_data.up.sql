@@ -1,7 +1,8 @@
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c07', 'create_order',           'company',     'Buyurtma qo''shish', 'order');
-INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c08', 'get_orders_list',        'company',     'Buyurtmalar ro''yxatini ko''rish', 'order');
-INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c09', 'get_order',              'company',     'Buyurtma ma''lumotlarini batafsil ko''rish', 'order');
+-- INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c08', 'get_orders_list',        'company',     'Buyurtmalar ro''yxatini ko''rish', 'order');
+-- INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c09', 'get_order',              'company',     'Buyurtma ma''lumotlarini batafsil ko''rish', 'order');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c10', 'edit_order',             'company',     'Buyurtmani taxrirlash', 'order');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c40', 'delete_order',             'company',     'Buyurtmani o''chirish', 'order');
 
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c11', 'change_status_to_1',             'company',     'Buyurtma statusini "Olish kerak"ga o''zgartirish', 'order');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c12', 'change_status_to_2',             'company',     'Buyurtma statusini "Olingan"ga o''zgartirish', 'order');
