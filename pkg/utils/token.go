@@ -30,7 +30,7 @@ func createToken(user_id string, phone string, lifespan int) (string, error) {
 	claims["authorized"] = true
 	claims["user_id"] = user_id
 	claims["phone"] = phone
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(lifespan)).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
