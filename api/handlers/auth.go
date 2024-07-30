@@ -39,7 +39,7 @@ func (h *Handler) AuthUser(c *gin.Context) {
 		return
 	}
 
-	h.handleResponse(c, http.OK, response.AccessToken)
+	h.handleResponse(c, http.OK, response)
 }
 
 func (h *Handler) RefreshToken(c *gin.Context) {
