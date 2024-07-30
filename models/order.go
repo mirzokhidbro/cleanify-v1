@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+type PaymentType string
+
+const (
+	Cach       PaymentType = "cach"
+	CreditCard PaymentType = "credit_card"
+)
+
 type CreateOrderModel struct {
 	CompanyID   string  `json:"company_id" binding:"required"`
 	ClientID    int     `json:"client_id"`
@@ -50,7 +57,15 @@ type OrdersListRequest struct {
 
 type OrderShowResponse struct {
 	Order
-	OrderItems []OrderItem `json:"order_items"`
+	OrderItems       []OrderItem        `json:"order_items"`
+	OrderTransaction []OrderTransaction `json:"transactions"`
+}
+
+type OrderTransaction struct {
+	ReceiverFullname string    `json:"receiver_fullname"`
+	PaymentType      string    `json:"payment_type"`
+	Amount           float64   `json:"amount"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 type Order struct {
@@ -96,6 +111,14 @@ type UpdateOrderRequest struct {
 	Longitude   float64 `json:"longitude"`
 }
 
+type AddOrderPaymentRequest struct {
+	CompanyID   string  `json:"company_id" binding:"required"`
+	OrderID     int     `json:"order_id" binding:"required"`
+	Amount      float64 `json:"amount" binding:"required"`
+	PaymentType string  `json:"payment_type" binding:"required,oneof=cach credit_card"`
+	Description string  `json:"description"`
+}
+
 type NullFloat struct {
 	sql.NullFloat64
 }
@@ -113,8 +136,9 @@ type DeleteOrderRequest struct {
 }
 
 type SetOrderPriceRequest struct {
-	ID                 int     `json:"id" binding:"required"`
-	ServicePrice       float64 `json:"service_price" binding:"required"`
+	ID                 int    `json:"order_id" binding:"required"`
+	CompanyID          string `json:"company_id" binding:"required"`
+	ServicePrice       float64
 	DiscountPercentage float64 `json:"discount_percentage" binding:"required"`
 	DiscountPrice      float64
 }

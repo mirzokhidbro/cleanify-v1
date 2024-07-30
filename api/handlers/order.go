@@ -146,7 +146,7 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
-func (h *Handler) SetOrderPrice(c *gin.Context) {
+func (h *Handler) SetOrderDiscount(c *gin.Context) {
 	var body models.SetOrderPriceRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -154,17 +154,48 @@ func (h *Handler) SetOrderPrice(c *gin.Context) {
 	}
 
 	if body.DiscountPercentage > 100 {
-		h.handleResponse(c, http.BadRequest, "Chegirma foizi qanaqasiga buncha bo'lishi mumkin guvala!!!")
+		h.handleResponse(c, http.BadRequest, "Invalid discount percentage")
 		return
 	}
 
-	body.DiscountPrice = (body.ServicePrice / 100) * (100 - body.DiscountPercentage)
-	err := h.Stg.Order().SetPrice(body)
+	err := h.Stg.Order().SetDiscount(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 	h.handleResponse(c, http.OK, "OK!")
+}
+
+func (h *Handler) AddOrderPayment(c *gin.Context) {
+	var body models.AddOrderPaymentRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	jwtData, err := utils.ExtractTokenID(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(jwtData.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	err = h.Stg.Order().AddPayment(user.ID, body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, "OK!")
+}
+
+func (h *Handler) GetTransactionByOrder(c *gin.Context) {
+	h.handleResponse(c, http.OK, "ok")
 }
 
 func (h *Handler) UpdateOrderModel(c *gin.Context) {

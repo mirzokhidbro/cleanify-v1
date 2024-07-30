@@ -40,6 +40,11 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c34', 'show_telegram_group',             'company',     'Telegram guruh ma''lumotini batafsil ko''rish', 'telegram_groups');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c35', 'edit_telegram_group',        'company',     'Telegram guruhni tahrirlash', 'telegram_groups');
 
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c36', 'get_employees_list',                'company',     'Xodimlar ro''yxatini ko''rish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c37', 'add_employee_group',                'company',     'Xodim qo''shish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c38', 'show_employee_group',               'company',     'Xodim ma''lumotini batafsil ko''rish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c39', 'add_transaction_to_employee_group', 'company',     'Xodimga oylik berish', 'Xodimlar');
+
 
 
 INSERT INTO "order_statuses"("company_id", "name", "number", "description") 
@@ -54,3 +59,25 @@ VALUES
 ('2287b482-3450-44aa-aa43-8783d016d79b', 'Omborda',        8,  'Buyurtma omborga olindi'),
 ('2287b482-3450-44aa-aa43-8783d016d79b', 'Bekor qilindi',  99, 'Buyurtma bekor qilindi');
 
+"change_status_to_1"
+"change_status_to_2"
+"change_status_to_3"
+"change_status_to_4"
+"change_status_to_5"
+"change_status_to_6"
+"change_status_to_7"
+"change_status_to_8"
+"change_status_to_99"
+
+update order_statuses
+set slug = 'change_status_to_1'
+where number = 1
+
+
+
+INSERT INTO "payment_purposes"("name", "type")
+VALUES
+('from_order', 'income'),
+('give_salary_to_worker', 'outcome'),
+('debt_collection_from_the_employee', 'income')
+('employee_loan', 'outcome');

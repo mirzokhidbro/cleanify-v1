@@ -214,29 +214,37 @@ ADD "discounted_price" FLOAT;
 
 CREATE TABLE IF NOT EXISTS "transactions" (
     "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
     "receiver_id" VARCHAR,
     "receiver_type" VARCHAR,
-    "payment_purpose_id" VARCHAR,
+    "payment_purpose_id" INTEGER,
+    "amount" FLOAT,
     "payer_id" VARCHAR,
     "payer_type" VARCHAR,
     "description" TEXT,
+    "payment_type" TEXT,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS "payment_purposes" (
+    "id" SERIAL PRIMARY KEY,
+    "type" VARCHAR,
+    "name" VARCHAR
+)
+
+CREATE TABLE IF NOT EXISTS "employees"(
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "phone" VARCHAR,
+    "firstname" VARCHAR,
+    "lastname" VARCHAR,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
+
 ALTER TABLE "order_statuses"
 ADD "slug" VARCHAR;
 
-"change_status_to_1"
-"change_status_to_2"
-"change_status_to_3"
-"change_status_to_4"
-"change_status_to_5"
-"change_status_to_6"
-"change_status_to_7"
-"change_status_to_8"
-"change_status_to_99"
-
-update order_statuses
-set slug = 'change_status_to_1'
-where number = 1
+ALTER TABLE "employees"
+ADD "balance" FLOAT DEFAULT 0;

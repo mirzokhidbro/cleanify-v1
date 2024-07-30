@@ -323,6 +323,23 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.StatusChangeHistory = append(order.StatusChangeHistory, history)
 	}
 
+	transactions, err := stg.db.Query(`select u.firstname || ' ' || u.lastname as fullname, t.payment_type, t.amount, t.created_at from transactions t
+									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id::text
+									where payment_purpose_id = (select id from payment_purposes where name = 'from_order')
+									and payer_type = 'orders' and payer_id::int = $1`, order.ID)
+	if err != nil {
+		return order, err
+	}
+	defer transactions.Close()
+
+	for transactions.Next() {
+		var transaction models.OrderTransaction
+		if err := transactions.Scan(&transaction.ReceiverFullname, &transaction.PaymentType, &transaction.Amount, &transaction.CreatedAt); err != nil {
+			return order, err
+		}
+		order.OrderTransaction = append(order.OrderTransaction, transaction)
+	}
+
 	return order, nil
 }
 
@@ -525,13 +542,24 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 	return nil
 }
 
-func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
+func (stg *orderRepo) SetDiscount(entity models.SetOrderPriceRequest) error {
+	var ServicePrice float64
+
+	err := stg.db.QueryRow(`select sum(height*width*price) from order_items where order_id = $1`, entity.ID).Scan(
+		&ServicePrice,
+	)
+	if err != nil {
+		return err
+	}
+
+	DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
+
 	query := `UPDATE "orders" SET service_price = :service_price, discount_percentage = :discount_percentage, discounted_price = :discounted_price where id = :id`
 
 	params := map[string]interface{}{
 		"id":                  entity.ID,
-		"service_price":       entity.ServicePrice,
-		"discounted_price":    entity.DiscountPrice,
+		"service_price":       ServicePrice,
+		"discounted_price":    DiscountPrice,
 		"discount_percentage": entity.DiscountPercentage,
 	}
 
@@ -542,6 +570,56 @@ func (stg *orderRepo) SetPrice(entity models.SetOrderPriceRequest) error {
 	}
 
 	_, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentRequest) error {
+	var paymentPurposeId int
+
+	err := stg.db.QueryRow(`select id from payment_purposes where name = 'from_order'`).Scan(
+		&paymentPurposeId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stg.db.Exec(`INSERT INTO transactions(
+		company_id,
+		payer_id,
+		payer_type,
+		amount,
+		receiver_id,
+		receiver_type,
+		payment_type,
+		payment_purpose_id,
+		description
+	) VALUES (
+		$1,
+		$2,
+		$3,
+		$4,
+		$5,
+		$6,
+		$7,
+		$8,
+		$9
+	)`,
+		entity.CompanyID,
+		entity.OrderID,
+		"orders",
+		entity.Amount,
+		userID,
+		"users",
+		entity.PaymentType,
+		paymentPurposeId,
+		&entity.Description,
+	)
+
 	if err != nil {
 		return err
 	}

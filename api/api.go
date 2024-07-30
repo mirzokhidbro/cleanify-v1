@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/handlers"
 	"bw-erp/api/middleware"
 	"bw-erp/config"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,12 +24,26 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit) //
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
+
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees", h.CreateEmployee)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees", h.GetEmployeeList)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees/show", h.ShowEmployeeDetailedData)
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/add-transaction", h.AddTransaction)
 	}
+
+	// {
+	// 	employeeGroup := baseRouter.Group("/employees")
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
+	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
+	// }
 
 	{
 		authRouter := baseRouter.Group("/auth")
 		authRouter.POST("/login", h.AuthUser)
 		authRouter.POST("/me", h.CurrentUser)
+		authRouter.POST("/refresh-token", h.RefreshToken)
 		authRouter.Use(middleware.AuthMiddleware()).POST("/change-password", h.ChangePassword)
 	}
 
@@ -52,7 +67,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).POST("/set-price", h.SetOrderPrice)
+		orderRouter.Use(middleware.AuthMiddleware()).POST("/set-discount", h.SetOrderDiscount)
+		orderRouter.Use(middleware.AuthMiddleware()).POST("add-payment", h.AddOrderPayment)
+		orderRouter.Use(middleware.AuthMiddleware()).GET("get-transactions-by-order", h.GetTransactionByOrder)
 		// orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
 		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
 	}
@@ -80,11 +97,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
 	}
 
-	// {
-	// companyBotRouter := baseRouter.Group("company-bot")
-	// companyBotRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateCompanyBotModel)
-	// companyBotRouter.Use(middleware.AuthMiddleware()).GET("/start", h.BotStart)
-	// }
 	{
 		statistics := baseRouter.Group("statistics")
 		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
@@ -114,19 +126,58 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	return
 }
 
+// func customCORSMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		c.Header("Access-Control-Allow-Origin", "*")
+// 		c.Header("Access-Control-Allow-Credentials", "true")
+// 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+// 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With,  Platform-Type")
+// 		c.Header("Access-Control-Max-Age", "3600")
+
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(204)
+// 			return
+// 		}
+
+// 		c.Next()
+// 	}
+// }
+
 func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With,  Platform-Type")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Platform-Type")
 		c.Header("Access-Control-Max-Age", "3600")
 
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
 
 		c.Next()
 	}
 }
+
+// func customCORSMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		origin := c.Request.Header.Get("Origin")
+// 		if origin != "" {
+// 			c.Header("Access-Control-Allow-Origin", origin)
+// 		} else {
+// 			c.Header("Access-Control-Allow-Origin", "*")
+// 		}
+// 		c.Header("Access-Control-Allow-Credentials", "true")
+// 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+// 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Platform-Type")
+// 		c.Header("Access-Control-Max-Age", "3600")
+
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(204)
+// 			return
+// 		}
+
+// 		c.Next()
+// 	}
+// }
