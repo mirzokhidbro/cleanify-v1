@@ -12,7 +12,7 @@ import (
 )
 
 func GenerateToken(user_id string, phone string) (string, string, error) {
-	accessToken, err := createToken(user_id, phone, 720) // 1 hour lifespan for access token
+	accessToken, err := createToken(user_id, phone, 1) // 1 hour lifespan for access token
 	if err != nil {
 		return "", "", err
 	}
@@ -30,7 +30,7 @@ func createToken(user_id string, phone string, lifespan int) (string, error) {
 	claims["authorized"] = true
 	claims["user_id"] = user_id
 	claims["phone"] = phone
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(lifespan)).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * time.Duration(lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
@@ -40,7 +40,7 @@ func TokenValid(c *gin.Context) error {
 	tokenString := ExtractToken(c)
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
@@ -67,7 +67,7 @@ func ExtractTokenID(c *gin.Context) (models.JWTData, error) {
 	tokenString := ExtractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
