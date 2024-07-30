@@ -47,17 +47,17 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 
 
 
-INSERT INTO "order_statuses"("company_id", "name", "number", "description") 
+INSERT INTO "order_statuses"("company_id", "name", "number", "slug", "description") 
 VALUES 
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Olish kerak', 1,  'Bu status mijoz tomonidan yangi zayavka tushganini anglatadi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Olingan',        2,  'Bu status buyurtma mijozdan kuryer tomonidan olinganini anglatadi.'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Yuvilgan',       3,  'Bu status buyurtma yuvilganini bildiradi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Tayyor',         4,  'Bu status buyurtma tayyorligini anglatadi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Oborish kerak',  5,  'Buyurtma oborishga tayyor'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Topshirildi',    6,  'Buyurtma topshirildi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Qaytarildi',     7,  'Buyurtma Mijoz tomonidan qaytarildi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Omborda',        8,  'Buyurtma omborga olindi'),
-('2287b482-3450-44aa-aa43-8783d016d79b', 'Bekor qilindi',  99, 'Buyurtma bekor qilindi');
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Olish kerak',    1,  'change_status_to_1', 'Bu status mijoz tomonidan yangi zayavka tushganini anglatadi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Olingan',        2,  'change_status_to_2', 'Bu status buyurtma mijozdan kuryer tomonidan olinganini anglatadi.'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Yuvilgan',       3,  'change_status_to_3', 'Bu status buyurtma yuvilganini bildiradi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Tayyor',         4,  'change_status_to_4', 'Bu status buyurtma tayyorligini anglatadi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Oborish kerak',  5,  'change_status_to_5', 'Buyurtma oborishga tayyor'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Topshirildi',    6,  'change_status_to_6', 'Buyurtma topshirildi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Qaytarildi',     7,  'change_status_to_7', 'Buyurtma Mijoz tomonidan qaytarildi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Omborda',        8,  'change_status_to_8', 'Buyurtma omborga olindi'),
+('8070790f-429b-449e-bfe5-fab0440c518f', 'Bekor qilindi',  99, 'change_status_to_99', 'Buyurtma bekor qilindi');
 
 "change_status_to_1"
 "change_status_to_2"
