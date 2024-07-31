@@ -56,3 +56,12 @@ type EmployeeTransactionRequest struct {
 	CompanyID     string  `json:"company_id" binding:"required"`
 	UserID        string
 }
+
+type AttendanceEmployeeRequest struct {
+	CompanyID string `json:"company_id" binding:"required"`
+	Date      string `json:"date" binding:"required"`
+	Employees []struct {
+		AttendanceType int8 `json:"attendance_type" binding:"required"`
+		EmployeeID     int  `json:"employee_id" binding:"required"`
+	} `json:"employees"`
+}

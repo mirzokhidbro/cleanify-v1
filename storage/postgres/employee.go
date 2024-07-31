@@ -4,6 +4,7 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
+	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -191,6 +192,35 @@ func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest
 	}
 
 	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, difference, entity.EmployeeID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (stg *employeeRepo) Attendance(entity models.AttendanceEmployeeRequest) error {
+
+	employeesJSON, err := json.Marshal(entity.Employees)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stg.db.Exec(`INSERT INTO attendance(
+		company_id,
+		date,
+		employees
+	) VALUES (
+		$1,
+		$2,
+		$3
+	)`,
+		entity.CompanyID,
+		entity.Date,
+		employeesJSON,
+	)
+
 	if err != nil {
 		return err
 	}

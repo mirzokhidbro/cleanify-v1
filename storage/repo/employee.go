@@ -7,4 +7,5 @@ type EmployeeI interface {
 	GetList(companyID string) (res []models.GetEmployeeList, err error)
 	GetDetailedData(queryParam models.ShowEmployeeRequest) (models.ShowEmployeeResponse, error)
 	AddTransaction(entity models.EmployeeTransactionRequest) error
+	Attendance(entity models.AttendanceEmployeeRequest) error
 }

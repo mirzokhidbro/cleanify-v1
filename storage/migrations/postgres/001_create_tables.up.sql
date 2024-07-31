@@ -248,3 +248,12 @@ ADD "slug" VARCHAR;
 
 ALTER TABLE "employees"
 ADD "balance" FLOAT DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS "attendance"(
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "date" DATE,
+    "employees" JSONB,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
