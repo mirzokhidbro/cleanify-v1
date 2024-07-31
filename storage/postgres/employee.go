@@ -98,7 +98,7 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 		return employee, err
 	}
 
-	rows, err := stg.db.Query(`select amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at`, employee.ID)
+	rows, err := stg.db.Query(`select amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at desc`, employee.ID)
 
 	if err != nil {
 		return employee, err
