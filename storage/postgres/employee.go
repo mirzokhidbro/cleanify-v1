@@ -115,6 +115,21 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 		employee.Transaction = append(employee.Transaction, transaction)
 	}
 
+	attendances, err := stg.db.Query(`SELECT attendance_record->>'work_schedule' AS work_schedule, date FROM attendance, jsonb_array_elements(employees) AS attendance_record where company_id = $1 and attendance_record->>'employee_id' = $2;`, queryParam.CompanyID, queryParam.EmployeeID)
+
+	if err != nil {
+		return employee, err
+	}
+	defer rows.Close()
+	for attendances.Next() {
+		var attendance models.EmployeeAttendance
+		if err := attendances.Scan(&attendance.WorkSchedule, &attendance.Date); err != nil {
+			return employee, err
+		}
+
+		employee.Attendance = append(employee.Attendance, attendance)
+	}
+
 	return employee, nil
 }
 

@@ -41,6 +41,7 @@ type ShowEmployeeResponse struct {
 	Lastname    string                 `json:"lastname"`
 	Balance     float64                `json:"balance"`
 	Transaction []EmployeeTransactions `json:"transactions"`
+	Attendance  []EmployeeAttendance   `json:"employee_attendance"`
 }
 
 type EmployeeTransactions struct {
@@ -61,7 +62,12 @@ type AttendanceEmployeeRequest struct {
 	CompanyID string `json:"company_id" binding:"required"`
 	Date      string `json:"date" binding:"required"`
 	Employees []struct {
-		AttendanceType int8 `json:"attendance_type" binding:"required"`
-		EmployeeID     int  `json:"employee_id" binding:"required"`
+		WorkSchedule int8 `json:"work_schedule" binding:"required"`
+		EmployeeID   int  `json:"employee_id" binding:"required"`
 	} `json:"employees"`
+}
+
+type EmployeeAttendance struct {
+	Date         time.Time `json:"date"`
+	WorkSchedule string    `json:"work_schedule"`
 }
