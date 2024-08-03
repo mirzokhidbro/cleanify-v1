@@ -45,6 +45,7 @@ type ShowEmployeeResponse struct {
 }
 
 type EmployeeTransactions struct {
+	ID        int       `json:"id"`
 	Amount    float64   `json:"amount"`
 	Status    float64   `json:"status"`
 	CreatedAt time.Time `json:"created_at"`

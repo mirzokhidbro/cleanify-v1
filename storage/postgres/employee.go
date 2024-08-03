@@ -99,7 +99,7 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 		return employee, err
 	}
 
-	rows, err := stg.db.Query(`select amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at desc`, employee.ID)
+	rows, err := stg.db.Query(`select id, amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at desc`, employee.ID)
 
 	if err != nil {
 		return employee, err
@@ -108,7 +108,7 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 
 	for rows.Next() {
 		var transaction models.EmployeeTransactions
-		if err := rows.Scan(&transaction.Amount, &transaction.Status, &transaction.CreatedAt); err != nil {
+		if err := rows.Scan(&transaction.ID, &transaction.Amount, &transaction.Status, &transaction.CreatedAt); err != nil {
 			return employee, err
 		}
 
