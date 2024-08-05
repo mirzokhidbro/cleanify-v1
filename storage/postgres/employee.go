@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
 	"encoding/json"
@@ -42,22 +41,27 @@ func (stg employeeRepo) Create(entity models.CreateEmployeeRequest) error {
 	return nil
 }
 
-func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList, err error) {
+func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []models.GetEmployeeList, err error) {
 	var employees []models.GetEmployeeList
-	var arr []interface{}
-	params := make(map[string]interface{})
+	// var arr []interface{}
+	// params := make(map[string]interface{})
 
-	query := "select id, company_id, phone, firstname, lastname from employees"
-	filter := " WHERE true"
-	order := " ORDER BY firstname"
+	query := `with attendance as (SELECT attendance_record->>'work_schedule' AS work_schedule, cast(attendance_record->>'employee_id' as integer) as employee_id, date 
+			FROM attendance, jsonb_array_elements(employees) AS attendance_record
+			where company_id = $1 and "date" = $2)
+			select e.id, e.company_id, e.phone, e.firstname, e.lastname, coalesce(a.work_schedule, '0') as work_schedule, a.date from employees e
+			left join attendance a on e.id = a.employee_id where company_id = $1`
 
-	params["company_id"] = companyID
-	filter += " AND (company_id = :company_id)"
+	// filter := " WHERE true"
+	order := " ORDER BY e.firstname"
 
-	q := query + filter + order
+	// params["company_id"] = companyID
+	// filter += " AND (company_id = :company_id)"
 
-	q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := stg.db.Query(q, arr...)
+	q := query + order
+
+	// q, arr = helper.ReplaceQueryParams(q, params)
+	rows, err := stg.db.Query(q, entity.CompanyID, entity.Date)
 	if err != nil {
 		return res, err
 	}
@@ -71,7 +75,9 @@ func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList
 			&employee.CompanyID,
 			&employee.Phone,
 			&employee.Firstname,
-			&employee.Lastname)
+			&employee.Lastname,
+			&employee.WorkSchedule,
+			&employee.Date)
 		if err != nil {
 			return res, err
 		}

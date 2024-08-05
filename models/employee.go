@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Employee struct {
 	CompanyID string `json:"company_id"`
@@ -22,15 +24,18 @@ type ShowEmployeeRequest struct {
 }
 
 type GetEmployeeList struct {
-	CompanyID string `json:"company_id"`
-	Phone     string `json:"phone"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	ID        int    `json:"id"`
+	CompanyID    string     `json:"company_id"`
+	Phone        string     `json:"phone"`
+	Firstname    string     `json:"firstname"`
+	Lastname     string     `json:"lastname"`
+	ID           int        `json:"id"`
+	WorkSchedule int        `json:"work_schedule"`
+	Date         *time.Time `json:"date"`
 }
 
 type GetEmployeeListRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+	Date      string `json:"date" form:"date" binding:"required"`
 }
 
 type ShowEmployeeResponse struct {

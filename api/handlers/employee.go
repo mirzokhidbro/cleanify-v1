@@ -4,6 +4,7 @@ import (
 	"bw-erp/api/http"
 	"bw-erp/models"
 	"bw-erp/pkg/utils"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +37,10 @@ func (h *Handler) GetEmployeeList(c *gin.Context) {
 		return
 	}
 
-	data, err := h.Stg.Employee().GetList(body.CompanyID)
+	fmt.Print("body:\n")
+	fmt.Print(body)
+
+	data, err := h.Stg.Employee().GetList(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
