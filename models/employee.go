@@ -35,7 +35,7 @@ type GetEmployeeList struct {
 
 type GetEmployeeListRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
-	Date      string `json:"date" form:"date" binding:"required"`
+	Date      string `json:"date" form:"date"`
 }
 
 type ShowEmployeeResponse struct {

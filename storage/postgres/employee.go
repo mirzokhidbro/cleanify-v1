@@ -43,8 +43,6 @@ func (stg employeeRepo) Create(entity models.CreateEmployeeRequest) error {
 
 func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []models.GetEmployeeList, err error) {
 	var employees []models.GetEmployeeList
-	// var arr []interface{}
-	// params := make(map[string]interface{})
 
 	query := `with attendance as (SELECT attendance_record->>'work_schedule' AS work_schedule, cast(attendance_record->>'employee_id' as integer) as employee_id, date 
 			FROM attendance, jsonb_array_elements(employees) AS attendance_record
@@ -52,16 +50,17 @@ func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []mo
 			select e.id, e.company_id, e.phone, e.firstname, e.lastname, coalesce(a.work_schedule, '0') as work_schedule, a.date from employees e
 			left join attendance a on e.id = a.employee_id where company_id = $1`
 
-	// filter := " WHERE true"
 	order := " ORDER BY e.firstname"
 
-	// params["company_id"] = companyID
-	// filter += " AND (company_id = :company_id)"
-
 	q := query + order
+	var date string
+	// [TODO: must to fix this sh*t]
+	date = entity.Date
+	if entity.Date == "" {
+		date = "2006-12-12"
+	}
 
-	// q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := stg.db.Query(q, entity.CompanyID, entity.Date)
+	rows, err := stg.db.Query(q, entity.CompanyID, date)
 	if err != nil {
 		return res, err
 	}
