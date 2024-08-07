@@ -227,19 +227,33 @@ func (stg *employeeRepo) Attendance(entity models.AttendanceEmployeeRequest) err
 		return err
 	}
 
-	_, err = stg.db.Exec(`INSERT INTO attendance(
-		company_id,
-		date,
-		employees
-	) VALUES (
-		$1,
-		$2,
-		$3
-	)`,
-		entity.CompanyID,
-		entity.Date,
-		employeesJSON,
-	)
+	rows, err := stg.db.Query(`select company_id from attendance where company_id = $1 and date = $2`, entity.CompanyID, entity.Date)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	rows.Scan(&entity.CompanyID)
+
+	if len(entity.CompanyID) == 0 {
+		_, err = stg.db.Exec(`INSERT INTO attendance(
+			company_id,
+			date,
+			employees
+		) VALUES (
+			$1,
+			$2,
+			$3
+		)`,
+			entity.CompanyID,
+			entity.Date,
+			employeesJSON,
+		)
+	} else {
+		_, err = stg.db.Exec(`UPDATE "attendance" SET employees = $1 where company_id = $2 and date = $3`, employeesJSON, entity.CompanyID, entity.Date)
+	}
 
 	if err != nil {
 		return err
