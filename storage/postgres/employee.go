@@ -227,17 +227,11 @@ func (stg *employeeRepo) Attendance(entity models.AttendanceEmployeeRequest) err
 		return err
 	}
 
-	rows, err := stg.db.Query(`select company_id from attendance where company_id = $1 and date = $2`, entity.CompanyID, entity.Date)
+	var companyId string
 
-	if err != nil {
-		return err
-	}
+	stg.db.QueryRow(`select company_id from attendance where company_id = $1 and date = $2`, entity.CompanyID, entity.Date).Scan(&companyId)
 
-	defer rows.Close()
-
-	rows.Scan(&entity.CompanyID)
-
-	if len(entity.CompanyID) == 0 {
+	if len(companyId) == 0 {
 		_, err = stg.db.Exec(`INSERT INTO attendance(
 			company_id,
 			date,
