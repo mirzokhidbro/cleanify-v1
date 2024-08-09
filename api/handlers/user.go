@@ -33,18 +33,7 @@ func (h *Handler) GetList(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	// token, err := utils.ExtractTokenID(c)
 
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
-
-	// user, err := h.Stg.User().GetById(token.UserID)
-	// if err != nil {
-	// 	h.handleResponse(c, http.BadRequest, err.Error())
-	// 	return
-	// }
 	users, err := h.Stg.User().GetList(body.CompanyID)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
@@ -60,11 +49,6 @@ func (h *Handler) Edit(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-
-	// if !utils.IsValidUUID(body.CompanyID) {
-	// 	h.handleResponse(c, http.InvalidArgument, "company id is the invalid uuid")
-	// 	return
-	// }
 
 	if !utils.IsValidUUID(body.ID) {
 		h.handleResponse(c, http.InvalidArgument, "user id is the invalid uuid")

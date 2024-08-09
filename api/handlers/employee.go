@@ -36,7 +36,7 @@ func (h *Handler) GetEmployeeList(c *gin.Context) {
 		return
 	}
 
-	data, err := h.Stg.Employee().GetList(body.CompanyID)
+	data, err := h.Stg.Employee().GetList(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
@@ -106,4 +106,25 @@ func (h *Handler) AddTransaction(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, "OK!")
 
+}
+
+func (h *Handler) Attendance(c *gin.Context) {
+	var body models.AttendanceEmployeeRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+		return
+	}
+
+	err := h.Stg.Employee().Attendance(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, "OK!")
 }

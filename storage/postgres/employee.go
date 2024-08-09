@@ -1,9 +1,9 @@
 package postgres
 
 import (
-	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
+	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -41,22 +41,26 @@ func (stg employeeRepo) Create(entity models.CreateEmployeeRequest) error {
 	return nil
 }
 
-func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList, err error) {
+func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []models.GetEmployeeList, err error) {
 	var employees []models.GetEmployeeList
-	var arr []interface{}
-	params := make(map[string]interface{})
 
-	query := "select id, company_id, phone, firstname, lastname from employees"
-	filter := " WHERE true"
-	order := " ORDER BY firstname"
+	query := `with attendance as (SELECT attendance_record->>'work_schedule' AS work_schedule, cast(attendance_record->>'employee_id' as integer) as employee_id, date 
+			FROM attendance, jsonb_array_elements(employees) AS attendance_record
+			where company_id = $1 and "date" = $2)
+			select e.id, e.company_id, e.phone, e.firstname, e.lastname, coalesce(a.work_schedule, '0') as work_schedule, a.date from employees e
+			left join attendance a on e.id = a.employee_id where company_id = $1`
 
-	params["company_id"] = companyID
-	filter += " AND (company_id = :company_id)"
+	order := " ORDER BY e.firstname"
 
-	q := query + filter + order
+	q := query + order
+	var date string
+	// [TODO: must to fix this sh*t]
+	date = entity.Date
+	if entity.Date == "" {
+		date = "2006-12-12"
+	}
 
-	q, arr = helper.ReplaceQueryParams(q, params)
-	rows, err := stg.db.Query(q, arr...)
+	rows, err := stg.db.Query(q, entity.CompanyID, date)
 	if err != nil {
 		return res, err
 	}
@@ -70,7 +74,9 @@ func (stg *employeeRepo) GetList(companyID string) (res []models.GetEmployeeList
 			&employee.CompanyID,
 			&employee.Phone,
 			&employee.Firstname,
-			&employee.Lastname)
+			&employee.Lastname,
+			&employee.WorkSchedule,
+			&employee.Date)
 		if err != nil {
 			return res, err
 		}
@@ -98,7 +104,7 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 		return employee, err
 	}
 
-	rows, err := stg.db.Query(`select amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at desc`, employee.ID)
+	rows, err := stg.db.Query(`select id, amount, payment_purpose_id, created_at from transactions where receiver_type = 'employees' and receiver_id = $1 order by created_at desc`, employee.ID)
 
 	if err != nil {
 		return employee, err
@@ -107,11 +113,26 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 
 	for rows.Next() {
 		var transaction models.EmployeeTransactions
-		if err := rows.Scan(&transaction.Amount, &transaction.Status, &transaction.CreatedAt); err != nil {
+		if err := rows.Scan(&transaction.ID, &transaction.Amount, &transaction.Status, &transaction.CreatedAt); err != nil {
 			return employee, err
 		}
 
 		employee.Transaction = append(employee.Transaction, transaction)
+	}
+
+	attendances, err := stg.db.Query(`SELECT attendance_record->>'work_schedule' AS work_schedule, date FROM attendance, jsonb_array_elements(employees) AS attendance_record where company_id = $1 and attendance_record->>'employee_id' = $2;`, queryParam.CompanyID, queryParam.EmployeeID)
+
+	if err != nil {
+		return employee, err
+	}
+	defer rows.Close()
+	for attendances.Next() {
+		var attendance models.EmployeeAttendance
+		if err := attendances.Scan(&attendance.WorkSchedule, &attendance.Date); err != nil {
+			return employee, err
+		}
+
+		employee.Attendance = append(employee.Attendance, attendance)
 	}
 
 	return employee, nil
@@ -119,6 +140,9 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 
 func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest) error {
 	difference := entity.Salary - entity.ReceivedMoney
+	var balance float64
+
+	stg.db.QueryRow(`select balance from employees where id = $1`, entity.EmployeeID).Scan(&balance)
 
 	if entity.Salary != 0 {
 		_, err := stg.db.Exec(`INSERT INTO transactions(
@@ -190,7 +214,45 @@ func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest
 		}
 	}
 
-	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, difference, entity.EmployeeID)
+	balance = balance + difference
+	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, balance, entity.EmployeeID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (stg *employeeRepo) Attendance(entity models.AttendanceEmployeeRequest) error {
+
+	employeesJSON, err := json.Marshal(entity.Employees)
+
+	if err != nil {
+		return err
+	}
+
+	var companyId string
+
+	stg.db.QueryRow(`select company_id from attendance where company_id = $1 and date = $2`, entity.CompanyID, entity.Date).Scan(&companyId)
+
+	if len(companyId) == 0 {
+		_, err = stg.db.Exec(`INSERT INTO attendance(
+			company_id,
+			date,
+			employees
+		) VALUES (
+			$1,
+			$2,
+			$3
+		)`,
+			entity.CompanyID,
+			entity.Date,
+			employeesJSON,
+		)
+	} else {
+		_, err = stg.db.Exec(`UPDATE "attendance" SET employees = $1 where company_id = $2 and date = $3`, employeesJSON, entity.CompanyID, entity.Date)
+	}
+
 	if err != nil {
 		return err
 	}
