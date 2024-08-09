@@ -41,10 +41,11 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c34', 'show_telegram_group',             'company',     'Telegram guruh ma''lumotini batafsil ko''rish', 'telegram_groups');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c35', 'edit_telegram_group',        'company',     'Telegram guruhni tahrirlash', 'telegram_groups');
 
-INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c36', 'get_employees_list',                'company',     'Xodimlar ro''yxatini ko''rish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c36', 'get_employees_list',          'company',     'Xodimlar ro''yxatini ko''rish', 'Xodimlar');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c37', 'add_employee',                'company',     'Xodim qo''shish', 'Xodimlar');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c38', 'show_employee',               'company',     'Xodim ma''lumotini batafsil ko''rish', 'Xodimlar');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c39', 'add_transaction_to_employee', 'company',     'Xodimga oylik berish', 'Xodimlar');
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c45', 'attendance_employee',         'company',     'Xodimlar davomati', 'Xodimlar');
 
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c43', 'setting_get_order_statuses',               'company',     'Buyurtma statuslarini ko''rish', '[Sozlama] Buyurtma Statuslari');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c44', 'setting_edit_order_status',                'company',     'Buyurtma statuslarini taxrirlash', '[Sozlama] Buyurtma Statuslari');
