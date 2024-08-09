@@ -140,6 +140,9 @@ func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) 
 
 func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest) error {
 	difference := entity.Salary - entity.ReceivedMoney
+	var balance float64
+
+	stg.db.QueryRow(`select balance from employees where id = $1`, entity.EmployeeID).Scan(&balance)
 
 	if entity.Salary != 0 {
 		_, err := stg.db.Exec(`INSERT INTO transactions(
@@ -211,7 +214,8 @@ func (stg *employeeRepo) AddTransaction(entity models.EmployeeTransactionRequest
 		}
 	}
 
-	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, difference, entity.EmployeeID)
+	balance = balance + difference
+	_, err := stg.db.Exec(`UPDATE "employees" SET balance = $1 where id = $2`, balance, entity.EmployeeID)
 	if err != nil {
 		return err
 	}
