@@ -6,7 +6,6 @@ import (
 	"bw-erp/pkg/utils"
 	"bytes"
 	"encoding/json"
-	"io"
 	"log"
 	newHttp "net/http"
 	"strconv"
@@ -235,19 +234,21 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	order, _ = h.Stg.Order().GetByPrimaryKey(body.ID)
 
 	if body.Status != 0 && oldOrderStatus != order.Status {
+
 		go func() {
-			h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
-				HistoryableType: "order",
-				HistoryableID:   order.ID,
-				Status:          int(body.Status),
-				UserID:          user.ID,
-			})
 
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
-				defer wg.Done()
 
+				h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
+					HistoryableType: "order",
+					HistoryableID:   order.ID,
+					Status:          int(body.Status),
+					UserID:          user.ID,
+				})
+
+				defer wg.Done()
 				requestBody := map[string]interface{}{
 					"order_id":   order.ID,
 					"status":     order.Status,
@@ -276,12 +277,6 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 					return
 				}
 				defer resp.Body.Close()
-
-				if resp.StatusCode != newHttp.StatusOK {
-					bodyBytes, _ := io.ReadAll(resp.Body)
-					bodyString := string(bodyBytes)
-					log.Printf("Received non-200 response: %d, body: %s", resp.StatusCode, bodyString)
-				}
 			}()
 
 			wg.Wait()
