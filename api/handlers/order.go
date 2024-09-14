@@ -235,19 +235,18 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	if body.Status != 0 && oldOrderStatus != order.Status {
 
+		h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
+			HistoryableType: "orders",
+			HistoryableID:   order.ID,
+			Status:          int(body.Status),
+			UserID:          user.ID,
+		})
+
 		go func() {
 
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
-
-				h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
-					HistoryableType: "order",
-					HistoryableID:   order.ID,
-					Status:          int(body.Status),
-					UserID:          user.ID,
-				})
-
 				defer wg.Done()
 				requestBody := map[string]interface{}{
 					"order_id":   order.ID,
