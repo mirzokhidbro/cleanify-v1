@@ -236,7 +236,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	if body.Status != 0 && oldOrderStatus != order.Status {
 
 		h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
-			HistoryableType: "order",
+			HistoryableType: "orders",
 			HistoryableID:   order.ID,
 			Status:          int(body.Status),
 			UserID:          user.ID,
