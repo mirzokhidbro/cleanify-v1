@@ -542,25 +542,25 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 	return nil
 }
 
-func (stg *orderRepo) SetDiscount(entity models.SetOrderPriceRequest) error {
-	var ServicePrice float64
+func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
+	// var ServicePrice float64
 
-	err := stg.db.QueryRow(`select sum(height*width*price) from order_items where order_id = $1`, entity.ID).Scan(
-		&ServicePrice,
-	)
-	if err != nil {
-		return err
-	}
+	// err := stg.db.QueryRow(`select sum(height*width*price) from order_items where order_id = $1`, entity.ID).Scan(
+	// 	&ServicePrice,
+	// )
+	// if err != nil {
+	// 	return err
+	// }
 
-	DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
+	// DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
 
-	query := `UPDATE "orders" SET service_price = :service_price, discount_percentage = :discount_percentage, discounted_price = :discounted_price where id = :id`
+	query := `UPDATE "orders" SET service_price = :service_price, discounted_price = :discounted_price where id = :id`
 
 	params := map[string]interface{}{
-		"id":                  entity.ID,
-		"service_price":       ServicePrice,
-		"discounted_price":    DiscountPrice,
-		"discount_percentage": entity.DiscountPercentage,
+		"id":               entity.ID,
+		"service_price":    entity.ServicePrice,
+		"discounted_price": entity.DiscountedPrice,
+		// "discount_percentage": entity.DiscountPercentage,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
