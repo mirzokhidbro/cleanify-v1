@@ -145,19 +145,14 @@ func (h *Handler) GetOrderByPrimaryKey(c *gin.Context) {
 	h.handleResponse(c, http.OK, data)
 }
 
-func (h *Handler) SetOrderDiscount(c *gin.Context) {
+func (h *Handler) SetOrderPrice(c *gin.Context) {
 	var body models.SetOrderPriceRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	if body.DiscountPercentage > 100 {
-		h.handleResponse(c, http.BadRequest, "Invalid discount percentage")
-		return
-	}
-
-	err := h.Stg.Order().SetDiscount(body)
+	err := h.Stg.Order().SetOrderPrice(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
