@@ -576,11 +576,11 @@ func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
 
 	// DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
 
-	query := `UPDATE "orders" SET service_price = :service_price, discounted_price = :discounted_price where id = :id`
+	query := `UPDATE "orders" SET discounted_price = :discounted_price where id = :id`
 
 	params := map[string]interface{}{
-		"id":               entity.ID,
-		"service_price":    entity.ServicePrice,
+		"id": entity.ID,
+		// "service_price":    entity.ServicePrice,
 		"discounted_price": entity.DiscountedPrice,
 		// "discount_percentage": entity.DiscountPercentage,
 	}
