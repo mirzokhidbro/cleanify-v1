@@ -252,11 +252,32 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									coalesce(o.service_price, 0),
 									coalesce(o.discount_percentage, 0),
 									coalesce(o.discounted_price, 0),
+									coalesce(round(sum(oi.width * oi.height * oi.price)::numeric, 2), 0) as price,
 									o.created_at,
 									o.updated_at 
 								from orders o
 								left join clients c on o.client_id = c.id 
-								where o.id = $1`, ID).Scan(
+								left join order_items oi on oi.order_id = o.id
+								where o.id = $1 group by 
+									o.id, 
+									o.company_id, 
+									c.phone_number, 
+									c.additional_phone_number, 
+									c.work_number, 
+									o.count, 
+									o.slug, 
+									o.description, 
+									c.latitute, 
+									c.longitude, 
+									o.client_id, 
+									o.address,
+									o.status,
+									o.payment_status,
+									o.service_price,
+									o.discount_percentage,
+									o.discounted_price,
+									o.created_at,
+									o.updated_at `, ID).Scan(
 		&order.ID,
 		&order.CompanyID,
 		&order.PhoneNumber,
@@ -274,6 +295,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		&order.ServicePrice,
 		&order.DiscountPercentage,
 		&order.DiscountPrice,
+		&order.Price,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
