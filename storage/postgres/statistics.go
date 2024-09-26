@@ -76,12 +76,16 @@ func (stg *statisticsRepo) GetServicePaymentStatistics(entity models.GetServiceP
 
 	if entity.DateFrom != "" {
 		params["date_from"] = entity.DateFrom
-		filter += " and (t.created_at) >= :date_from::date "
+		filter += " and (t.created_at::date >= :date_from::date) "
 	}
 
 	if entity.DateTo != "" {
 		params["date_to"] = entity.DateTo
-		filter += " and (t.created_at) <= :date_to::date "
+		filter += " and (t.created_at::date <= :date_to::date) "
+	}
+
+	if entity.DateFrom == "" && entity.DateTo == "" {
+		filter += " and (t.created_at::date = now()::date) "
 	}
 
 	group := " group by u.id, u.firstname, u.lastname"
