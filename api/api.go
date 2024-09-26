@@ -101,6 +101,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		statistics := baseRouter.Group("statistics")
 		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
+		statistics.Use(middleware.AuthMiddleware()).GET("get-service-statistics-payment", h.GetServicePaymentStatistics)
 	}
 	{
 		statistics := baseRouter.Group("permissions")
