@@ -16,3 +16,16 @@ type WorkVolumeListRequest struct {
 type GetWorkVolumeListRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 }
+
+type GetServicePaymentStatisticsRequest struct {
+	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+	DateFrom  string `json:"date_from" form:"date_from"`
+	DateTo    string `json:"date_to" form:"date_to"`
+}
+
+type ServicePaymentStatistics struct {
+	UserID    string  `json:"user_id"`
+	Firstname string  `json:"firstname"`
+	Lastname  string  `json:"lastname"`
+	Amount    float64 `json:"amount"`
+}

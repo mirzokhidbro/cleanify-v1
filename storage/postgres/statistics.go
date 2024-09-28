@@ -61,3 +61,61 @@ func (stg *statisticsRepo) GetWorkVolume(companyID string) ([]models.WorkVolume,
 
 	return workVolumes, nil
 }
+
+func (stg *statisticsRepo) GetServicePaymentStatistics(entity models.GetServicePaymentStatisticsRequest) ([]models.ServicePaymentStatistics, error) {
+	var arr []interface{}
+	var servicePaymentStatistics []models.ServicePaymentStatistics
+	params := make(map[string]interface{})
+
+	query := `select u.id, u.firstname, u.lastname, sum(t.amount) as amount from transactions t
+				inner join users u on t.receiver_id = u.id::text and t.payer_type = 'orders'`
+
+	params["company_id"] = entity.CompanyID
+
+	filter := " where (t.company_id = :company_id)"
+
+	if entity.DateFrom != "" {
+		params["date_from"] = entity.DateFrom
+		filter += " and (t.created_at::date >= :date_from::date) "
+	}
+
+	if entity.DateTo != "" {
+		params["date_to"] = entity.DateTo
+		filter += " and (t.created_at::date <= :date_to::date) "
+	}
+
+	if entity.DateFrom == "" && entity.DateTo == "" {
+		filter += " and (t.created_at::date = now()::date) "
+	}
+
+	group := " group by u.id, u.firstname, u.lastname"
+
+	q := query + filter + group
+
+	q, arr = helper.ReplaceQueryParams(q, params)
+	rows, err := stg.db.Query(q, arr...)
+
+	if err != nil {
+		return servicePaymentStatistics, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var servicePaymentStatistic models.ServicePaymentStatistics
+		err = rows.Scan(
+			&servicePaymentStatistic.UserID,
+			&servicePaymentStatistic.Firstname,
+			&servicePaymentStatistic.Lastname,
+			&servicePaymentStatistic.Amount)
+		if err != nil {
+			return nil, err
+		}
+		servicePaymentStatistics = append(servicePaymentStatistics, servicePaymentStatistic)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return servicePaymentStatistics, nil
+}

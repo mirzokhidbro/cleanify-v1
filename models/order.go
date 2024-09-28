@@ -7,10 +7,17 @@ import (
 )
 
 type PaymentType string
+type PaymentStatus int8
 
 const (
 	Cach       PaymentType = "cach"
 	CreditCard PaymentType = "credit_card"
+)
+
+const (
+	Pending PaymentStatus = 1
+	Partial PaymentStatus = 2
+	Paid    PaymentStatus = 3
 )
 
 type CreateOrderModel struct {
@@ -45,14 +52,15 @@ type OrderListResponse struct {
 }
 
 type OrdersListRequest struct {
-	Limit     int32     `json:"limit" form:"limit"`
-	Offset    int32     `json:"offset" form:"offset"`
-	Status    int       `json:"status" form:"status"`
-	Phone     string    `json:"phone" form:"phone"`
-	ID        string    `json:"id" form:"id"`
-	DateFrom  time.Time `json:"date_from" form:"date_from"`
-	DateTo    time.Time `json:"date_to" form:"date_to"`
-	CompanyID string    `json:"company_id" form:"company_id" binding:"required"`
+	Limit         int32         `json:"limit" form:"limit"`
+	Offset        int32         `json:"offset" form:"offset"`
+	Status        int           `json:"status" form:"status"`
+	PaymentStatus PaymentStatus `json:"payment_status" form:"payment_status"`
+	Phone         string        `json:"phone" form:"phone"`
+	ID            string        `json:"id" form:"id"`
+	DateFrom      time.Time     `json:"date_from" form:"date_from"`
+	DateTo        time.Time     `json:"date_to" form:"date_to"`
+	CompanyID     string        `json:"company_id" form:"company_id" binding:"required"`
 }
 
 type OrderShowResponse struct {
@@ -98,17 +106,18 @@ type OrderSendLocationRequest struct {
 }
 
 type UpdateOrderRequest struct {
-	ID          int     `json:"id" binding:"required"`
-	CompanyID   string  `json:"company_id"`
-	Address     string  `json:"address"`
-	Slug        string  `json:"slug"`
-	Status      int8    `json:"status"`
-	Phone       string  `json:"phone"`
-	ChatID      int64   `json:"chat_id"`
-	Description string  `json:"description"`
-	Count       int     `json:"count"`
-	Latitute    float64 `json:"latitute"`
-	Longitude   float64 `json:"longitude"`
+	ID            int           `json:"id" binding:"required"`
+	CompanyID     string        `json:"company_id"`
+	Address       string        `json:"address"`
+	Slug          string        `json:"slug"`
+	Status        int8          `json:"status"`
+	PaymentStatus PaymentStatus `json:"payment_status"`
+	Phone         string        `json:"phone"`
+	ChatID        int64         `json:"chat_id"`
+	Description   string        `json:"description"`
+	Count         int           `json:"count"`
+	Latitute      float64       `json:"latitute"`
+	Longitude     float64       `json:"longitude"`
 }
 
 type AddOrderPaymentRequest struct {

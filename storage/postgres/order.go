@@ -120,6 +120,11 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		filter += " AND (o.status = :status)"
 	}
 
+	if queryParam.PaymentStatus != 0 {
+		params["payment_status"] = queryParam.PaymentStatus
+		filter += " AND (o.payment_status = :payment_status)"
+	}
+
 	if !queryParam.DateFrom.IsZero() {
 		params["date_from"] = queryParam.DateFrom
 		filter += " AND (o.created_at >= :date_from::date)"
@@ -449,6 +454,10 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `longitude = :longitude,`
 	}
 
+	if entity.PaymentStatus != 0 {
+		query += `payment_status = :payment_status,`
+	}
+
 	query += `updated_at = now()
 			  WHERE
 					id = :id`
@@ -470,15 +479,16 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 	}
 
 	params := map[string]interface{}{
-		"id":          entity.ID,
-		"status":      entity.Status,
-		"slug":        entity.Slug,
-		"phone":       entity.Phone,
-		"description": entity.Description,
-		"count":       entity.Count,
-		"address":     entity.Address,
-		"latitute":    entity.Latitute,
-		"longitude":   entity.Longitude,
+		"id":             entity.ID,
+		"status":         entity.Status,
+		"slug":           entity.Slug,
+		"phone":          entity.Phone,
+		"description":    entity.Description,
+		"count":          entity.Count,
+		"address":        entity.Address,
+		"latitute":       entity.Latitute,
+		"longitude":      entity.Longitude,
+		"payment_status": entity.PaymentStatus,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -565,24 +575,14 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 }
 
 func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
-	// var ServicePrice float64
+	query := `UPDATE "orders" SET discounted_price = :discounted_price, payment_status = :payment_status where id = :id`
 
-	// err := stg.db.QueryRow(`select sum(height*width*price) from order_items where order_id = $1`, entity.ID).Scan(
-	// 	&ServicePrice,
-	// )
-	// if err != nil {
-	// 	return err
-	// }
-
-	// DiscountPrice := (ServicePrice / 100) * (100 - entity.DiscountPercentage)
-
-	query := `UPDATE "orders" SET discounted_price = :discounted_price where id = :id`
+	var payment_status models.PaymentStatus = models.Pending
 
 	params := map[string]interface{}{
-		"id": entity.ID,
-		// "service_price":    entity.ServicePrice,
+		"id":               entity.ID,
 		"discounted_price": entity.DiscountedPrice,
-		// "discount_percentage": entity.DiscountPercentage,
+		"payment_status":   payment_status,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -644,6 +644,27 @@ func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentReq
 
 	if err != nil {
 		return err
+	}
+
+	var PaidAmount float64
+
+	err = stg.db.QueryRow(`select sum(amount) from transactions where payer_type = 'orders' and payer_id::int = $1`, entity.OrderID).Scan(&PaidAmount)
+
+	if err != nil {
+		return err
+	}
+
+	var ServicePrice float64
+
+	err = stg.db.QueryRow(`select discounted_price from orders where id = $1`, entity.OrderID).Scan(&ServicePrice)
+
+	if err != nil {
+		return err
+	}
+
+	if PaidAmount == ServicePrice {
+		var payment_status models.PaymentStatus = models.Paid
+		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
 	}
 
 	return nil
