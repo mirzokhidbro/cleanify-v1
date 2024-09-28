@@ -502,25 +502,6 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		return 0, err
 	}
 
-	// if entity.Status != 0 {
-	// 	stg.db.QueryRow(`INSERT INTO status_change_histories(
-	// 		historyable_id,
-	// 		historyable_type,
-	// 		user_id,
-	// 		status
-	// 	) VALUES (
-	// 		$1,
-	// 		$2,
-	// 		$3,
-	// 		$4
-	// 	) RETURNING id`,
-	// 		entity.ID,
-	// 		"orders",
-	// 		userID,
-	// 		entity.Status,
-	// 	).Scan()
-	// }
-
 	return rowsAffected, nil
 }
 
@@ -664,6 +645,9 @@ func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentReq
 
 	if PaidAmount == ServicePrice {
 		var payment_status models.PaymentStatus = models.Paid
+		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
+	} else {
+		var payment_status models.PaymentStatus = models.Partial
 		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
 	}
 
