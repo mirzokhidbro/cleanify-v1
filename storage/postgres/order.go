@@ -577,10 +577,12 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
 	query := `UPDATE "orders" SET discounted_price = :discounted_price, payment_status = :payment_status where id = :id`
 
+	var payment_status models.PaymentStatus = models.Pending
+
 	params := map[string]interface{}{
 		"id":               entity.ID,
 		"discounted_price": entity.DiscountedPrice,
-		"payment_status":   1, //[TODO: bu yerda enum ishlatish kerak]
+		"payment_status":   payment_status,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -642,6 +644,27 @@ func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentReq
 
 	if err != nil {
 		return err
+	}
+
+	var PaidAmount float64
+
+	err = stg.db.QueryRow(`select sum(amount) from transactions where payer_type = 'orders' and payer_id::int = $1`, entity.OrderID).Scan(&PaidAmount)
+
+	if err != nil {
+		return err
+	}
+
+	var ServicePrice float64
+
+	err = stg.db.QueryRow(`select discounted_price from orders where id = $1`, entity.OrderID).Scan(&ServicePrice)
+
+	if err != nil {
+		return err
+	}
+
+	if PaidAmount == ServicePrice {
+		var payment_status models.PaymentStatus = models.Paid
+		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
 	}
 
 	return nil
