@@ -575,7 +575,7 @@ func (stg *orderRepo) Delete(entity models.DeleteOrderRequest) error {
 }
 
 func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
-	query := `UPDATE "orders" SET discounted_price = :discounted_price where id = :id`
+	query := `UPDATE "orders" SET discounted_price = :discounted_price, payment_status = :payment_status where id = :id`
 
 	params := map[string]interface{}{
 		"id":               entity.ID,
