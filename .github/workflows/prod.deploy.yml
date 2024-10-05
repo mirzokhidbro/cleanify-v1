@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: clenaify_prod_runner
+    runs-on: cleanify_prod_runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
