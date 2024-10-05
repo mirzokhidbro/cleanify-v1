@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: bwerp-dev-api-runner
+    runs-on: cleanify_dev_runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,17 +18,17 @@ jobs:
           go-version: '1.21'
 
       - name: Remove old project files and folders
-        run: find /home/bwerp_dev/www/backend/bwerp-dev -type f ! -name '.env' -delete
+        run: find /home/cleanify_dev/www/backend -type f ! -name '.env' -delete
 
       - name: Copy project
-        run: cp -r /home/bwerp_dev/actions-runner/_work/bw-erp/bw-erp/* /home/bwerp_dev/www/backend/bwerp-dev
+        run: cp -r /home/cleanify_dev/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_dev/www/backend
 
       - name: Build Go application
         run: |
-          cd /home/bwerp_dev/www/backend/bwerp-dev
+          cd /home/cleanify_dev/www/backend
           go build -o main ./cmd/main.go
 
       - name: Deploy
         run: |
-          echo "${{ secrets.BWERP_DEV_PASSWORD }}" | sudo -S systemctl restart bwerp_dev
+          echo "${{ secrets.CLEANIFY_DEV_PASSWORD }}" | sudo -S systemctl restart cleanify_dev.service
         
