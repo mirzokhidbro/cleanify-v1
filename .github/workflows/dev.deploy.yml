@@ -28,7 +28,7 @@ jobs:
           cd /home/cleanify_dev/www/backend
           go build -o main ./cmd/main.go
 
-      # - name: Deploy
-      #   run: |
-      #     echo "${{ secrets.BWERP_DEV_PASSWORD }}" | sudo -S systemctl restart bwerp_dev
+      - name: Deploy
+        run: |
+          echo "${{ secrets.CLEANIFY_DEV_PASSWORD }}" | sudo -S systemctl restart cleanify_dev.service
         
