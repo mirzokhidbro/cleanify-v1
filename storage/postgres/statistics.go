@@ -26,7 +26,7 @@ func (stg *statisticsRepo) GetWorkVolume(companyID string) ([]models.WorkVolume,
 		type
 		FROM order_items oi inner join orders o on oi.order_id = o.id where washed_at::date >= CONVERT(date, DATEADD(DAY, -15, GETDATE()))`
 
-	filter := " WHERE true"
+	filter := " "
 	order := " ORDER BY washed_at"
 	arrangement := " DESC"
 	group := " group by washed_at::date, type"
