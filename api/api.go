@@ -127,6 +127,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		notificationSettingRouter := baseRouter.Group("notification-setting")
 		notificationSettingRouter.Use(middleware.AuthMiddleware()).POST("", h.SetNotificationSetting)
+		notificationSettingRouter.Use(middleware.AuthMiddleware()).GET("", h.UsersListForNotificationSettings)
 	}
 
 	{

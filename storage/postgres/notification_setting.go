@@ -35,3 +35,26 @@ func (repo *notificationSettingRepo) NotificationSetting(entity models.SetNotifi
 	}
 	return nil
 }
+
+func (repo *notificationSettingRepo) UsersListForNotificationSettings(companyID string) []models.UsersListForNotificationSettings {
+	var users []models.UsersListForNotificationSettings
+
+	rows, err := repo.db.Query(`select firstname || ' ' || lastname as fullname, u.id from users u
+												inner join user_permissions up on up.user_id = u.id
+												where up.company_id = $1`, companyID)
+
+	if err != nil {
+		return users
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.UsersListForNotificationSettings
+		if err := rows.Scan(&user.Fullname, &user.UserID); err != nil {
+			return users
+		}
+		users = append(users, user)
+	}
+
+	return users
+}
