@@ -125,6 +125,11 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
+		notificationSettingRouter := baseRouter.Group("notification-setting")
+		notificationSettingRouter.Use(middleware.AuthMiddleware()).POST("", h.SetNotificationSetting)
+	}
+
+	{
 		orderStatuses := baseRouter.Group("order-statuses")
 		orderStatuses.Use(middleware.AuthMiddleware()).GET("", h.GetOrderStatusesList) //
 		orderStatuses.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderStatusModel)
