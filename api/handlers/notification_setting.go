@@ -21,11 +21,6 @@ func (h Handler) SetNotificationSetting(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidUUID(body.UserID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
-		return
-	}
-
 	err := h.Stg.NotificationSetting().NotificationSetting(body)
 
 	if err != nil {
@@ -50,5 +45,27 @@ func (h Handler) UsersListForNotificationSettings(c *gin.Context) {
 	}
 
 	data := h.Stg.NotificationSetting().UsersListForNotificationSettings(body.CompanyID)
+	h.handleResponse(c, http.OK, data)
+}
+
+func (h *Handler) GetUsersByStatus(c *gin.Context) {
+	var body models.GetUsersByStatusRequest
+
+	if err := c.ShouldBindQuery(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	if !utils.IsValidUUID(body.CompanyID) {
+		h.handleResponse(c, http.InvalidArgument, "company id is an invalid uuid")
+		return
+	}
+
+	data, err := h.Stg.NotificationSetting().GetUsersByStatus(body)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	h.handleResponse(c, http.OK, data)
 }

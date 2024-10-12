@@ -262,11 +262,11 @@ CREATE TABLE IF NOT EXISTS "attendance"(
 CREATE TABLE IF NOT EXISTS "notification_settings"(
     "id" SERIAL PRIMARY KEY,
     "company_id" UUID REFERENCES "companies"("id") NOT NULL,
-    "statuses" INT[],
-    "user_id" UUID REFERENCES "users"("id") NOT NULL,
+    "status" INT,
+    "user_ids" VARCHAR[],
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
 
 ALTER TABLE notification_settings
-ADD CONSTRAINT user_company_unique UNIQUE (user_id, company_id);
+ADD CONSTRAINT user_company_unique UNIQUE ("status", "company_id");

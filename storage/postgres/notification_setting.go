@@ -17,18 +17,18 @@ func NewNotificationSettingRepo(db *sqlx.DB) repo.NotificationSettingI {
 }
 
 func (repo *notificationSettingRepo) NotificationSetting(entity models.SetNotificationSettingRequest) error {
-	notification_statuses := utils.SetArray(utils.IntSliceToInterface(entity.Statuses))
+	user_ids := utils.SetArray(utils.StringSliceToInterface(entity.UserIDs))
 	_, err := repo.db.Exec(`
-		INSERT INTO notification_settings (user_id, company_id, statuses)	
+		INSERT INTO notification_settings (user_ids, company_id, status)	
 		VALUES ($1, $2, $3)
-		ON CONFLICT (user_id, company_id)
+		ON CONFLICT (status, company_id)
 		DO UPDATE SET
-		user_id = EXCLUDED.user_id,
+		user_ids = EXCLUDED.user_ids,
 		company_id = EXCLUDED.company_id,
-		statuses = EXCLUDED.statuses`,
-		entity.UserID,
+		status = EXCLUDED.status`,
+		user_ids,
 		entity.CompanyID,
-		notification_statuses,
+		entity.Status,
 	)
 	if err != nil {
 		return err
@@ -57,4 +57,39 @@ func (repo *notificationSettingRepo) UsersListForNotificationSettings(companyID 
 	}
 
 	return users
+}
+
+func (repo *notificationSettingRepo) GetUsersByStatus(entity models.GetUsersByStatusRequest) (models.GetUsersByStatus, error) {
+	var usersByStatus models.GetUsersByStatus
+
+	err := repo.db.QueryRow(`select name, number from order_statuses where company_id = $1 and number = $2`, entity.CompanyID, entity.Status).Scan(&usersByStatus.StatusName, &usersByStatus.StatusNumber)
+
+	if err != nil {
+		return usersByStatus, err
+	}
+
+	rows, err := repo.db.Query(`SELECT u.firstname || ' ' || lastname as fullname, id
+								FROM users u
+								JOIN (
+									SELECT DISTINCT unnest(ns.user_ids) AS user_id
+									FROM order_statuses os
+									JOIN notification_settings ns ON os.company_id = ns.company_id AND ns.status = os.number
+									WHERE os.number = $1 AND os.company_id = $2
+								) AS subquery ON u.id = subquery.user_id::uuid`, entity.Status, entity.CompanyID)
+
+	if err != nil {
+		return usersByStatus, err
+	}
+
+	for rows.Next() {
+		var user models.UsersListForNotificationSettings
+		if err := rows.Scan(&user.Fullname, &user.UserID); err != nil {
+			return usersByStatus, err
+		}
+
+		usersByStatus.Users = append(usersByStatus.Users, user)
+	}
+
+	return usersByStatus, nil
+
 }
