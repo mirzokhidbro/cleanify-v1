@@ -270,3 +270,22 @@ CREATE TABLE IF NOT EXISTS "notification_settings"(
 
 ALTER TABLE notification_settings
 ADD CONSTRAINT user_company_unique UNIQUE ("status", "company_id");
+
+CREATE TABLE IF NOT EXISTS "notifications"(
+    "id" SERIAL PRIMARY KEY,
+    "company_id" UUID REFERENCES "companies"("id") NOT NULL,
+    "model_type" VARCHAR(255),
+    "model_id" INT,
+    "status" INT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS "user_notifications"(
+    "id" SERIAL PRIMARY KEY,
+    "notification_id" BIGINT REFERENCES "notifications"("id") NOT NULL,
+    "is_read" BOOLEAN DEFAULT FALSE,
+    "user_id" UUID,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)

@@ -14,4 +14,5 @@ type CreateStatusChangeHistoryModel struct {
 	HistoryableID   int
 	UserID          string
 	Status          int
+	CompanyID       string
 }

@@ -245,6 +245,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 			HistoryableID:   order.ID,
 			Status:          int(body.Status),
 			UserID:          user.ID,
+			CompanyID:       order.CompanyID,
 		})
 
 		go func() {
