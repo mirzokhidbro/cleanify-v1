@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -27,12 +30,20 @@ func HandleWebSocket(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	fmt.Println("query")
-
 	clientID := c.Query("user_id")
 
 	connections.Store(clientID, conn)
 	defer connections.Delete(clientID)
+
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				fmt.Println("Ping failed:", err)
+				return
+			}
+		}
+	}()
 
 	for {
 		_, msg, err := conn.ReadMessage()
