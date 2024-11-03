@@ -248,6 +248,17 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 			CompanyID:       order.CompanyID,
 		})
 
+		notifications, _ := h.Stg.Notification().GetNotificationsByStatus(models.GetNotificationsByStatusRequest{
+			CompanyID: order.CompanyID,
+			Status:    int8(body.Status),
+			ModelType: "orders",
+			ModelID:   order.ID,
+		})
+
+		for _, notification := range notifications {
+			utils.SendMessageToClient(notification.UserID, notification)
+		}
+
 		go func() {
 
 			var wg sync.WaitGroup

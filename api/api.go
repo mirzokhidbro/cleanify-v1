@@ -4,67 +4,21 @@ import (
 	"bw-erp/api/handlers"
 	"bw-erp/api/middleware"
 	"bw-erp/config"
-	"log"
+	"bw-erp/pkg/utils"
 	"net/http"
-
-	"github.com/gorilla/websocket"
 
 	"github.com/gin-gonic/gin"
 )
 
-var clients = make(map[*websocket.Conn]bool)
-
-var upgrader = websocket.Upgrader{}
-
-func handleConnections(broadcast chan []byte, w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ws.Close()
-
-	clients[ws] = true
-
-	for {
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			log.Printf("Mijoz bilan ulanish tugadi: %v", err)
-			delete(clients, ws)
-			break
-		}
-
-		broadcast <- msg
-	}
-}
-
-func handleMessages(broadcast chan []byte) {
-	for {
-		msg := <-broadcast
-		for client := range clients {
-			err := client.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				log.Printf("Mijozga xabar jo'natishda xatolik: %v", err)
-				client.Close()
-				delete(clients, client)
-			}
-		}
-	}
-}
-
 func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
-	var broadcast = make(chan []byte)
 	r = gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handleConnections(broadcast, w, r)
-	})
-
-	go handleMessages(broadcast)
 
 	r.Use(customCORSMiddleware())
 
 	r.GET("api/ping", h.Ping)
+
+	r.GET("/notifications", utils.HandleWebSocket)
 
 	baseRouter := r.Group("/api/v1")
 	{
