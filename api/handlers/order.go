@@ -240,7 +240,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	if body.Status != 0 && oldOrderStatus != order.Status {
 
-		h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
+		notificationID, _ := h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
 			HistoryableType: "orders",
 			HistoryableID:   order.ID,
 			Status:          int(body.Status),
@@ -249,10 +249,11 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		})
 
 		notifications, _ := h.Stg.Notification().GetNotificationsByStatus(models.GetNotificationsByStatusRequest{
-			CompanyID: order.CompanyID,
-			Status:    int8(body.Status),
-			ModelType: "orders",
-			ModelID:   order.ID,
+			// CompanyID: order.CompanyID,
+			// Status:    int8(body.Status),
+			// ModelType: "orders",
+			// ModelID:   order.ID,
+			NotificationID: notificationID,
 		})
 
 		for _, notification := range notifications {

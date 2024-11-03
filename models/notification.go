@@ -6,10 +6,11 @@ type GetMyNotificationsRequest struct {
 }
 
 type GetNotificationsByStatusRequest struct {
-	Status    int8
-	CompanyID string
-	ModelType string
-	ModelID   int
+	NotificationID int
+	// Status    int8
+	// CompanyID string
+	// ModelType string
+	// ModelID   int
 }
 
 type GetMyNotificationsResponse struct {

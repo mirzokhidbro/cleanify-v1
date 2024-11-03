@@ -16,8 +16,8 @@ func NewStatusChangeHistoryRepo(db *sqlx.DB) repo.StatusChangeHistoryI {
 	return &statusChangeHistoryRepo{db: db}
 }
 
-func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHistoryModel) error {
-	_, err := stg.db.Exec(`INSERT INTO status_change_histories(
+func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHistoryModel) (int, error) {
+	stg.db.Exec(`INSERT INTO status_change_histories(
 		historyable_id,
 		historyable_type,
 		user_id,
@@ -63,7 +63,7 @@ func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHisto
 		).Scan(&notification_id)
 
 		if err != nil {
-			return err
+			return notification_id, err
 		}
 
 		for _, user_id := range userIDArray {
@@ -80,11 +80,11 @@ func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHisto
 			)
 
 			if err != nil {
-				return err
+				return notification_id, err
 			}
 		}
 
 	}
 
-	return err
+	return notification_id, nil
 }

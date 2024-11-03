@@ -64,7 +64,7 @@ func (stg notificationRepo) GetNotificationsByStatus(entity models.GetNotificati
 
 	rows, err := stg.db.Query(`select n.company_id, n.model_type, n.status, ui.user_id from user_notifications ui
 								inner join notifications n on ui.notification_id = n.id
-								where n.status = $1 and n.company_id = $2 and n.model_type = $3 and n.model_id = $4`, entity.Status, entity.CompanyID, entity.ModelType, entity.ModelID)
+								where n.id = $1 `, entity.NotificationID)
 
 	if err != nil {
 		return nil, err
