@@ -4,67 +4,21 @@ import (
 	"bw-erp/api/handlers"
 	"bw-erp/api/middleware"
 	"bw-erp/config"
-	"log"
+	"bw-erp/pkg/utils"
 	"net/http"
-
-	"github.com/gorilla/websocket"
 
 	"github.com/gin-gonic/gin"
 )
 
-var clients = make(map[*websocket.Conn]bool)
-
-var upgrader = websocket.Upgrader{}
-
-func handleConnections(broadcast chan []byte, w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ws.Close()
-
-	clients[ws] = true
-
-	for {
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			log.Printf("Mijoz bilan ulanish tugadi: %v", err)
-			delete(clients, ws)
-			break
-		}
-
-		broadcast <- msg
-	}
-}
-
-func handleMessages(broadcast chan []byte) {
-	for {
-		msg := <-broadcast
-		for client := range clients {
-			err := client.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				log.Printf("Mijozga xabar jo'natishda xatolik: %v", err)
-				client.Close()
-				delete(clients, client)
-			}
-		}
-	}
-}
-
 func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
-	var broadcast = make(chan []byte)
 	r = gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handleConnections(broadcast, w, r)
-	})
-
-	go handleMessages(broadcast)
 
 	r.Use(customCORSMiddleware())
 
 	r.GET("api/ping", h.Ping)
+
+	r.GET("/notifications", utils.HandleWebSocket)
 
 	baseRouter := r.Group("/api/v1")
 	{
@@ -100,16 +54,12 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		companyRouter := baseRouter.Group("/company")
 		companyRouter.POST("", h.CreateCompanyModel)
-		// companyRouter.Use(middleware.AuthMiddleware()).GET("/get-by-owner", h.GetCompanyByOwnerId)
 	}
 
-	// {
-	// 	roleRouter := baseRouter.Group("/role")
-	// 	roleRouter.POST("", h.CreateRoleModel)
-	// 	roleRouter.Use(middleware.AuthMiddleware()).GET("/show/:role-id", h.GetRoleByPrimaryKey)
-	// 	roleRouter.Use(middleware.AuthMiddleware()).GET("/:company-id", h.GetRolesListByCompany)
-	// 	roleRouter.Use(middleware.AuthMiddleware()).POST("/give-permissions", h.GetPermissionsToRole)
-	// }
+	{
+		notificationRouret := baseRouter.Group("/notifications")
+		notificationRouret.Use(middleware.AuthMiddleware()).GET("/", h.GetMyNotifications)
+	}
 
 	{
 		orderRouter := baseRouter.Group("orders")
@@ -120,8 +70,14 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).POST("/set-price", h.SetOrderPrice)
 		orderRouter.Use(middleware.AuthMiddleware()).POST("add-payment", h.AddOrderPayment)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("get-transactions-by-order", h.GetTransactionByOrder)
-		// orderRouter.Use(middleware.AuthMiddleware()).GET("/send-location", h.SendLocation)
 		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
+	}
+
+	{
+		notificationSettingRouter := baseRouter.Group("notification-setting")
+		notificationSettingRouter.Use(middleware.AuthMiddleware()).POST("", h.SetNotificationSetting)
+		notificationSettingRouter.Use(middleware.AuthMiddleware()).GET("", h.UsersListForNotificationSettings)
+		notificationSettingRouter.Use(middleware.AuthMiddleware()).GET("get-users-by-status", h.GetUsersByStatus)
 	}
 
 	{
@@ -177,23 +133,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	return
 }
 
-// func customCORSMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		c.Header("Access-Control-Allow-Origin", "*")
-// 		c.Header("Access-Control-Allow-Credentials", "true")
-// 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-// 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With,  Platform-Type")
-// 		c.Header("Access-Control-Max-Age", "3600")
-
-// 		if c.Request.Method == "OPTIONS" {
-// 			c.AbortWithStatus(204)
-// 			return
-// 		}
-
-// 		c.Next()
-// 	}
-// }
-
 func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -210,25 +149,3 @@ func customCORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-// func customCORSMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		origin := c.Request.Header.Get("Origin")
-// 		if origin != "" {
-// 			c.Header("Access-Control-Allow-Origin", origin)
-// 		} else {
-// 			c.Header("Access-Control-Allow-Origin", "*")
-// 		}
-// 		c.Header("Access-Control-Allow-Credentials", "true")
-// 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-// 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, Origin, Cache-Control, X-Requested-With, Platform-Type")
-// 		c.Header("Access-Control-Max-Age", "3600")
-
-// 		if c.Request.Method == "OPTIONS" {
-// 			c.AbortWithStatus(204)
-// 			return
-// 		}
-
-// 		c.Next()
-// 	}
-// }

@@ -6,7 +6,6 @@ import (
 	"bw-erp/pkg/utils"
 	"bw-erp/storage/repo"
 	"errors"
-	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -153,8 +152,6 @@ func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequ
 	query := `UPDATE "telegram_groups" SET with_location = :with_location, notification_statuses = :notification_statuses WHERE	id = :id`
 
 	notification_statuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
-
-	fmt.Print(notification_statuses)
 
 	params := map[string]interface{}{
 		"id":                    ID,
