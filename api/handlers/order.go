@@ -243,16 +243,16 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		notificationID, _ := h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
 			HistoryableType: "orders",
 			HistoryableID:   order.ID,
-			Status:          int(body.Status),
 			UserID:          user.ID,
 			CompanyID:       order.CompanyID,
+			HistoryDetails: models.HistoryDetails{
+				Address: "test",
+				Type:    "status_changed",
+				Status:  int(body.Status),
+			},
 		})
 
 		notifications, _ := h.Stg.Notification().GetNotificationsByStatus(models.GetNotificationsByStatusRequest{
-			// CompanyID: order.CompanyID,
-			// Status:    int8(body.Status),
-			// ModelType: "orders",
-			// ModelID:   order.ID,
 			NotificationID: notificationID,
 		})
 

@@ -58,7 +58,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 	{
 		notificationRouret := baseRouter.Group("/notifications")
-		notificationRouret.Use(middleware.AuthMiddleware()).GET("/", h.GetMyNotifications)
+		notificationRouret.Use(middleware.AuthMiddleware()).GET("/list", h.GetMyNotifications)
 	}
 
 	{

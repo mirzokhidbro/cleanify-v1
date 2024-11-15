@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type GetMyNotificationsRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
 	UserID    string `json:"user_id" form:"user_id" binding:"required"`
@@ -14,10 +16,18 @@ type GetNotificationsByStatusRequest struct {
 }
 
 type GetMyNotificationsResponse struct {
-	CompanyID string `json:"company_id"`
-	ModelType string `json:"model_type"`
-	Status    int    `json:"status"`
-	UserID    string `json:"user_id"`
+	CompanyID    string                   `json:"company_id"`
+	ModelType    string                   `json:"model_type"`
+	ModelID      int                      `json:"model_id"`
+	UserID       string                   `json:"user_id"`
+	PermformedAt time.Time                `json:"performed_at"`
+	Details      OrderNotificationDetails `json:"details"`
+}
+
+type OrderNotificationDetails struct {
+	Type    string `json:"type"`
+	Address string `json:"address"`
+	Status  int    `json:"status"`
 }
 
 type Message struct {

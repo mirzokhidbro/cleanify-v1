@@ -13,6 +13,12 @@ type CreateStatusChangeHistoryModel struct {
 	HistoryableType string
 	HistoryableID   int
 	UserID          string
-	Status          int
 	CompanyID       string
+	HistoryDetails
+}
+
+type HistoryDetails struct {
+	Type    string `json:"type"`
+	Address string `json:"address"`
+	Status  int    `json:"status"`
 }

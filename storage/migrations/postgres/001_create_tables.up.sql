@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS "notifications"(
     "company_id" UUID REFERENCES "companies"("id") NOT NULL,
     "model_type" VARCHAR(255),
     "model_id" INT,
-    "status" INT,
+    "details" JSONB,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
