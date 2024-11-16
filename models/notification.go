@@ -21,6 +21,7 @@ type GetMyNotificationsResponse struct {
 	ModelID      int                      `json:"model_id"`
 	UserID       string                   `json:"user_id"`
 	PermformedAt time.Time                `json:"performed_at"`
+	UnreadCount  int                      `json:"unread_count"`
 	Details      OrderNotificationDetails `json:"details"`
 }
 
