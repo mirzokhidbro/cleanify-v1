@@ -261,7 +261,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 		for _, notification := range notifications {
 			// Get unread notifications count for the user
-			unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
+			unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID, notification.CompanyID)
 			if err != nil {
 				log.Printf("Error getting unread notifications count: %v", err)
 				continue
