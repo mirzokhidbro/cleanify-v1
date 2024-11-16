@@ -249,7 +249,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 			UserID:          user.ID,
 			CompanyID:       order.CompanyID,
 			HistoryDetails: models.HistoryDetails{
-				Address: "test",
+				Address: *order.Address,
 				Type:    "status_changed",
 				Status:  int(body.Status),
 			},
@@ -260,17 +260,14 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		})
 
 		for _, notification := range notifications {
-			// Get unread notifications count for the user
-			unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID, notification.CompanyID)
+			unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
 			if err != nil {
 				log.Printf("Error getting unread notifications count: %v", err)
 				continue
 			}
 
-			// Add unread count to notification
 			notification.UnreadCount = unreadCount
 
-			// Send notification with unread count
 			utils.GetManager().SendMessage(notification.UserID, notification)
 		}
 

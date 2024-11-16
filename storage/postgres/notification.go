@@ -129,12 +129,12 @@ func (stg notificationRepo) GetNotificationsByStatus(entity models.GetNotificati
 	return notifications, nil
 }
 
-func (stg notificationRepo) GetUnreadNotificationsCount(userID string, companyID string) (int, error) {
+func (stg notificationRepo) GetUnreadNotificationsCount(userID string) (int, error) {
 	var count int
 	err := stg.db.QueryRow(`
 		SELECT COUNT(*) 
 		FROM user_notifications 
-		WHERE user_id = $1 AND is_read = false and created_at::date = now()::date, company_id = $2`, userID, companyID).Scan(&count)
+		WHERE user_id = $1 AND is_read = false and created_at::date = now()::date`, userID).Scan(&count)
 
 	if err != nil {
 		return 0, err
