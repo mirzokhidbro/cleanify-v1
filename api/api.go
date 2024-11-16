@@ -35,6 +35,8 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/attendance", h.Attendance)
 	}
 
+	baseRouter.Static("/uploads", "./uploads")
+
 	// {
 	// 	employeeGroup := baseRouter.Group("/employees")
 	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
