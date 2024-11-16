@@ -71,6 +71,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).POST("add-payment", h.AddOrderPayment)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("get-transactions-by-order", h.GetTransactionByOrder)
 		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
+		orderRouter.Use(middleware.AuthMiddleware()).POST("/comment", h.AddOrderComment)
 	}
 
 	{

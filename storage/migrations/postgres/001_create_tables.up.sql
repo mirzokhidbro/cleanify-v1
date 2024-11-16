@@ -289,3 +289,16 @@ CREATE TABLE IF NOT EXISTS "user_notifications"(
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
+
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    company_id UUID NOT NULL,
+    model_type VARCHAR(50) NOT NULL,
+    model_id INTEGER NOT NULL,
+    type VARCHAR(10) NOT NULL,
+    message TEXT,
+    voice_url TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_comments_model ON comments(model_type, model_id);

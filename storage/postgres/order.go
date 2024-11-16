@@ -4,6 +4,7 @@ import (
 	"bw-erp/helper"
 	"bw-erp/models"
 	"bw-erp/storage/repo"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -367,6 +368,39 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.OrderTransaction = append(order.OrderTransaction, transaction)
 	}
 
+	comments, err := stg.db.Query(`
+		SELECT 
+			id,
+			model_type,
+			model_id,
+			type,
+			message,
+			voice_url,
+			created_at
+		FROM comments 
+		WHERE model_type = 'order' AND model_id = $1 
+		ORDER BY created_at DESC`, ID)
+	if err != nil {
+		return order, err
+	}
+	defer comments.Close()
+
+	for comments.Next() {
+		var comment models.Comment
+		if err := comments.Scan(
+			&comment.ID,
+			&comment.ModelType,
+			&comment.ModelID,
+			&comment.Type,
+			&comment.Message,
+			&comment.VoiceURL,
+			&comment.CreatedAt,
+		); err != nil {
+			return order, err
+		}
+		order.Comments = append(order.Comments, comment)
+	}
+
 	return order, nil
 }
 
@@ -652,4 +686,29 @@ func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentReq
 	}
 
 	return nil
+}
+
+func (stg *orderRepo) AddComment(entity models.CreateOrderComment) error {
+	query := `
+		INSERT INTO comments (
+			model_type,
+			model_id,
+			type,
+			message,
+			voice_url,
+			created_at
+		) VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	_, err := stg.db.Exec(
+		query,
+		"order",
+		entity.OrderID,
+		entity.Type,
+		entity.Message,
+		entity.VoiceURL,
+		time.Now(),
+	)
+
+	return err
 }

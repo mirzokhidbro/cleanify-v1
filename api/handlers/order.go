@@ -8,10 +8,13 @@ import (
 	"encoding/json"
 	"log"
 	newHttp "net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (h *Handler) CreateOrderModel(c *gin.Context) {
@@ -319,4 +322,48 @@ func (h *Handler) DeleteOrder(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, "Deleted successfully!")
+}
+
+func (h *Handler) AddOrderComment(c *gin.Context) {
+	var body models.CreateOrderComment
+	if err := c.ShouldBind(&body); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	// Voice comment uchun faylni yuklash
+	if body.Type == "voice" {
+		file, err := c.FormFile("voice")
+		if err != nil {
+			h.handleResponse(c, http.BadRequest, "voice file is required for voice comment")
+			return
+		}
+
+		// Voice fayllar uchun papka yaratish
+		uploadDir := "uploads/voices"
+		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+
+		// Fayl nomini unique qilish
+		fileName := uuid.New().String() + filepath.Ext(file.Filename)
+		filePath := filepath.Join(uploadDir, fileName)
+
+		// Faylni saqlash
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			h.handleResponse(c, http.InternalServerError, err.Error())
+			return
+		}
+
+		body.VoiceURL = "/uploads/voices/" + fileName
+	}
+
+	err := h.Stg.Order().AddComment(body)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.Created, "Comment added to order successfully!")
 }

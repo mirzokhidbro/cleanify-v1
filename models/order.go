@@ -67,6 +67,14 @@ type OrderShowResponse struct {
 	Order
 	OrderItems       []OrderItem        `json:"order_items"`
 	OrderTransaction []OrderTransaction `json:"transactions"`
+	Comments         []Comment          `json:"comment"`
+}
+
+type CreateOrderComment struct {
+	OrderID  int    `json:"order_id" form:"order_id" binding:"required"`
+	Type     string `json:"type" form:"type" binding:"required,oneof=text voice"`
+	Message  string `json:"message" form:"message"`
+	VoiceURL string `json:"voice_url,omitempty"`
 }
 
 type OrderTransaction struct {
