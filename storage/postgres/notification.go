@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type notificationRepo struct {
@@ -17,9 +18,10 @@ func NewNotificationRepo(db *sqlx.DB) repo.NotificationI {
 }
 
 func (stg notificationRepo) GetMyNotifications(entity models.GetMyNotificationsRequest) ([]models.GetMyNotificationsResponse, error) {
-	rows, err := stg.db.Query(`SELECT n.company_id, n.model_type, n.model_id, n.details, ui.created_at FROM user_notifications ui
+	rows, err := stg.db.Query(`SELECT ui.id, n.company_id, n.model_type, n.model_id, n.details, ui.created_at 
+								FROM user_notifications ui
 								INNER JOIN notifications n ON ui.notification_id = n.id
-								WHERE ui.user_id = $1 AND n.company_id = $2`, entity.UserID, entity.CompanyID)
+								WHERE ui.user_id = $1 AND n.company_id = $2 and ui.created_at::date = now()::date`, entity.UserID, entity.CompanyID)
 
 	if err != nil {
 		return nil, err
@@ -27,11 +29,14 @@ func (stg notificationRepo) GetMyNotifications(entity models.GetMyNotificationsR
 	defer rows.Close()
 
 	var notifications []models.GetMyNotificationsResponse
+	var notificationIDs []int
 	for rows.Next() {
 		var notification models.GetMyNotificationsResponse
 		var detailsData []byte
+		var notificationID int
 
 		err = rows.Scan(
+			&notificationID,
 			&notification.CompanyID,
 			&notification.ModelType,
 			&notification.ModelID,
@@ -49,10 +54,19 @@ func (stg notificationRepo) GetMyNotifications(entity models.GetMyNotificationsR
 		}
 
 		notifications = append(notifications, notification)
+		notificationIDs = append(notificationIDs, notificationID)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
+	}
+
+	if len(notificationIDs) > 0 {
+		query := `UPDATE user_notifications SET is_read = true WHERE id = ANY($1::int[])`
+		_, err = stg.db.Exec(query, pq.Array(notificationIDs))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return notifications, nil

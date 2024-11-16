@@ -292,7 +292,6 @@ CREATE TABLE IF NOT EXISTS "user_notifications"(
 
 CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
-    company_id UUID NOT NULL,
     model_type VARCHAR(50) NOT NULL,
     model_id INTEGER NOT NULL,
     type VARCHAR(10) NOT NULL,

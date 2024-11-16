@@ -260,7 +260,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		})
 
 		for _, notification := range notifications {
-			utils.SendMessageToClient(notification.UserID, notification)
+			utils.GetManager().SendMessage(notification.UserID, notification)
 		}
 
 		go func() {
@@ -331,7 +331,6 @@ func (h *Handler) AddOrderComment(c *gin.Context) {
 		return
 	}
 
-	// Voice comment uchun faylni yuklash
 	if body.Type == "voice" {
 		file, err := c.FormFile("voice")
 		if err != nil {
@@ -339,18 +338,15 @@ func (h *Handler) AddOrderComment(c *gin.Context) {
 			return
 		}
 
-		// Voice fayllar uchun papka yaratish
 		uploadDir := "uploads/voices"
 		if err := os.MkdirAll(uploadDir, 0755); err != nil {
 			h.handleResponse(c, http.InternalServerError, err.Error())
 			return
 		}
 
-		// Fayl nomini unique qilish
 		fileName := uuid.New().String() + filepath.Ext(file.Filename)
 		filePath := filepath.Join(uploadDir, fileName)
 
-		// Faylni saqlash
 		if err := c.SaveUploadedFile(file, filePath); err != nil {
 			h.handleResponse(c, http.InternalServerError, err.Error())
 			return
