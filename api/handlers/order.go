@@ -339,6 +339,12 @@ func (h *Handler) AddOrderComment(c *gin.Context) {
 		return
 	}
 
+	token, err := utils.ExtractTokenID(c)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
 	if body.Type == "voice" {
 		file, err := c.FormFile("voice")
 		if err != nil {
@@ -363,7 +369,9 @@ func (h *Handler) AddOrderComment(c *gin.Context) {
 		body.VoiceURL = "/uploads/voices/" + fileName
 	}
 
-	err := h.Stg.Order().AddComment(body)
+	body.UserID = token.UserID
+
+	err = h.Stg.Order().AddComment(body)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return

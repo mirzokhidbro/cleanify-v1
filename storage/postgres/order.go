@@ -699,8 +699,9 @@ func (stg *orderRepo) AddComment(entity models.CreateOrderComment) error {
 			type,
 			message,
 			voice_url,
+			user_id,
 			created_at
-		) VALUES ($1, $2, $3, $4, $5, $6)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := stg.db.Exec(
@@ -710,6 +711,7 @@ func (stg *orderRepo) AddComment(entity models.CreateOrderComment) error {
 		entity.Type,
 		entity.Message,
 		entity.VoiceURL,
+		entity.UserID,
 		time.Now(),
 	)
 

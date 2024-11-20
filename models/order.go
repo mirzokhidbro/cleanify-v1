@@ -75,6 +75,7 @@ type CreateOrderComment struct {
 	Type     string `json:"type" form:"type" binding:"required,oneof=text voice"`
 	Message  string `json:"message" form:"message"`
 	VoiceURL string `json:"voice_url,omitempty"`
+	UserID   string `json:"-"`
 }
 
 type OrderTransaction struct {
