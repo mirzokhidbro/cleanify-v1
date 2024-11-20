@@ -9,5 +9,7 @@ type Comment struct {
 	Type      string    `json:"type"` // "text" yoki "voice"
 	Message   string    `json:"message"`
 	VoiceURL  string    `json:"voice_url,omitempty"`
+	AuthorID  int       `json:"author_id"`
+	FullName  string    `json:"full_name"`
 	CreatedAt time.Time `json:"created_at"`
 }

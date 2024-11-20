@@ -24,7 +24,6 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		return errors.New("confirmation password is not the same with password")
 	}
 	password, _ := utils.HashPassword(entity.Password)
-	// PermissionIDs := utils.SetArray(utils.StringSliceToInterface(entity.PermissionIDs))
 
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
@@ -321,4 +320,34 @@ func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, 
 	}
 
 	return rowsAffected, nil
+}
+
+func (stg *userRepo) GetCouriesList(companyID string) ([]models.GetCouriesResponse, error) {
+	var result []models.GetCouriesResponse
+
+	rows, err := stg.db.Query(`
+		SELECT u.id, firstname || ' ' || lastname as fullname 
+		FROM user_permissions up
+		INNER JOIN users u ON up.user_id = u.id
+		WHERE up.company_id = $1 AND up.is_courier = true`, companyID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var courier models.GetCouriesResponse
+		err := rows.Scan(&courier.ID, &courier.Fullname)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, courier)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

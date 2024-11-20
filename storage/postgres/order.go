@@ -370,16 +370,19 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	comments, err := stg.db.Query(`
 		SELECT 
-			id,
-			model_type,
-			model_id,
-			type,
-			message,
-			voice_url,
-			created_at
-		FROM comments 
-		WHERE model_type = 'order' AND model_id = $1 
-		ORDER BY created_at DESC`, ID)
+			c.id,
+			c.model_type,
+			c.model_id,
+			c.type,
+			c.message,
+			c.voice_url,
+			c.author_id,
+			COALESCE(u.firstname || ' ' || u.lastname, '') as full_name,
+			c.created_at
+		FROM comments c
+		LEFT JOIN users u ON u.id = c.user_id
+		WHERE c.model_type = 'order' AND c.model_id = $1 
+		ORDER BY c.created_at DESC`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -394,6 +397,8 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 			&comment.Type,
 			&comment.Message,
 			&comment.VoiceURL,
+			&comment.AuthorID,
+			&comment.FullName,
 			&comment.CreatedAt,
 		); err != nil {
 			return order, err

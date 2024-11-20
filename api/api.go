@@ -28,8 +28,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter := baseRouter.Group("/users")
 		usersRouter.Use(middleware.AuthMiddleware()).POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit) //
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/couriers", h.GetCouriesList)
 
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees", h.CreateEmployee)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees", h.GetEmployeeList)

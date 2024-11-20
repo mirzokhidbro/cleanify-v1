@@ -296,8 +296,12 @@ CREATE TABLE comments (
     model_id INTEGER NOT NULL,
     type VARCHAR(10) NOT NULL,
     message TEXT,
+    user_id UUID REFERENCES "users"("id"),
     voice_url TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_comments_model ON comments(model_type, model_id);
+
+ALTER TABLE user_permissions
+ADD  is_courier BOOLEAN DEFAULT FALSE;
