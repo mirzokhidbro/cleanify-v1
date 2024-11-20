@@ -376,7 +376,6 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 			c.type,
 			c.message,
 			c.voice_url,
-			c.author_id,
 			COALESCE(u.firstname || ' ' || u.lastname, '') as full_name,
 			c.created_at
 		FROM comments c
@@ -397,7 +396,6 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 			&comment.Type,
 			&comment.Message,
 			&comment.VoiceURL,
-			&comment.AuthorID,
 			&comment.FullName,
 			&comment.CreatedAt,
 		); err != nil {
