@@ -21,7 +21,7 @@ func (stg notificationRepo) GetMyNotifications(entity models.GetMyNotificationsR
 	rows, err := stg.db.Query(`SELECT ui.id, n.company_id, n.model_type, n.model_id, n.details, ui.created_at 
 								FROM user_notifications ui
 								INNER JOIN notifications n ON ui.notification_id = n.id
-								WHERE ui.user_id = $1 AND n.company_id = $2 and ui.created_at::date = now()::date`, entity.UserID, entity.CompanyID)
+								WHERE ui.user_id = $1 AND n.company_id = $2 and ui.created_at::date = now()::date order by ui.created_at desc`, entity.UserID, entity.CompanyID)
 
 	if err != nil {
 		return nil, err
