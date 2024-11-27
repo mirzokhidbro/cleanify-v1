@@ -15,7 +15,7 @@ import (
 // WebSocketManager handles WebSocket connections
 type WebSocketManager struct {
 	upgrader    websocket.Upgrader
-	connections sync.Map
+	connections sync.Map // map[string][]*websocket.Conn
 	mu          sync.RWMutex
 }
 
@@ -55,10 +55,31 @@ func (m *WebSocketManager) HandleConnection(c *gin.Context, userID string) error
 func (m *WebSocketManager) handleClient(userID string, conn *websocket.Conn) {
 	defer func() {
 		conn.Close()
-		m.connections.Delete(userID)
+		m.mu.Lock()
+		if conns, ok := m.connections.Load(userID); ok {
+			connections := conns.([]*websocket.Conn)
+			// Remove this connection from the slice
+			for i, c := range connections {
+				if c == conn {
+					connections = append(connections[:i], connections[i+1:]...)
+					break
+				}
+			}
+			if len(connections) == 0 {
+				m.connections.Delete(userID)
+			} else {
+				m.connections.Store(userID, connections)
+			}
+		}
+		m.mu.Unlock()
 	}()
 
-	m.connections.Store(userID, conn)
+	m.mu.Lock()
+	conns, _ := m.connections.LoadOrStore(userID, []*websocket.Conn{})
+	connections := conns.([]*websocket.Conn)
+	connections = append(connections, conn)
+	m.connections.Store(userID, connections)
+	m.mu.Unlock()
 
 	// Start keepalive
 	go m.keepAlive(conn)
@@ -89,14 +110,14 @@ func (m *WebSocketManager) SendMessage(userID string, notification models.GetMyN
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	connVal, ok := m.connections.Load(userID)
+	connsVal, ok := m.connections.Load(userID)
 	if !ok {
 		return fmt.Errorf("client %s not connected", userID)
 	}
 
-	conn, ok := connVal.(*websocket.Conn)
-	if !ok {
-		return fmt.Errorf("invalid connection type for client %s", userID)
+	connections := connsVal.([]*websocket.Conn)
+	if len(connections) == 0 {
+		return fmt.Errorf("no active connections for client %s", userID)
 	}
 
 	message, err := json.Marshal(notification)
@@ -104,14 +125,22 @@ func (m *WebSocketManager) SendMessage(userID string, notification models.GetMyN
 		return fmt.Errorf("failed to marshal notification: %v", err)
 	}
 
-	return conn.WriteMessage(websocket.TextMessage, message)
+	var lastErr error
+	for _, conn := range connections {
+		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			lastErr = err
+		}
+	}
+
+	return lastErr
 }
 
 // GetActiveConnections returns the count of active connections
 func (m *WebSocketManager) GetActiveConnections() int {
 	count := 0
 	m.connections.Range(func(_, _ interface{}) bool {
-		count++
+		conns := _.(map[string][]*websocket.Conn)
+		count += len(conns)
 		return true
 	})
 	return count
