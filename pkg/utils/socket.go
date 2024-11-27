@@ -138,9 +138,10 @@ func (m *WebSocketManager) SendMessage(userID string, notification models.GetMyN
 // GetActiveConnections returns the count of active connections
 func (m *WebSocketManager) GetActiveConnections() int {
 	count := 0
-	m.connections.Range(func(_, _ interface{}) bool {
-		conns := _.(map[string][]*websocket.Conn)
-		count += len(conns)
+	m.connections.Range(func(key, value interface{}) bool {
+		if conns, ok := value.([]*websocket.Conn); ok {
+			count += len(conns)
+		}
 		return true
 	})
 	return count
