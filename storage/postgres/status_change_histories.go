@@ -3,6 +3,7 @@ package postgres
 import (
 	"bw-erp/models"
 	"bw-erp/storage/repo"
+	"encoding/json"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -31,7 +32,7 @@ func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHisto
 		entity.HistoryableID,
 		entity.HistoryableType,
 		entity.UserID,
-		entity.Status,
+		entity.HistoryDetails.Status,
 	)
 
 	var (
@@ -39,17 +40,19 @@ func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHisto
 		notification_id int
 	)
 
-	stg.db.QueryRow(`select user_ids from notification_settings where company_id = $1 and status = $2`, entity.CompanyID, entity.Status).Scan(&user_ids)
+	stg.db.QueryRow(`select user_ids from notification_settings where company_id = $1 and status = $2`, entity.CompanyID, entity.HistoryDetails.Status).Scan(&user_ids)
 
 	if user_ids != "" {
 		user_ids = strings.Trim(user_ids, "{}")
 		userIDArray := strings.Split(user_ids, ",")
 
-		err := stg.db.QueryRow(`INSERT INTO notifications(
+		DetailsJson, err := json.Marshal(entity.HistoryDetails)
+
+		err = stg.db.QueryRow(`INSERT INTO notifications(
 			company_id,
 			model_type,
 			model_id,
-			status
+			details
 		) VALUES (
 			$1,
 			$2,
@@ -59,7 +62,7 @@ func (stg *statusChangeHistoryRepo) Create(entity models.CreateStatusChangeHisto
 			entity.CompanyID,
 			"orders",
 			entity.HistoryableID,
-			entity.Status,
+			DetailsJson,
 		).Scan(&notification_id)
 
 		if err != nil {

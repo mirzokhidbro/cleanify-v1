@@ -4,7 +4,6 @@ import (
 	"bw-erp/api/handlers"
 	"bw-erp/api/middleware"
 	"bw-erp/config"
-	"bw-erp/pkg/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,15 +17,20 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 	r.GET("api/ping", h.Ping)
 
-	r.GET("/notifications", utils.HandleWebSocket)
-
 	baseRouter := r.Group("/api/v1")
 	{
+		notificationRouter := baseRouter.Group("/notifications")
+		{
+			notificationRouter.GET("list", h.GetMyNotifications)
+			notificationRouter.GET("/ws", h.HandleNotificationWebSocket) // WebSocket endpoint
+		}
+
 		usersRouter := baseRouter.Group("/users")
 		usersRouter.Use(middleware.AuthMiddleware()).POST("", h.Create)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit) //
+		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
+		usersRouter.Use(middleware.AuthMiddleware()).GET("/couriers", h.GetCouriesList)
 
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees", h.CreateEmployee)
 		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees", h.GetEmployeeList)
@@ -35,13 +39,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/attendance", h.Attendance)
 	}
 
-	// {
-	// 	employeeGroup := baseRouter.Group("/employees")
-	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/", h.CreateEmployee)
-	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/", h.GetEmployeeList)
-	// 	employeeGroup.Use(middleware.AuthMiddleware()).GET("/show", h.ShowEmployeeDetailedData)
-	// 	employeeGroup.Use(middleware.AuthMiddleware()).POST("/add-transaction", h.AddTransaction)
-	// }
+	baseRouter.Static("/uploads", "./uploads")
 
 	{
 		authRouter := baseRouter.Group("/auth")
@@ -57,11 +55,6 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	}
 
 	{
-		notificationRouret := baseRouter.Group("/notifications")
-		notificationRouret.Use(middleware.AuthMiddleware()).GET("/", h.GetMyNotifications)
-	}
-
-	{
 		orderRouter := baseRouter.Group("orders")
 		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
@@ -71,6 +64,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderRouter.Use(middleware.AuthMiddleware()).POST("add-payment", h.AddOrderPayment)
 		orderRouter.Use(middleware.AuthMiddleware()).GET("get-transactions-by-order", h.GetTransactionByOrder)
 		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
+		orderRouter.Use(middleware.AuthMiddleware()).POST("/comment", h.AddOrderComment)
 	}
 
 	{

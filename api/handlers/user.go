@@ -82,3 +82,19 @@ func (h *Handler) GetById(c *gin.Context) {
 
 	h.handleResponse(c, http.OK, user)
 }
+
+func (h *Handler) GetCouriesList(c *gin.Context) {
+	var req models.GetCouriesListRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	couriers, err := h.Stg.User().GetCouriesList(req.CompanyID)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, couriers)
+}

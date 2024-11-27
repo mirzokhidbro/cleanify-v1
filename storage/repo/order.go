@@ -14,4 +14,5 @@ type OrderI interface {
 	Delete(entity models.DeleteOrderRequest) error
 	SetOrderPrice(entity models.SetOrderPriceRequest) error
 	AddPayment(userID string, entity models.AddOrderPaymentRequest) error
+	AddComment(entity models.CreateOrderComment) error
 }

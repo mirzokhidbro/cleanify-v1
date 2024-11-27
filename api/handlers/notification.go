@@ -3,6 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
+	"bw-erp/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,4 +24,21 @@ func (h *Handler) GetMyNotifications(c *gin.Context) {
 	}
 
 	h.handleResponse(c, http.OK, data)
+}
+
+func (h *Handler) HandleNotificationWebSocket(c *gin.Context) {
+	userID := c.Query("user_id")
+	if userID == "" {
+		h.handleResponse(c, http.BadRequest, "user_id is required")
+		return
+	}
+
+	if err := utils.GetManager().HandleConnection(c, userID); err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+}
+
+func (h *Handler) SendNotificationToUser(userID string, notification models.GetMyNotificationsResponse) error {
+	return utils.GetManager().SendMessage(userID, notification)
 }

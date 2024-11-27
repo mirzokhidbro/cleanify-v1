@@ -26,6 +26,7 @@ type StorageI interface {
 	Employee() repo.EmployeeI
 	NotificationSetting() repo.NotificationSettingI
 	Notification() repo.NotificationI
+	Comment() repo.CommentStorageI
 }
 
 type storagePg struct {
@@ -48,6 +49,7 @@ type storagePg struct {
 	employee            repo.EmployeeI
 	notificationSetting repo.NotificationSettingI
 	notification        repo.NotificationI
+	comment             repo.CommentStorageI
 }
 
 func NewStoragePg(db *sqlx.DB) StorageI {
@@ -70,6 +72,7 @@ func NewStoragePg(db *sqlx.DB) StorageI {
 		employee:            postgres.NewEmployeeRepo(db),
 		notificationSetting: postgres.NewNotificationSettingRepo(db),
 		notification:        postgres.NewNotificationRepo(db),
+		comment:             postgres.NewCommentRepo(db),
 	}
 }
 
@@ -143,4 +146,8 @@ func (s storagePg) NotificationSetting() repo.NotificationSettingI {
 
 func (s storagePg) Notification() repo.NotificationI {
 	return s.notification
+}
+
+func (s storagePg) Comment() repo.CommentStorageI {
+	return s.comment
 }

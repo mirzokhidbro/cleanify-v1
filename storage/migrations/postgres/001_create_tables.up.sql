@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS "notifications"(
     "company_id" UUID REFERENCES "companies"("id") NOT NULL,
     "model_type" VARCHAR(255),
     "model_id" INT,
-    "status" INT,
+    "details" JSONB,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
@@ -289,3 +289,19 @@ CREATE TABLE IF NOT EXISTS "user_notifications"(
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
+
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    model_type VARCHAR(50) NOT NULL,
+    model_id INTEGER NOT NULL,
+    type VARCHAR(10) NOT NULL,
+    message TEXT,
+    user_id UUID REFERENCES "users"("id"),
+    voice_url TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_comments_model ON comments(model_type, model_id);
+
+ALTER TABLE user_permissions
+ADD  is_courier BOOLEAN DEFAULT FALSE;

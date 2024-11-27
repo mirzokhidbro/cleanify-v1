@@ -9,4 +9,5 @@ type UserI interface {
 	GetList(companyID string) ([]models.User, error)
 	ChangePassword(userID string, entity models.ChangePasswordRequest) error
 	Edit(entity models.UpdateUserRequest) (rowsAffected int64, err error)
+	GetCouriesList(companyID string) ([]models.GetCouriesResponse, error)
 }
