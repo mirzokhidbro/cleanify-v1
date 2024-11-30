@@ -496,8 +496,10 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `payment_status = :payment_status,`
 	}
 
-	if entity.CourierID != "" {
+	if entity.CourierID != "" && entity.CourierID != "null" {
 		query += `courier_id = :courier_id,`
+	} else {
+		query += `courier_id = NULL,`
 	}
 
 	query += `updated_at = now()
