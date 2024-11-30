@@ -319,38 +319,38 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		}()
 	}
 
-	if body.CourierID != *oldCourierID && body.CourierID != user.ID {
+	// if body.CourierID != *oldCourierID && body.CourierID != user.ID {
 
-		notificationID, _ := h.Stg.Notification().Create(models.CreateNotificationModel{
-			CompanyID: order.CompanyID,
-			ModelType: "orders",
-			ModelID:   order.ID,
-			Details: models.NotificationDetails{
-				Address: *order.Address,
-				Status:  order.Status,
-				Type:    "order_attached",
-				Courier: body.CourierID,
-			},
-		})
+	notificationID, _ := h.Stg.Notification().Create(models.CreateNotificationModel{
+		CompanyID: order.CompanyID,
+		ModelType: "orders",
+		ModelID:   order.ID,
+		Details: models.NotificationDetails{
+			Address: *order.Address,
+			Status:  order.Status,
+			Type:    "order_attached",
+			Courier: body.CourierID,
+		},
+	})
 
-		notifications, _ := h.Stg.Notification().GetNotificationsByID(models.GetNotificationsByIDRequest{
-			NotificationID: notificationID,
-		})
+	notifications, _ := h.Stg.Notification().GetNotificationsByID(models.GetNotificationsByIDRequest{
+		NotificationID: notificationID,
+	})
 
-		for _, notification := range notifications {
-			unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
-			if err != nil {
-				log.Printf("Error getting unread notifications count: %v", err)
-				continue
-			}
-
-			notification.UnreadCount = unreadCount
+	for _, notification := range notifications {
+		unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
+		if err != nil {
+			log.Printf("Error getting unread notifications count: %v", err)
+			continue
 		}
 
-		if len(notifications) > 0 {
-			utils.GetManager().BroadcastMessage(notifications[0])
-		}
+		notification.UnreadCount = unreadCount
 	}
+
+	if len(notifications) > 0 {
+		utils.GetManager().BroadcastMessage(notifications[0])
+	}
+	// }
 	h.handleResponse(c, http.OK, rowsAffected)
 }
 
