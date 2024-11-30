@@ -256,7 +256,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									coalesce(o.discount_percentage, 0),
 									coalesce(o.discounted_price, 0),
 									coalesce(round(sum(oi.width * oi.height * oi.price)::numeric, 2), 0) as price,
-									o.courier_id,
+									COALESCE(o.courier_id, null) as courier_id,
 									o.created_at,
 									o.updated_at 
 								from orders o

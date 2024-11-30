@@ -90,7 +90,7 @@ type Order struct {
 	ID                    int                   `json:"id"`
 	CompanyID             string                `json:"company_id"`
 	ClientID              int                   `json:"client_id"`
-	CourierID             string                `json:"courier_id"`
+	CourierID             *string               `json:"courier_id"`
 	PhoneNumber           string                `json:"phone_number"`
 	AdditionalPhoneNumber string                `json:"additional_phone_number"`
 	WorkNumber            string                `json:"work_number"`

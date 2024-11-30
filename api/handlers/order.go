@@ -6,7 +6,6 @@ import (
 	"bw-erp/pkg/utils"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	newHttp "net/http"
 	"os"
@@ -320,43 +319,15 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		}()
 	}
 
-	fmt.Println(body.CourierID)
+	isCourierChanged := false
+	if oldCourierID == nil {
+		isCourierChanged = body.CourierID != ""
+	} else {
+		isCourierChanged = body.CourierID != *oldCourierID
+	}
 
-	fmt.Println("\n")
-
-	fmt.Println(oldCourierID)
-
-	if body.CourierID != oldCourierID {
-		// notificationID, _ := h.Stg.Notification().Create(models.CreateNotificationModel{
-		// 	CompanyID: order.CompanyID,
-		// 	ModelType: "orders",
-		// 	ModelID:   order.ID,
-		// 	Details: models.NotificationDetails{
-		// 		Address: *order.Address,
-		// 		Status:  order.Status,
-		// 		Type:    "order_attached",
-		// 		Courier: body.CourierID,
-		// 	},
-		// })
-
-		// notifications, _ := h.Stg.Notification().GetNotificationsByID(models.GetNotificationsByIDRequest{
-		// 	NotificationID: notificationID,
-		// })
-
-		// for _, notification := range notifications {
-		// 	unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
-		// 	if err != nil {
-		// 		log.Printf("Error getting unread notifications count: %v", err)
-		// 		continue
-		// 	}
-
-		// 	notification.UnreadCount = unreadCount
-		// }
-
-		// if len(notifications) > 0 {
-		fmt.Println("order attached")
-		utils.GetManager().BroadcastMessage("order attached")
-		// }
+	if isCourierChanged {
+		utils.GetManager().BroadcastMessage("Order courier changed")
 	}
 	h.handleResponse(c, http.OK, rowsAffected)
 }
