@@ -122,6 +122,11 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		filter += " AND (o.payment_status = :payment_status)"
 	}
 
+	if queryParam.CourierID != "" {
+		params["courier_id"] = queryParam.CourierID
+		filter += " AND (o.courier_id = :courier_id)"
+	}
+
 	if !queryParam.DateFrom.IsZero() {
 		params["date_from"] = queryParam.DateFrom
 		filter += " AND (o.created_at >= :date_from::date)"

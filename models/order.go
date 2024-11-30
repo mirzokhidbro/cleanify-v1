@@ -62,6 +62,7 @@ type OrdersListRequest struct {
 	DateFrom      time.Time     `json:"date_from" form:"date_from"`
 	DateTo        time.Time     `json:"date_to" form:"date_to"`
 	CompanyID     string        `json:"company_id" form:"company_id" binding:"required"`
+	CourierID     string        `json:"courier_id" form:"courier_id"`
 }
 
 type OrderShowResponse struct {
