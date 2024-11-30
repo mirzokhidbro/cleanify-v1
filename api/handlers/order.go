@@ -309,8 +309,29 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 			wg.Wait()
 		}()
+
 	}
 
+	// Send notifications for courier assignment
+	if body.CourierID != "" && body.CourierID != user.ID {
+		notifications, _ := h.Stg.Notification().GetNotificationsByStatus(models.GetNotificationsByStatusRequest{
+			NotificationID: order.ID,
+		})
+
+		for _, notification := range notifications {
+			if notification.UserID == body.CourierID {
+				unreadCount, err := h.Stg.Notification().GetUnreadNotificationsCount(notification.UserID)
+				if err != nil {
+					log.Printf("Error getting unread notifications count: %v", err)
+					continue
+				}
+
+				notification.UnreadCount = unreadCount
+				utils.GetManager().SendMessage(notification.UserID, notification)
+				break
+			}
+		}
+	}
 	h.handleResponse(c, http.OK, rowsAffected)
 
 }
