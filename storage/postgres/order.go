@@ -259,6 +259,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									coalesce(o.discount_percentage, 0),
 									coalesce(o.discounted_price, 0),
 									coalesce(round(sum(oi.width * oi.height * oi.price)::numeric, 2), 0) as price,
+									o.courier_id,
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -302,6 +303,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		&order.DiscountPercentage,
 		&order.DiscountPrice,
 		&order.Price,
+		&order.CourierID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -424,6 +426,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 									COALESCE(o.address, ''),
 									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price,
 									round(cast(COALESCE(sum(oi.width*oi.height), 0) as numeric), 2) as square, 
+									o.courier_id,
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -446,6 +449,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 		&order.Address,
 		&order.Price,
 		&order.Square,
+		&order.CourierID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -495,9 +499,13 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `payment_status = :payment_status,`
 	}
 
+	if entity.CourierID != "" {
+		query += `courier_id = :courier_id,`
+	}
+
 	query += `updated_at = now()
-			  WHERE
-					id = :id`
+              WHERE
+                    id = :id`
 
 	order, _ := stg.GetByPrimaryKey(entity.ID)
 	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
@@ -526,6 +534,7 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		"latitute":       entity.Latitute,
 		"longitude":      entity.Longitude,
 		"payment_status": entity.PaymentStatus,
+		"courier_id":     entity.CourierID,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

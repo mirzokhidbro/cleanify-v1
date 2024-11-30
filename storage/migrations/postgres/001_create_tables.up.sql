@@ -67,6 +67,9 @@ USING chat_id::BIGINT;
 ALTER TABLE "orders"
 ALTER COLUMN "status" SET DEFAULT 1;
 
+ALTER TABLE "orders"
+ADD COLUMN "courier_id" UUID REFERENCES "users"("id");
+
 CREATE TABLE IF NOT EXISTS "order_items" (
     "id" SERIAL PRIMARY KEY,
     "order_id" INTEGER REFERENCES "orders"("id") NOT NULL,

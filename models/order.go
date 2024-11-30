@@ -89,6 +89,7 @@ type Order struct {
 	ID                    int                   `json:"id"`
 	CompanyID             string                `json:"company_id"`
 	ClientID              int                   `json:"client_id"`
+	CourierID             *string               `json:"courier_id"`
 	PhoneNumber           string                `json:"phone_number"`
 	AdditionalPhoneNumber string                `json:"additional_phone_number"`
 	WorkNumber            string                `json:"work_number"`
@@ -118,6 +119,7 @@ type UpdateOrderRequest struct {
 	ID            int           `json:"id" binding:"required"`
 	CompanyID     string        `json:"company_id"`
 	Address       string        `json:"address"`
+	CourierID     string        `json:"courier_id"`
 	Slug          string        `json:"slug"`
 	Status        int8          `json:"status"`
 	PaymentStatus PaymentStatus `json:"payment_status"`
