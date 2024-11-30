@@ -135,6 +135,30 @@ func (m *WebSocketManager) SendMessage(userID string, notification models.GetMyN
 	return lastErr
 }
 
+// BroadcastMessage sends a notification to all connected clients
+func (m *WebSocketManager) BroadcastMessage(message interface{}) error {
+	jsonMessage, err := json.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("error marshalling broadcast message: %v", err)
+	}
+
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var lastErr error
+	m.connections.Range(func(key, value interface{}) bool {
+		connections := value.([]*websocket.Conn)
+		for _, conn := range connections {
+			if err := conn.WriteMessage(websocket.TextMessage, jsonMessage); err != nil {
+				lastErr = err
+			}
+		}
+		return true
+	})
+
+	return lastErr
+}
+
 // GetActiveConnections returns the count of active connections
 func (m *WebSocketManager) GetActiveConnections() int {
 	count := 0

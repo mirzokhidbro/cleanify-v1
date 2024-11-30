@@ -4,6 +4,7 @@ import (
 	"bw-erp/models"
 	"bw-erp/storage/repo"
 	"encoding/json"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -15,6 +16,105 @@ type notificationRepo struct {
 
 func NewNotificationRepo(db *sqlx.DB) repo.NotificationI {
 	return &notificationRepo{db: db}
+}
+
+func (stg notificationRepo) Create(entity models.CreateNotificationModel) (notification_id int, err error) {
+	var (
+		user_ids string
+	)
+
+	if entity.Details.Type == "status_changed" {
+		stg.db.QueryRow(`select user_ids from notification_settings where company_id = $1 and status = $2`, entity.CompanyID, entity.Details.Status).Scan(&user_ids)
+
+		if user_ids != "" {
+			user_ids = strings.Trim(user_ids, "{}")
+			userIDArray := strings.Split(user_ids, ",")
+
+			DetailsJson, _ := json.Marshal(entity.Details)
+
+			err = stg.db.QueryRow(`INSERT INTO notifications(
+				company_id,
+				model_type,
+				model_id,
+				details
+			) VALUES (
+				$1,
+				$2,
+				$3,
+				$4
+			) RETURNING id`,
+				entity.CompanyID,
+				"orders",
+				entity.ModelID,
+				DetailsJson,
+			).Scan(&notification_id)
+
+			if err != nil {
+				return notification_id, err
+			}
+
+			for _, user_id := range userIDArray {
+
+				_, err = stg.db.Exec(`INSERT INTO user_notifications(
+					notification_id,
+					user_id
+				) VALUES (
+					$1,
+					$2
+				)`,
+					&notification_id,
+					&user_id,
+				)
+
+				if err != nil {
+					return notification_id, err
+				}
+			}
+		}
+	}
+
+	if entity.Details.Type == "order_attached" {
+		DetailsJson, _ := json.Marshal(entity.Details)
+
+		err = stg.db.QueryRow(`INSERT INTO notifications(
+			company_id,
+			model_type,
+			model_id,
+			details
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4
+		) RETURNING id`,
+			entity.CompanyID,
+			"orders",
+			entity.ModelID,
+			DetailsJson,
+		).Scan(&notification_id)
+
+		if err != nil {
+			return notification_id, err
+		}
+
+		_, err = stg.db.Exec(`INSERT INTO user_notifications(
+			notification_id,
+			user_id
+		) VALUES (
+			$1,
+			$2
+		)`,
+			&notification_id,
+			&entity.Details.Courier,
+		)
+
+		if err != nil {
+			return notification_id, err
+		}
+
+	}
+
+	return notification_id, nil
 }
 
 func (stg notificationRepo) GetMyNotifications(entity models.GetMyNotificationsRequest) ([]models.GetMyNotificationsResponse, error) {
@@ -86,7 +186,7 @@ func (stg notificationRepo) GetMyLatestNotifications(entity models.GetMyNotifica
 
 }
 
-func (stg notificationRepo) GetNotificationsByStatus(entity models.GetNotificationsByStatusRequest) ([]models.GetMyNotificationsResponse, error) {
+func (stg notificationRepo) GetNotificationsByID(entity models.GetNotificationsByIDRequest) ([]models.GetMyNotificationsResponse, error) {
 
 	rows, err := stg.db.Query(`select ui.user_id, n.company_id, n.model_type, n.model_id, n.details, ui.created_at from user_notifications ui
 								inner join notifications n on ui.notification_id = n.id
