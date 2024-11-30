@@ -234,7 +234,7 @@ func (stg notificationRepo) GetUnreadNotificationsCount(userID string) (int, err
 	err := stg.db.QueryRow(`
 		SELECT COUNT(*) 
 		FROM user_notifications 
-		WHERE user_id = $1 AND is_read = false and created_at::date = now()::date`, userID).Scan(&count)
+		WHERE user_id = $1 AND is_read = false`, userID).Scan(&count)
 
 	if err != nil {
 		return 0, err
