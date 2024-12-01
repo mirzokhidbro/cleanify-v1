@@ -42,3 +42,27 @@ func (h *Handler) HandleNotificationWebSocket(c *gin.Context) {
 func (h *Handler) SendNotificationToUser(userID string, notification models.GetMyNotificationsResponse) error {
 	return utils.GetManager().SendMessage(userID, notification)
 }
+
+func (h *Handler) UnreadNotificationsCount(c *gin.Context) {
+	token, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	user, err := h.Stg.User().GetById(token.UserID)
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	count, err := h.Stg.Notification().GetUnreadNotificationsCount(user.ID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, count)
+}

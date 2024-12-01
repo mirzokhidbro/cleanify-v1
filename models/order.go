@@ -40,6 +40,7 @@ type OrderList struct {
 	Slug      string    `json:"slug"`
 	Phone     string    `json:"phone"`
 	Address   *string   `json:"address"`
+	CourierID *string   `json:"courier_id"`
 	Status    int16     `json:"status"`
 	Square    float64   `json:"square"`
 	Price     float64   `json:"price"`
@@ -61,6 +62,7 @@ type OrdersListRequest struct {
 	DateFrom      time.Time     `json:"date_from" form:"date_from"`
 	DateTo        time.Time     `json:"date_to" form:"date_to"`
 	CompanyID     string        `json:"company_id" form:"company_id" binding:"required"`
+	CourierID     string        `json:"courier_id" form:"courier_id"`
 }
 
 type OrderShowResponse struct {
@@ -89,6 +91,7 @@ type Order struct {
 	ID                    int                   `json:"id"`
 	CompanyID             string                `json:"company_id"`
 	ClientID              int                   `json:"client_id"`
+	CourierID             *string               `json:"courier_id"`
 	PhoneNumber           string                `json:"phone_number"`
 	AdditionalPhoneNumber string                `json:"additional_phone_number"`
 	WorkNumber            string                `json:"work_number"`
@@ -118,6 +121,7 @@ type UpdateOrderRequest struct {
 	ID            int           `json:"id" binding:"required"`
 	CompanyID     string        `json:"company_id"`
 	Address       string        `json:"address"`
+	CourierID     string        `json:"courier_id"`
 	Slug          string        `json:"slug"`
 	Status        int8          `json:"status"`
 	PaymentStatus PaymentStatus `json:"payment_status"`

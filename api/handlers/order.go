@@ -232,6 +232,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 	}
 
 	oldOrderStatus := order.Status
+	oldCourierID := order.CourierID
 
 	rowsAffected, err := h.Stg.Order().Update(user.ID, &body)
 	if err != nil {
@@ -241,21 +242,28 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	order, _ = h.Stg.Order().GetByPrimaryKey(body.ID)
 
-	if body.Status != 0 && oldOrderStatus != order.Status {
+	if oldOrderStatus != order.Status {
 
-		notificationID, _ := h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
+		h.Stg.StatusChangeHistory().Create(models.CreateStatusChangeHistoryModel{
 			HistoryableType: "orders",
 			HistoryableID:   order.ID,
 			UserID:          user.ID,
 			CompanyID:       order.CompanyID,
-			HistoryDetails: models.HistoryDetails{
+			Status:          order.Status,
+		})
+
+		notificationID, _ := h.Stg.Notification().Create(models.CreateNotificationModel{
+			CompanyID: order.CompanyID,
+			ModelType: "orders",
+			ModelID:   order.ID,
+			Details: models.NotificationDetails{
 				Address: *order.Address,
+				Status:  order.Status,
 				Type:    "status_changed",
-				Status:  int(body.Status),
 			},
 		})
 
-		notifications, _ := h.Stg.Notification().GetNotificationsByStatus(models.GetNotificationsByStatusRequest{
+		notifications, _ := h.Stg.Notification().GetNotificationsByID(models.GetNotificationsByIDRequest{
 			NotificationID: notificationID,
 		})
 
@@ -311,8 +319,17 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 		}()
 	}
 
-	h.handleResponse(c, http.OK, rowsAffected)
+	isCourierChanged := false
+	if oldCourierID == nil {
+		isCourierChanged = body.CourierID != ""
+	} else {
+		isCourierChanged = body.CourierID != *oldCourierID
+	}
 
+	if isCourierChanged {
+		utils.GetManager().BroadcastMessage("Order courier changed")
+	}
+	h.handleResponse(c, http.OK, rowsAffected)
 }
 
 func (h *Handler) DeleteOrder(c *gin.Context) {

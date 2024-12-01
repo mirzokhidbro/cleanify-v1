@@ -128,7 +128,7 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 		return user, err
 	}
 
-	rows, err := stg.db.Query(`select c.id, c.name, up.permission_ids from user_permissions up 
+	rows, err := stg.db.Query(`select c.id, c.name, up.permission_ids, up.is_courier from user_permissions up 
 									inner join companies c on c.id = up.company_id 
 									where up.user_id = $1 order by c.name desc`, user.ID)
 	if err != nil {
@@ -138,7 +138,7 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 
 	for rows.Next() {
 		var permissions models.UserPermissionByCompany
-		if err := rows.Scan(&permissions.CompanyID, &permissions.CompanyName, &permissions.Can); err != nil {
+		if err := rows.Scan(&permissions.CompanyID, &permissions.CompanyName, &permissions.Can, &permissions.IsCourier); err != nil {
 			return user, err
 		}
 

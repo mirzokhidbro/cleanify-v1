@@ -91,13 +91,14 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		o.address,
 		o.created_at,
 		o.phone,
+		COALESCE(o.courier_id, null) as courier_id,
 		ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price, 
 		round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
 		FROM "orders" as o 
 		left join order_items oi on o.id = oi.order_id`
 
 	filter := " WHERE true"
-	group := " group by o.id, o.slug, o.status, o.address, o.created_at, o.phone"
+	group := " group by o.id, o.slug, o.status, o.address, o.created_at, o.phone, o.courier_id"
 	order := " ORDER BY created_at"
 	arrangement := " DESC"
 	offset := " OFFSET 0"
@@ -105,11 +106,6 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 
 	params["company_id"] = companyID
 	filter += " and (o.company_id = :company_id)"
-
-	// if queryParam.ID != 0 {
-	// 	params["id"] = queryParam.ID
-	// 	filter += " AND (o.id = :id)"
-	// }
 
 	if len(queryParam.ID) > 3 {
 		params["phone"] = queryParam.ID
@@ -124,6 +120,11 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	if queryParam.PaymentStatus != 0 {
 		params["payment_status"] = queryParam.PaymentStatus
 		filter += " AND (o.payment_status = :payment_status)"
+	}
+
+	if queryParam.CourierID != "" {
+		params["courier_id"] = queryParam.CourierID
+		filter += " AND (o.courier_id = :courier_id)"
 	}
 
 	if !queryParam.DateFrom.IsZero() {
@@ -174,6 +175,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 			&order.Address,
 			&order.CreatedAt,
 			&order.Phone,
+			&order.CourierID,
 			&order.Price,
 			&order.Square,
 		)
@@ -259,6 +261,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 									coalesce(o.discount_percentage, 0),
 									coalesce(o.discounted_price, 0),
 									coalesce(round(sum(oi.width * oi.height * oi.price)::numeric, 2), 0) as price,
+									COALESCE(o.courier_id, null) as courier_id,
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -302,6 +305,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		&order.DiscountPercentage,
 		&order.DiscountPrice,
 		&order.Price,
+		&order.CourierID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -424,6 +428,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 									COALESCE(o.address, ''),
 									ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price,
 									round(cast(COALESCE(sum(oi.width*oi.height), 0) as numeric), 2) as square, 
+									o.courier_id,
 									o.created_at,
 									o.updated_at 
 								from orders o
@@ -446,6 +451,7 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 		&order.Address,
 		&order.Price,
 		&order.Square,
+		&order.CourierID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
 	)
@@ -495,9 +501,15 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `payment_status = :payment_status,`
 	}
 
+	if entity.CourierID != "" && entity.CourierID != "null" {
+		query += `courier_id = :courier_id,`
+	} else {
+		query += `courier_id = NULL,`
+	}
+
 	query += `updated_at = now()
-			  WHERE
-					id = :id`
+              WHERE
+                    id = :id`
 
 	order, _ := stg.GetByPrimaryKey(entity.ID)
 	if entity.Longitude != 0 && entity.Latitute != 0 && order.ClientID != 0 {
@@ -526,6 +538,7 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		"latitute":       entity.Latitute,
 		"longitude":      entity.Longitude,
 		"payment_status": entity.PaymentStatus,
+		"courier_id":     entity.CourierID,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)

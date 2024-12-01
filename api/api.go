@@ -21,8 +21,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	{
 		notificationRouter := baseRouter.Group("/notifications")
 		{
-			notificationRouter.GET("list", h.GetMyNotifications)
 			notificationRouter.GET("/ws", h.HandleNotificationWebSocket) // WebSocket endpoint
+			notificationRouter.Use(middleware.AuthMiddleware()).GET("list", h.GetMyNotifications)
+			notificationRouter.Use(middleware.AuthMiddleware()).GET("/unread-notifications-count", h.UnreadNotificationsCount)
 		}
 
 		usersRouter := baseRouter.Group("/users")

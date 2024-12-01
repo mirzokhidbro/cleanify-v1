@@ -7,7 +7,7 @@ type GetMyNotificationsRequest struct {
 	UserID    string `json:"user_id" form:"user_id" binding:"required"`
 }
 
-type GetNotificationsByStatusRequest struct {
+type GetNotificationsByIDRequest struct {
 	NotificationID int
 	// Status    int8
 	// CompanyID string
@@ -34,4 +34,18 @@ type OrderNotificationDetails struct {
 type Message struct {
 	ClientID string
 	Content  string
+}
+
+type CreateNotificationModel struct {
+	CompanyID string
+	ModelType string
+	ModelID   int
+	Details   NotificationDetails
+}
+
+type NotificationDetails struct {
+	Type    string `json:"type"`
+	Address string `json:"address"`
+	Status  int8   `json:"status"`
+	Courier string `json:"courier"`
 }

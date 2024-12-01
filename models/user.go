@@ -48,6 +48,7 @@ type UserPermissionByCompany struct {
 	CompanyName   string   `json:"company_name"`
 	PermissionIDs []string `json:"permission_ids"`
 	Can           string   `json:"can"`
+	IsCourier     bool     `json:"is_courier"`
 }
 
 type UpdateUserRequest struct {
