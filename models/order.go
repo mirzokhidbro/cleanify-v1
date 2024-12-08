@@ -68,8 +68,8 @@ type OrdersListRequest struct {
 type OrderShowResponse struct {
 	Order
 	OrderItems       []OrderItem        `json:"order_items"`
-	OrderTransaction []OrderTransaction `json:"transactions"`
-	Comments         []Comment          `json:"comment"`
+	OrderTransaction []OrderTransaction `json:"transactions,omitempty"`
+	Comments         []Comment          `json:"comment,omitempty"`
 }
 
 type CreateOrderComment struct {
@@ -88,29 +88,42 @@ type OrderTransaction struct {
 }
 
 type Order struct {
-	ID                    int                   `json:"id"`
-	CompanyID             string                `json:"company_id"`
-	ClientID              int                   `json:"client_id"`
-	CourierID             *string               `json:"courier_id"`
-	PhoneNumber           string                `json:"phone_number"`
-	AdditionalPhoneNumber string                `json:"additional_phone_number"`
-	WorkNumber            string                `json:"work_number"`
-	Count                 int                   `json:"count"`
-	Slug                  string                `json:"slug"`
-	Status                int8                  `json:"status"`
-	Description           string                `json:"description"`
-	CreatedAt             time.Time             `json:"created_at"`
-	UpdatedAt             time.Time             `json:"updated_at"`
-	Latitute              *float64              `json:"latitute"`
-	Longitude             *float64              `json:"longitude"`
-	Address               *string               `json:"address"`
-	Square                float64               `json:"square"`
-	Price                 float64               `json:"price"`
-	StatusChangeHistory   []StatusChangeHistory `json:"status_change_history"`
-	PaymentStatus         int16                 `json:"payment_status"`
-	ServicePrice          float64               `json:"service_price"`
-	DiscountPercentage    float64               `json:"discount_percentage"`
-	DiscountPrice         float64               `json:"discounted_price"`
+	ID                    int                   `json:"id,omitempty"`
+	CompanyID             string                `json:"company_id,omitempty"`
+	Uuid                  string                `json:"uuid,omitempty"`
+	ClientID              int                   `json:"client_id,omitempty"`
+	CourierID             *string               `json:"courier_id,omitempty"`
+	PhoneNumber           string                `json:"phone_number,omitempty"`
+	AdditionalPhoneNumber string                `json:"additional_phone_number,omitempty"`
+	WorkNumber            string                `json:"work_number,omitempty"`
+	Count                 int                   `json:"count,omitempty"`
+	Slug                  string                `json:"slug,omitempty"`
+	Status                int8                  `json:"status,omitempty"`
+	Description           string                `json:"description,omitempty"`
+	CreatedAt             time.Time             `json:"created_at,omitempty"`
+	UpdatedAt             time.Time             `json:"updated_at,omitempty"`
+	Latitute              *float64              `json:"latitute,omitempty"`
+	Longitude             *float64              `json:"longitude,omitempty"`
+	Address               *string               `json:"address,omitempty"`
+	Square                float64               `json:"square,omitempty"`
+	Price                 float64               `json:"price,omitempty"`
+	StatusChangeHistory   []StatusChangeHistory `json:"status_change_history,omitempty"`
+	PaymentStatus         int16                 `json:"payment_status,omitempty"`
+	ServicePrice          float64               `json:"service_price,omitempty"`
+	DiscountPercentage    float64               `json:"discount_percentage,omitempty"`
+	DiscountPrice         float64               `json:"discounted_price,omitempty"`
+}
+
+type OrderReceipt struct {
+	CompanyName        string      `json:"company_name,omitempty"`
+	Address            string      `json:"address"`
+	Phone              string      `json:"phone"`
+	OrderNumber        int         `json:"order_number"`
+	CreatedAt          time.Time   `json:"created_at"`
+	ServicePrice       *float64    `json:"service_price"`
+	DiscountPercentage *float64    `json:"discount_percentage"`
+	DiscountedPrice    *float64    `json:"discounted_price"`
+	OrderItems         []OrderItem `json:"order_item"`
 }
 
 type OrderSendLocationRequest struct {

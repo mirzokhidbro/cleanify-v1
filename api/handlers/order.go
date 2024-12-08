@@ -17,6 +17,27 @@ import (
 	"github.com/google/uuid"
 )
 
+func (h *Handler) GetOrderReceiptByUuid(c *gin.Context) {
+	orderUUID := c.Param("uuid")
+	if orderUUID == "" {
+		h.handleResponse(c, http.BadRequest, "uuid parameter is required")
+		return
+	}
+
+	if _, err := uuid.Parse(orderUUID); err != nil {
+		h.handleResponse(c, http.BadRequest, "invalid uuid format")
+		return
+	}
+
+	order, err := h.Stg.Order().GetByUuid(orderUUID)
+	if err != nil {
+		h.handleResponse(c, http.InternalServerError, err.Error())
+		return
+	}
+
+	h.handleResponse(c, http.OK, order)
+}
+
 func (h *Handler) CreateOrderModel(c *gin.Context) {
 	var body models.CreateOrderModel
 	if err := c.ShouldBindJSON(&body); err != nil {
