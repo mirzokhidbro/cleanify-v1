@@ -90,6 +90,7 @@ type OrderTransaction struct {
 type Order struct {
 	ID                    int                   `json:"id,omitempty"`
 	CompanyID             string                `json:"company_id,omitempty"`
+	Uuid                  string                `json:"uuid,omitempty"`
 	ClientID              int                   `json:"client_id,omitempty"`
 	CourierID             *string               `json:"courier_id,omitempty"`
 	PhoneNumber           string                `json:"phone_number,omitempty"`
