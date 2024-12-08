@@ -490,7 +490,7 @@ func (stg *orderRepo) GetByUuid(uuid string) (models.OrderReceipt, error) {
 
 	for rows.Next() {
 		var item models.OrderItem
-		if err := rows.Scan(&item.Type, &item.Price, &item.Width, &item.Height, &item.Width, &item.Height, &item.IsCountable); err != nil {
+		if err := rows.Scan(&item.Type, &item.Price, &item.Width, &item.Height, &item.IsCountable); err != nil {
 			return order, err
 		}
 		order.OrderItems = append(order.OrderItems, item)
