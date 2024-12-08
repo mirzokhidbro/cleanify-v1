@@ -16,6 +16,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 	r.Use(customCORSMiddleware())
 
 	r.GET("api/ping", h.Ping)
+	r.GET("api/get-order-receipt-by-uuid/:uuid", h.GetOrderReceiptByUuid)
 
 	baseRouter := r.Group("/api/v1")
 	{

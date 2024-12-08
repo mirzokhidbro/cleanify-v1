@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS "bot_users" (
 CREATE TABLE IF NOT EXISTS "orders" (
     "id" SERIAL PRIMARY KEY,
     "company_id" UUID REFERENCES "companies"("id"),
-    "chat_id" INTEGER REFERENCES "bot_users"("id"),
+    "chat_id" BIGINT,
     "phone" VARCHAR NULL,
     "count" INTEGER,
     "status" INTEGER,
@@ -55,8 +55,16 @@ CREATE TABLE IF NOT EXISTS "orders" (
     "latitute" FLOAT,
     "longitude" FLOAT,
     "description" VARCHAR,
+    "uuid" UUID DEFAULT gen_random_uuid(),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "courier_id" UUID REFERENCES "users"("id"),
+    "address" VARCHAR,
+    "client_id" INTEGER REFERENCES "clients"("id"),
+    "service_price" FLOAT,
+    "discount_percentage" FLOAT,
+    "payment_status" INTEGER,
+    "discounted_price" FLOAT
 );
 
 
@@ -80,7 +88,10 @@ CREATE TABLE IF NOT EXISTS "order_items" (
     "description" VARCHAR,
     "washed_at"  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "is_countable" BOOLEAN DEFAULT FALSE,
+    "status" INTEGER DEFAULT 1,
+    "order_item_type_id" UUID REFERENCES "order_item_types"("id")
 );
 
 CREATE TABLE IF NOT EXISTS "order_item_types" (
@@ -89,7 +100,8 @@ CREATE TABLE IF NOT EXISTS "order_item_types" (
     "name" VARCHAR NOT NULL,
     "price" FLOAT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "is_countable" BOOLEAN DEFAULT FALSE
 );
 
 ALTER TABLE "telegram_bots"
@@ -114,7 +126,8 @@ CREATE TABLE IF NOT EXISTS "permissions" (
     "name" VARCHAR UNIQUE,
     "scope" VARCHAR DEFAULT ('company'),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "group" VARCHAR
 );
 
 CREATE TABLE IF NOT EXISTS "role_and_permissions" (
@@ -176,7 +189,8 @@ CREATE TABLE IF NOT EXISTS "order_statuses" (
     "number" INTEGER,
     "description" TEXT,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "slug" VARCHAR
 );
 
 
@@ -200,12 +214,9 @@ CREATE TABLE IF NOT EXISTS "user_permissions" (
     "company_id"     UUID REFERENCES "companies"("id") NOT NULL,
     "user_id"        UUID REFERENCES "users"("id") NOT NULL,
     "created_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at"     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "is_courier" BOOLEAN DEFAULT FALSE
 );
-
-ALTER TABLE "permissions"
-ADD "group" VARCHAR;
-
 
 ALTER TABLE "orders"
 ADD "service_price" FLOAT,
@@ -243,14 +254,12 @@ CREATE TABLE IF NOT EXISTS "employees"(
     "firstname" VARCHAR,
     "lastname" VARCHAR,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "balance" FLOAT DEFAULT 0
 )
 
 ALTER TABLE "order_statuses"
 ADD "slug" VARCHAR;
-
-ALTER TABLE "employees"
-ADD "balance" FLOAT DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS "attendance"(
     "id" SERIAL PRIMARY KEY,
@@ -305,6 +314,3 @@ CREATE TABLE comments (
 );
 
 CREATE INDEX idx_comments_model ON comments(model_type, model_id);
-
-ALTER TABLE user_permissions
-ADD  is_courier BOOLEAN DEFAULT FALSE;

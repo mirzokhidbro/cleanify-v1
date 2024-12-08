@@ -15,4 +15,5 @@ type OrderI interface {
 	SetOrderPrice(entity models.SetOrderPriceRequest) error
 	AddPayment(userID string, entity models.AddOrderPaymentRequest) error
 	AddComment(entity models.CreateOrderComment) error
+	GetByUuid(uuid string) (models.OrderReceipt, error)
 }

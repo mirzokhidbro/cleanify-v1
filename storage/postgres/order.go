@@ -462,6 +462,40 @@ func (stg *orderRepo) GetByPrimaryKey(ID int) (models.OrderShowResponse, error) 
 	return order, nil
 }
 
+func (stg *orderRepo) GetByUuid(uuid string) (models.OrderReceipt, error) {
+	var order models.OrderReceipt
+	err := stg.db.QueryRow(`select c.name, o.address, o.phone, o.id, o.service_price, o.discount_percentage, o.discounted_price, o.created_at::date from orders o inner join companies c on o.company_id = c.id where uuid = $1`, uuid).Scan(
+		&order.CompanyName,
+		&order.Address,
+		&order.Phone,
+		&order.OrderNumber,
+		&order.ServicePrice,
+		&order.DiscountPercentage,
+		&order.DiscountedPrice,
+		&order.CreatedAt,
+	)
+	if err != nil {
+		return order, err
+	}
+
+	rows, err := stg.db.Query(`select type, price, width, height, is_countable from order_items where order_id = $1 order by created_at`, order.OrderNumber)
+
+	if err != nil {
+		return order, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item models.OrderItem
+		if err := rows.Scan(&item.Type, &item.Price, &item.Width, &item.Height, &item.Width, &item.Height, &item.IsCountable); err != nil {
+			return order, err
+		}
+		order.OrderItems = append(order.OrderItems, item)
+	}
+
+	return order, nil
+}
+
 func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "orders" SET `
 
