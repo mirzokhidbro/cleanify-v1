@@ -9,10 +9,6 @@ type GetMyNotificationsRequest struct {
 
 type GetNotificationsByIDRequest struct {
 	NotificationID int
-	// Status    int8
-	// CompanyID string
-	// ModelType string
-	// ModelID   int
 }
 
 type GetMyNotificationsResponse struct {
@@ -26,9 +22,8 @@ type GetMyNotificationsResponse struct {
 }
 
 type OrderNotificationDetails struct {
+	Message string `json:"message"`
 	Type    string `json:"type"`
-	Address string `json:"address"`
-	Status  int    `json:"status"`
 }
 
 type Message struct {

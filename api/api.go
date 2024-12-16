@@ -23,6 +23,18 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		notificationRouter := baseRouter.Group("/notifications")
 		{
 			notificationRouter.GET("/ws", h.HandleNotificationWebSocket) // WebSocket endpoint
+
+			// Web Push endpoints
+			webpushRouter := notificationRouter.Group("/webpush")
+			webpushRouter.Use(middleware.AuthMiddleware())
+			{
+				webpushRouter.POST("/subscribe", h.SavePushSubscription)
+				webpushRouter.GET("/subscription", h.GetPushSubscription)
+				webpushRouter.DELETE("/subscription", h.DeletePushSubscription)
+				webpushRouter.GET("/subscriptions", h.GetAllPushSubscriptions)
+				webpushRouter.POST("/send", h.SendPushNotification)
+			}
+
 			notificationRouter.Use(middleware.AuthMiddleware()).GET("list", h.GetMyNotifications)
 			notificationRouter.Use(middleware.AuthMiddleware()).GET("/unread-notifications-count", h.UnreadNotificationsCount)
 		}

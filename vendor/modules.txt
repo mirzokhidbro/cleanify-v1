@@ -1,3 +1,6 @@
+# github.com/SherClockHolmes/webpush-go v1.3.0
+## explicit; go 1.13
+github.com/SherClockHolmes/webpush-go
 # github.com/bytedance/sonic v1.11.6
 ## explicit; go 1.16
 github.com/bytedance/sonic
@@ -181,6 +184,7 @@ golang.org/x/arch/x86/x86asm
 ## explicit; go 1.18
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
+golang.org/x/crypto/hkdf
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/sha3
 # golang.org/x/net v0.24.0
