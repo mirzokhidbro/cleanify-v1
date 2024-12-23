@@ -12,20 +12,27 @@ import (
 )
 
 func (h *Handler) AuthUser(c *gin.Context) {
+	fmt.Println("AuthUser handler called")
+
 	var payload models.AuthUserModel
 	if err := c.ShouldBindJSON(&payload); err != nil {
+		fmt.Printf("Error binding JSON: %v\n", err)
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
+	fmt.Printf("Attempting login for phone: %s\n", payload.Phone)
+
 	user, err := h.Stg.User().GetByPhone(payload.Phone)
 	if err != nil {
+		fmt.Printf("Error getting user by phone: %v\n", err)
 		h.handleResponse(c, http.BadRequest, "Foydalanuvchi topilmadi")
 		return
 	}
 
 	err = utils.VerifyPassword(user.Password, payload.Password)
 	if err != nil {
+		fmt.Printf("Password verification failed: %v\n", err)
 		h.handleResponse(c, http.BadRequest, "Parol noto'g'ri")
 		return
 	}
