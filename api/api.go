@@ -130,16 +130,19 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Clear any existing CORS headers
+		c.Writer.Header().Del("Access-Control-Allow-Origin")
+		c.Writer.Header().Del("Access-Control-Allow-Credentials")
+		c.Writer.Header().Del("Access-Control-Allow-Headers")
+		c.Writer.Header().Del("Access-Control-Allow-Methods")
+		
+		// Set new CORS headers
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://prod.yangidunyo.group")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "*")
-		c.Writer.Header().Set("Access-Control-Max-Age", "86400") // 24 hours
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
 		if c.Request.Method == "OPTIONS" {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "https://prod.yangidunyo.group")
-			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-			c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Origin, X-Requested-With")
 			c.AbortWithStatus(204)
 			return
 		}
