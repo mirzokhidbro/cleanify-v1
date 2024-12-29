@@ -317,9 +317,10 @@ CREATE INDEX idx_comments_model ON comments(model_type, model_id);
 
 CREATE TABLE push_subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR NOT NULL,
-    endpoint TEXT NOT NULL,
-    auth_key TEXT NOT NULL,
-    p256dh_key TEXT NOT NULL,
+    user_id UUID REFERENCES "users"("id") NOT NULL,
+    data JSONB NOT NULL,
+    -- endpoint TEXT NOT NULL,
+    -- auth_key TEXT NOT NULL,
+    -- p256dh_key TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

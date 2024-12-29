@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type PushSubscription struct {
 	ID        int64     `json:"id" db:"id"`
@@ -12,13 +15,11 @@ type PushSubscription struct {
 }
 
 type CreatePushSubscriptionRequest struct {
-	UserID    string `json:"user_id" binding:"required"`
-	Endpoint  string `json:"endpoint" binding:"required"`
-	AuthKey   string `json:"auth_key" binding:"required"`
-	P256dhKey string `json:"p256dh_key" binding:"required"`
+	UserID string          `json:"user_id" binding:"required"`
+	Data   json.RawMessage `json:"data" binding:"required"`
 }
 
 type GetPushSubscriptionResponse struct {
 	Subscriptions []PushSubscription `json:"subscriptions"`
-	Count        int64              `json:"count"`
+	Count         int64              `json:"count"`
 }
