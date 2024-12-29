@@ -16,16 +16,13 @@ func (h *Handler) SavePushSubscription(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("subscription")
-	fmt.Println(subscription)
-
-	id, err := h.Stg.WebPush().CreatePushSubscription(subscription)
+	_, err := h.Stg.WebPush().CreatePushSubscription(subscription)
 	if err != nil {
 		h.handleResponse(c, http.InternalServerError, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.Created, id)
+	h.handleResponse(c, http.Created, "OK")
 }
 
 // GetPushSubscription returns subscription details for a user
