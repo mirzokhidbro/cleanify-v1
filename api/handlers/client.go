@@ -116,11 +116,6 @@ func (h *Handler) UpdateClient(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
-		return
-	}
-
 	// token, err := utils.ExtractTokenID(c)
 
 	// if err != nil {
