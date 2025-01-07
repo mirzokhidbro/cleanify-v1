@@ -131,19 +131,20 @@ type OrderSendLocationRequest struct {
 }
 
 type UpdateOrderRequest struct {
-	ID            int           `json:"id" binding:"required"`
-	CompanyID     string        `json:"company_id"`
-	Address       string        `json:"address"`
-	CourierID     string        `json:"courier_id"`
-	Slug          string        `json:"slug"`
-	Status        int8          `json:"status"`
-	PaymentStatus PaymentStatus `json:"payment_status"`
-	Phone         string        `json:"phone"`
-	ChatID        int64         `json:"chat_id"`
-	Description   string        `json:"description"`
-	Count         int           `json:"count"`
-	Latitute      float64       `json:"latitute"`
-	Longitude     float64       `json:"longitude"`
+	ID              int           `json:"id" binding:"required"`
+	CompanyID       string        `json:"company_id"`
+	Address         string        `json:"address"`
+	CourierID       string        `json:"courier_id"`
+	Slug            string        `json:"slug"`
+	Status          int8          `json:"status"`
+	PaymentStatus   PaymentStatus `json:"payment_status"`
+	Phone           string        `json:"phone"`
+	ChatID          int64         `json:"chat_id"`
+	Description     string        `json:"description"`
+	Count           int           `json:"count"`
+	Latitute        float64       `json:"latitute"`
+	Longitude       float64       `json:"longitude"`
+	DiscountedPrice float64       `json:"discounted_price"`
 }
 
 type AddOrderPaymentRequest struct {

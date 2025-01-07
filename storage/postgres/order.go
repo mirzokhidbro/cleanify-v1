@@ -534,6 +534,10 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `longitude = :longitude,`
 	}
 
+	if entity.DiscountedPrice != 0 {
+		query += `discounted_price = :discounted_price`
+	}
+
 	if entity.PaymentStatus != 0 {
 		query += `payment_status = :payment_status,`
 	}
@@ -565,17 +569,18 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 	}
 
 	params := map[string]interface{}{
-		"id":             entity.ID,
-		"status":         entity.Status,
-		"slug":           entity.Slug,
-		"phone":          entity.Phone,
-		"description":    entity.Description,
-		"count":          entity.Count,
-		"address":        entity.Address,
-		"latitute":       entity.Latitute,
-		"longitude":      entity.Longitude,
-		"payment_status": entity.PaymentStatus,
-		"courier_id":     entity.CourierID,
+		"id":               entity.ID,
+		"status":           entity.Status,
+		"slug":             entity.Slug,
+		"phone":            entity.Phone,
+		"description":      entity.Description,
+		"count":            entity.Count,
+		"address":          entity.Address,
+		"latitute":         entity.Latitute,
+		"longitude":        entity.Longitude,
+		"payment_status":   entity.PaymentStatus,
+		"courier_id":       entity.CourierID,
+		"discounted_price": entity.DiscountedPrice,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
