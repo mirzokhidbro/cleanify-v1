@@ -46,6 +46,6 @@ type OrderItem struct {
 	OrderItemStatus     OrderItemStatus       `json:"status,omitempty"`
 	IsCountable         bool                  `json:"is_countable,omitempty"`
 	Description         string                `json:"description,omitempty"`
-	OrderItemTypeID     string                `json:"order_item_type_id,omitempty"`
+	OrderItemTypeID     *string               `json:"order_item_type_id,omitempty"`
 	StatusChangeHistory []StatusChangeHistory `json:"status_change_history,omitempty"`
 }
