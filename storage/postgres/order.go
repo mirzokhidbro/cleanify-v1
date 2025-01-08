@@ -535,7 +535,7 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 	}
 
 	if entity.DiscountedPrice != 0 {
-		query += `discounted_price = :discounted_price`
+		query += `discounted_price = :discounted_price,`
 	}
 
 	if entity.PaymentStatus != 0 {
