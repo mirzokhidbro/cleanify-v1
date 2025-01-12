@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: prod
+    runs-on: cleanify_prod_runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,17 +18,17 @@ jobs:
           go-version: '1.21'
 
       - name: Remove old project files and folders
-        run: find /home/cleanify_backend/www/core-service/project -type f ! -name '.env' -delete
+        run: find /home/cleanify_prod/www/backend -type f ! -name '.env' -delete
 
       - name: Copy project
-        run: cp -r /home/cleanify_backend/www/core-service/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_backend/www/core-service/project
+        run: cp -r /home/cleanify_prod/www/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_prod/www/backend
 
       - name: Build Go application
         run: |
-          cd /home/cleanify_backend/www/core-service/project
+          cd /home/cleanify_prod/www/backend
           go build -o main ./cmd/main.go
 
       - name: Deploy
         run: |
-          echo "${{ secrets.PROD_PASSWORD }}" | sudo -S systemctl restart cleanify-core
+          echo "${{ secrets.CLEANIFY_PROD_PASSWORD }}" | sudo -S systemctl restart cleanify_prod.service
         
