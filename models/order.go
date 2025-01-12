@@ -172,7 +172,7 @@ type DeleteOrderRequest struct {
 }
 
 type SetOrderPriceRequest struct {
-	ID        int    `json:"order_id" binding:"required"`
+	ID        int    `json:"id" binding:"required"`
 	CompanyID string `json:"company_id" binding:"required"`
 	// ServicePrice float64 `json:"service_price" binding:"required"`
 	// DiscountPercentage float64 `json:"discount_percentage" binding:"required"`
