@@ -3,6 +3,7 @@ module bw-erp
 go 1.21
 
 require (
+	github.com/SherClockHolmes/webpush-go v1.3.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-telegram/bot v1.0.1
 	github.com/go-telegram/ui v0.2.0
