@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 func GenerateToken(user_id string, phone string) (string, string, error) {
@@ -26,13 +27,19 @@ func GenerateToken(user_id string, phone string) (string, string, error) {
 }
 
 func createToken(user_id string, phone string, lifespan int) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = user_id
-	claims["phone"] = phone
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(lifespan)).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	now := time.Now()
+	claims := jwt.MapClaims{
+		"iss": "bw-erp",                    // issuer
+		"iat": now.Unix(),                  // issued at
+		"exp": now.Add(time.Hour * time.Duration(lifespan)).Unix(), // expiration
+		"nbf": now.Unix(),                  // not before
+		"sub": user_id,                     // subject (user ID)
+		"jti": uuid.New().String(),         // JWT ID
+		"prv": []string{"*"},               // Laravel JWT specific
+		"phone": phone,                     // custom claim
+	}
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
@@ -77,7 +84,7 @@ func ExtractTokenID(c *gin.Context) (models.JWTData, error) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		jwtdata.Phone, _ = claims["phone"].(string)
-		jwtdata.UserID, _ = claims["user_id"].(string)
+		jwtdata.UserID, _ = claims["sub"].(string)  // user_id endi 'sub' claim'da
 		return jwtdata, nil
 	}
 
