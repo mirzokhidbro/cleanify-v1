@@ -12,27 +12,20 @@ import (
 )
 
 func (h *Handler) AuthUser(c *gin.Context) {
-	fmt.Println("AuthUser handler called")
-
 	var payload models.AuthUserModel
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		fmt.Printf("Error binding JSON: %v\n", err)
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	fmt.Printf("Attempting login for phone: %s\n", payload.Phone)
-
 	user, err := h.Stg.User().GetByPhone(payload.Phone)
 	if err != nil {
-		fmt.Printf("Error getting user by phone: %v\n", err)
 		h.handleResponse(c, http.BadRequest, "Foydalanuvchi topilmadi")
 		return
 	}
 
 	err = utils.VerifyPassword(user.Password, payload.Password)
 	if err != nil {
-		fmt.Printf("Password verification failed: %v\n", err)
 		h.handleResponse(c, http.BadRequest, "Parol noto'g'ri")
 		return
 	}
@@ -50,15 +43,13 @@ func (h *Handler) AuthUser(c *gin.Context) {
 }
 
 func (h *Handler) RefreshToken(c *gin.Context) {
-	var body models.RefreshTokenRequest
-	var jwtdata models.JWTData
-
-	if err := c.ShouldBindJSON(&body); err != nil {
+	var payload models.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	token, err := jwt.Parse(body.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(payload.RefreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -66,24 +57,38 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 	})
 
 	if err != nil {
-		h.handleResponse(c, http.BadRequest, err.Error())
+		h.handleResponse(c, http.BadRequest, "Refresh token yaroqsiz")
 		return
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		jwtdata.Phone, _ = claims["phone"].(string)
-		jwtdata.UserID, _ = claims["user_id"].(string)
+	if !token.Valid {
+		h.handleResponse(c, http.BadRequest, "Refresh token yaroqsiz")
+		return
 	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		h.handleResponse(c, http.BadRequest, "Token ma'lumotlarini olishda xatolik")
+		return
+	}
+	user, err := h.Stg.User().GetByPhone(claims["phone"].(string))
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, "Foydalanuvchi topilmadi")
+		return
+	}
+
+	phone, _ := claims["phone"].(string)
 
 	var response models.AuthorizationResponse
-
-	accessToken, refreshToken, err := utils.GenerateToken(jwtdata.UserID, jwtdata.Phone)
-	response.AccessToken = accessToken
-	response.RefreshToken = refreshToken
-	if err != err {
+	accessToken, refreshToken, err := utils.GenerateToken(user.ID, phone)
+	if err != nil {
+		fmt.Printf("Error generating new tokens: %v\n", err)
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
+
+	response.AccessToken = accessToken
+	response.RefreshToken = refreshToken
 
 	h.handleResponse(c, http.OK, response)
 }
