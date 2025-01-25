@@ -6,6 +6,7 @@ type WorkVolume struct {
 	MeterSquare float64   `json:"meter_square"`
 	WashedAt    time.Time `json:"washed_at"`
 	Type        string    `json:"type"`
+	IsCountable bool      `json:"is_countable"`
 }
 
 type WorkVolumeListRequest struct {

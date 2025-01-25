@@ -23,13 +23,14 @@ func (stg *statisticsRepo) GetWorkVolume(companyID string) ([]models.WorkVolume,
 	query := `SELECT
 	round(sum((width::numeric * height::numeric)), 2) as meter_square,
 		washed_at::date,
-		type
+		type,
+		is_countable
 		FROM order_items oi inner join orders o on oi.order_id = o.id WHERE washed_at::date >= (NOW()::date - INTERVAL '15 days')`
 
 	filter := " "
 	order := " ORDER BY washed_at"
 	arrangement := " DESC"
-	group := " group by washed_at::date, type"
+	group := " group by washed_at::date, type, is_countable"
 
 	params["company_id"] = companyID
 	filter += " AND (o.company_id = :company_id)"
@@ -48,7 +49,8 @@ func (stg *statisticsRepo) GetWorkVolume(companyID string) ([]models.WorkVolume,
 		err = rows.Scan(
 			&workVolume.MeterSquare,
 			&workVolume.WashedAt,
-			&workVolume.Type)
+			&workVolume.Type,
+			&workVolume.IsCountable)
 		if err != nil {
 			return nil, err
 		}
