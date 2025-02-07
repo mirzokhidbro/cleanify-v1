@@ -727,21 +727,21 @@ func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentReq
 		return err
 	}
 
-	var ServicePrice float64
+	// var ServicePrice float64
 
-	err = stg.db.QueryRow(`select discounted_price from orders where id = $1`, entity.OrderID).Scan(&ServicePrice)
+	// err = stg.db.QueryRow(`select discounted_price from orders where id = $1`, entity.OrderID).Scan(&ServicePrice)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	if PaidAmount == ServicePrice {
-		var payment_status models.PaymentStatus = models.Paid
-		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
-	} else {
-		var payment_status models.PaymentStatus = models.Partial
-		stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
-	}
+	// if PaidAmount == ServicePrice {
+	// 	var payment_status models.PaymentStatus = models.Paid
+	// 	stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
+	// } else {
+	// 	var payment_status models.PaymentStatus = models.Partial
+	// 	stg.db.Query(`UPDATE "orders" SET payment_status = $1 where id = $2`, payment_status, entity.OrderID)
+	// }
 
 	return nil
 }
