@@ -142,10 +142,14 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		offset = " OFFSET :offset"
 	}
 
-	if queryParam.Limit > 0 {
-		params["limit"] = queryParam.Limit
-		limit = " LIMIT :limit"
-	}
+	// if queryParam.Limit > 0 {
+	// 	params["limit"] = queryParam.Limit
+	// 	limit = " LIMIT :limit"
+	// }
+
+	params["limit"] = 100
+	limit = " LIMIT :limit"
+
 	cQ := `SELECT count(1) FROM "orders" as o` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
 	err = stg.db.QueryRow(cQ, arr...).Scan(
