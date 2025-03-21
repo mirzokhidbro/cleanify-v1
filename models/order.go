@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type PaymentType string
+type PaymentType int8
 type PaymentStatus int8
 
 const (
-	Cach       PaymentType = "cach"
-	CreditCard PaymentType = "credit_card"
+	Cach       PaymentType = 1 // cash
+	CreditCard PaymentType = 2 // credit card
 )
 
 const (
@@ -147,11 +147,11 @@ type UpdateOrderRequest struct {
 }
 
 type AddOrderPaymentRequest struct {
-	CompanyID   string  `json:"company_id" binding:"required"`
-	OrderID     int     `json:"order_id" binding:"required"`
-	Amount      float64 `json:"amount" binding:"required"`
-	PaymentType string  `json:"payment_type" binding:"required,oneof=cach credit_card"`
-	Description string  `json:"description"`
+	CompanyID   string      `json:"company_id" binding:"required"`
+	OrderID     int         `json:"order_id" binding:"required"`
+	Amount      float64     `json:"amount" binding:"required"`
+	PaymentType PaymentType `json:"payment_type" binding:"required,oneof=1 2"`
+	Description string      `json:"description"`
 }
 
 type NullFloat struct {
