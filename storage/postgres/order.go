@@ -147,7 +147,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	// 	limit = " LIMIT :limit"
 	// }
 
-	params["limit"] = 100
+	params["limit"] = 150
 	limit = " LIMIT :limit"
 
 	cQ := `SELECT count(1) FROM "orders" as o` + filter
