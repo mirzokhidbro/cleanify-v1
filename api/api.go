@@ -93,6 +93,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		orderStatuses.Use(middleware.AuthMiddleware()).GET("", h.GetOrderStatusesList) //
 		orderStatuses.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderStatusModel)
 		orderStatuses.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetOrderStatusById)
+		orderStatuses.Use(middleware.AuthMiddleware()).PUT("/reorder", h.ReorderOrderStatus)
 	}
 
 	{

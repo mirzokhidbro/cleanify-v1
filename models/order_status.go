@@ -7,6 +7,7 @@ type OrderStatus struct {
 	Color       string `json:"color"`
 	Description string `json:"description"`
 	Slug        string `json:"slug"`
+	Order       int16  `json:"order"`
 }
 
 type UpdateOrderStatusRequest struct {
@@ -18,4 +19,14 @@ type UpdateOrderStatusRequest struct {
 
 type GetOrderStatusListRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+}
+
+type OrderStatusOrder struct {
+	ID    int   `json:"id" binding:"required"`
+	Order int16 `json:"order" binding:"required"`
+}
+
+type ReorderOrderStatusRequest struct {
+	CompanyID string             `json:"company_id" binding:"required"`
+	Orders    []OrderStatusOrder `json:"orders" binding:"required,min=1"`
 }

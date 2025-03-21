@@ -21,9 +21,9 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus,
 	var arr []interface{}
 	params := make(map[string]interface{})
 
-	query := "select id, number, name, coalesce(color, ''), description, slug from order_statuses"
+	query := "select id, number, name, coalesce(color, ''), description, slug, \"order\" from order_statuses"
 	filter := " WHERE true"
-	order := " ORDER BY number"
+	order := " ORDER BY \"order\""
 
 	params["company_id"] = companyID
 	filter += " AND (company_id = :company_id)"
@@ -46,7 +46,9 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus,
 			&orderStatus.Name,
 			&orderStatus.Color,
 			&orderStatus.Description,
-			&orderStatus.Slug)
+			&orderStatus.Slug,
+			&orderStatus.Order,
+		)
 		if err != nil {
 			return res, err
 		}
@@ -58,6 +60,34 @@ func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus,
 	}
 
 	return orderStatuses, nil
+}
+
+func (stg *orderStatusRepo) Reorder(companyID string, orders []models.OrderStatusOrder) error {
+	tx, err := stg.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	for _, order := range orders {
+		_, err = tx.Exec(
+			`UPDATE order_statuses SET "order" = $1, updated_at = now() WHERE id = $2 AND company_id = $3`,
+			order.Order,
+			order.ID,
+			companyID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (stg orderStatusRepo) Update(entity models.UpdateOrderStatusRequest) (rowsAffected int64, err error) {

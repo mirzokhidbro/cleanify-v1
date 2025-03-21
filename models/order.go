@@ -43,7 +43,6 @@ type OrderList struct {
 	CourierID *string   `json:"courier_id"`
 	Status    int16     `json:"status"`
 	Square    float64   `json:"square"`
-	Price     float64   `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

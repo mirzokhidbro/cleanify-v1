@@ -324,3 +324,6 @@ CREATE TABLE push_subscriptions (
     -- p256dh_key TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE "order_statuses"
+ADD "order" INTEGER;
