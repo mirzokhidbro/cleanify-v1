@@ -11,9 +11,9 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c14', 'change_status_to_4',             'company',     'Buyurtma statusini "Tayyor"ga o''zgartirish', 'order');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c15', 'change_status_to_5',             'company',     'Buyurtma statusini "Oborish kerak"ga o''zgartirish', 'order');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c16', 'change_status_to_6',             'company',     'Buyurtma statusini "Topshirildi"ga o''zgartirish', 'order');
-INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c17', 'change_status_to_7',             'company',     'Buyurtma statusini "Qaytarildi"ga o''zgartirish', 'order');
+-- INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c17', 'change_status_to_7',             'company',     'Buyurtma statusini "Qaytarildi"ga o''zgartirish', 'order');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c18', 'change_status_to_8',             'company',     'Buyurtma statusini "Omborda"ga o''zgartirish', 'order');
-INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c19', 'change_status_to_99',             'company',     'Buyurtma statusini "Bekor qilindi"ga o''zgartirish', 'order');
+-- INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c19', 'change_status_to_99',             'company',     'Buyurtma statusini "Bekor qilindi"ga o''zgartirish', 'order');
 
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c01', 'user_create',            'company',     'Foydalanuvchi qo''shish', 'user');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c02', 'get_users_list',         'company',     'Foydalanuvchilar ro''yxatini olish', 'user');
@@ -61,9 +61,9 @@ VALUES
 ('8070790f-429b-449e-bfe5-fab0440c518f', 'Tayyor',         4,  'change_status_to_4', 'Bu status buyurtma tayyorligini anglatadi'),
 ('8070790f-429b-449e-bfe5-fab0440c518f', 'Oborish kerak',  5,  'change_status_to_5', 'Buyurtma oborishga tayyor'),
 ('8070790f-429b-449e-bfe5-fab0440c518f', 'Topshirildi',    6,  'change_status_to_6', 'Buyurtma topshirildi'),
-('8070790f-429b-449e-bfe5-fab0440c518f', 'Qaytarildi',     7,  'change_status_to_7', 'Buyurtma Mijoz tomonidan qaytarildi'),
+-- ('8070790f-429b-449e-bfe5-fab0440c518f', 'Qaytarildi',     7,  'change_status_to_7', 'Buyurtma Mijoz tomonidan qaytarildi'),
 ('8070790f-429b-449e-bfe5-fab0440c518f', 'Omborda',        8,  'change_status_to_8', 'Buyurtma omborga olindi'),
-('8070790f-429b-449e-bfe5-fab0440c518f', 'Bekor qilindi',  99, 'change_status_to_99', 'Buyurtma bekor qilindi');
+-- ('8070790f-429b-449e-bfe5-fab0440c518f', 'Bekor qilindi',  99, 'change_status_to_99', 'Buyurtma bekor qilindi');
 
 "change_status_to_1"
 "change_status_to_2"
