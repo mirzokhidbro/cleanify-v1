@@ -80,7 +80,7 @@ type CreateOrderComment struct {
 
 type OrderTransaction struct {
 	ReceiverFullname string    `json:"receiver_fullname"`
-	PaymentType      string    `json:"payment_type"`
+	PaymentType      uint8     `json:"payment_type"`
 	Amount           float64   `json:"amount"`
 	CreatedAt        time.Time `json:"created_at"`
 }
