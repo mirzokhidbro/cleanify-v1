@@ -37,7 +37,6 @@ type CreateOrderModel struct {
 
 type OrderList struct {
 	ID        int       `json:"id"`
-	Slug      string    `json:"slug"`
 	Phone     string    `json:"phone"`
 	Address   *string   `json:"address"`
 	CourierID *string   `json:"courier_id"`

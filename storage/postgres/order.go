@@ -85,8 +85,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	res = models.OrderListResponse{}
 	params := make(map[string]interface{})
 	query := `SELECT 
-		o.id, 
-		COALESCE(o.slug, ''), 
+		o.id,
 		o.status, 
 		o.address,
 		o.created_at,
@@ -95,12 +94,12 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
 		FROM "orders" as o 
 		left join order_items oi on o.id = oi.order_id
-		left join order_statuses os on os.number = o.status`
+		left join order_statuses os on os.number = o.status and os.company_id = o.company_id`
 
 	filter := " WHERE true"
-	group := " group by o.id, o.slug, o.status, o.address, o.created_at, o.phone, o.courier_id, os.order"
+	group := " group by o.id, o.status, o.address, o.created_at, o.phone, o.courier_id, os.order"
 	order := " ORDER BY os.order"
-	arrangement := " DESC"
+	arrangement := " ASC"
 	offset := " OFFSET 0"
 	limit := " LIMIT 20"
 
@@ -142,11 +141,13 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		offset = " OFFSET :offset"
 	}
 
-	if queryParam.Limit > 0 {
-		params["limit"] = queryParam.Limit
-		limit = " LIMIT :limit"
-	}
+	// if queryParam.Limit > 0 {
+	// 	params["limit"] = queryParam.Limit
+	// 	limit = " LIMIT :limit"
+	// }
 
+	params["limit"] = 150
+	limit = " LIMIT :limit"
 
 	cQ := `SELECT count(1) FROM "orders" as o` + filter
 	cQ, arr = helper.ReplaceQueryParams(cQ, params)
@@ -172,7 +173,6 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		var order models.OrderList
 		err = rows.Scan(
 			&order.ID,
-			&order.Slug,
 			&order.Status,
 			&order.Address,
 			&order.CreatedAt,
