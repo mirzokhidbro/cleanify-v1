@@ -41,7 +41,7 @@ type OrderList struct {
 	Address   *string   `json:"address"`
 	CourierID *string   `json:"courier_id"`
 	Status    int16     `json:"status"`
-	Square    float64   `json:"square"`
+	Price     float64   `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -80,7 +80,7 @@ type CreateOrderComment struct {
 
 type OrderTransaction struct {
 	ReceiverFullname string    `json:"receiver_fullname"`
-	PaymentType      string    `json:"payment_type"`
+	PaymentType      uint8     `json:"payment_type"`
 	Amount           float64   `json:"amount"`
 	CreatedAt        time.Time `json:"created_at"`
 }
