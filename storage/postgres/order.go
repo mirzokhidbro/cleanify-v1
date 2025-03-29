@@ -91,7 +91,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		o.created_at,
 		o.phone,
 		COALESCE(o.courier_id, null) as courier_id, 
-		round(cast(coalesce(sum(oi.width*oi.height), 0) as numeric), 2) as square 
+		ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price
 		FROM "orders" as o 
 		left join order_items oi on o.id = oi.order_id
 		left join order_statuses os on os.number = o.status and os.company_id = o.company_id`
@@ -178,7 +178,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 			&order.CreatedAt,
 			&order.Phone,
 			&order.CourierID,
-			&order.Square,
+			&order.Price,
 		)
 		if err != nil {
 			return res, err
