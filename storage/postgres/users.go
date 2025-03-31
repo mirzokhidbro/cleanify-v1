@@ -20,31 +20,29 @@ func NewUserRepo(db *sqlx.DB) repo.UserI {
 }
 
 func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
-	if entity.ConfirmationPassword != entity.Password {
-		return errors.New("confirmation password is not the same with password")
-	}
-	password, _ := utils.HashPassword(entity.Password)
+	// if entity.ConfirmationPassword != entity.Password {
+	// 	return errors.New("confirmation password is not the same with password")
+	// }
+	// password, _ := utils.HashPassword(entity.Password)
 
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
 		phone,
 		firstname,
 		lastname,
-		password,
 		company_id
 	) VALUES (
 		$1,
 		$2,
 		$3, 
 		$4,
-		$5,
-		$6
+		$5
 	)`,
 		id,
 		entity.Phone,
 		entity.Firstname,
 		entity.Lastname,
-		password,
+		// password,
 		entity.CompanyID,
 	)
 

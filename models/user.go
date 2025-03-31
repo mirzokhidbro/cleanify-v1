@@ -9,11 +9,11 @@ type CreateUserModel struct {
 	Firstname string `json:"firstname" binding:"required" minLength:"2" maxLength:"255" example:"John"`
 	Lastname  string `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
 	Phone     string `json:"phone" binding:"required" example:"991234567"`
-	Password  string `json:"password" binding:"required"`
+	// Password  string `json:"password" binding:"required"`
 	CompanyID string `json:"company_id" binding:"required"`
 	// PermissionIDs        []string `json:"permission_ids" binding:"required"`
-	ConfirmationPassword string `json:"confirmation_password" binding:"required"`
-	Permissions          []struct {
+	// ConfirmationPassword string `json:"confirmation_password" binding:"required"`
+	Permissions []struct {
 		CompanyID     string   `json:"company_id"`
 		PermissionIDs []string `json:"permission_ids"`
 	} `json:"permissions"`
