@@ -26,7 +26,6 @@ type GetServicePaymentStatisticsRequest struct {
 
 type ServicePaymentStatistics struct {
 	UserID    string  `json:"user_id"`
-	Firstname string  `json:"firstname"`
-	Lastname  string  `json:"lastname"`
+	Fullname  string  `json:"fullname"`
 	Amount    float64 `json:"amount"`
 }

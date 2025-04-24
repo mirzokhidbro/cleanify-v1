@@ -69,7 +69,7 @@ func (stg *statisticsRepo) GetServicePaymentStatistics(entity models.GetServiceP
 	var servicePaymentStatistics []models.ServicePaymentStatistics
 	params := make(map[string]interface{})
 
-	query := `select u.id, u.firstname, u.lastname, sum(t.amount) as amount from transactions t
+	query := `select u.id, u.fullname, sum(t.amount) as amount from transactions t
 				inner join users u on t.receiver_id = u.id::text and t.payer_type = 'orders'`
 
 	params["company_id"] = entity.CompanyID
@@ -90,7 +90,7 @@ func (stg *statisticsRepo) GetServicePaymentStatistics(entity models.GetServiceP
 		filter += " and (t.created_at::date = now()::date) "
 	}
 
-	group := " group by u.id, u.firstname, u.lastname"
+	group := " group by u.id, u.fullname"
 
 	q := query + filter + group
 
@@ -106,8 +106,7 @@ func (stg *statisticsRepo) GetServicePaymentStatistics(entity models.GetServiceP
 		var servicePaymentStatistic models.ServicePaymentStatistics
 		err = rows.Scan(
 			&servicePaymentStatistic.UserID,
-			&servicePaymentStatistic.Firstname,
-			&servicePaymentStatistic.Lastname,
+			&servicePaymentStatistic.Fullname,
 			&servicePaymentStatistic.Amount)
 		if err != nil {
 			return nil, err

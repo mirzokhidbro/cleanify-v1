@@ -20,18 +20,15 @@ func (stg employeeRepo) Create(entity models.CreateEmployeeRequest) error {
 	_, err := stg.db.Exec(`INSERT INTO employees(
 		company_id,
 		phone,
-		firstname,
-		lastname
+		fullname
 	) VALUES (
 		$1,
 		$2,
-		$3,
-		$4
+		$3
 	)`,
 		entity.CompanyID,
 		entity.Phone,
-		entity.Firstname,
-		entity.Lastname,
+		entity.Fullname,
 	)
 
 	if err != nil {
@@ -47,10 +44,10 @@ func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []mo
 	query := `with attendance as (SELECT attendance_record->>'work_schedule' AS work_schedule, cast(attendance_record->>'employee_id' as integer) as employee_id, date 
 			FROM attendance, jsonb_array_elements(employees) AS attendance_record
 			where company_id = $1 and "date" = $2)
-			select e.id, e.company_id, e.phone, e.firstname, e.lastname, coalesce(a.work_schedule, '0') as work_schedule, a.date from employees e
+			select e.id, e.company_id, e.phone, e.fullname, coalesce(a.work_schedule, '0') as work_schedule, a.date from employees e
 			left join attendance a on e.id = a.employee_id where company_id = $1`
 
-	order := " ORDER BY e.firstname"
+	order := " ORDER BY e.fullname"
 
 	q := query + order
 	var date string
@@ -73,8 +70,7 @@ func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []mo
 			&employee.ID,
 			&employee.CompanyID,
 			&employee.Phone,
-			&employee.Firstname,
-			&employee.Lastname,
+			&employee.Fullname,
 			&employee.WorkSchedule,
 			&employee.Date)
 		if err != nil {
@@ -92,12 +88,11 @@ func (stg *employeeRepo) GetList(entity models.GetEmployeeListRequest) (res []mo
 
 func (stg *employeeRepo) GetDetailedData(queryParam models.ShowEmployeeRequest) (models.ShowEmployeeResponse, error) {
 	var employee models.ShowEmployeeResponse
-	err := stg.db.QueryRow(`select id, company_id, phone, firstname, lastname, balance from employees where company_id=$1 and id=$2`, queryParam.CompanyID, queryParam.EmployeeID).Scan(
+	err := stg.db.QueryRow(`select id, company_id, phone, fullname, balance from employees where company_id=$1 and id=$2`, queryParam.CompanyID, queryParam.EmployeeID).Scan(
 		&employee.ID,
 		&employee.CompanyID,
 		&employee.Phone,
-		&employee.Firstname,
-		&employee.Lastname,
+		&employee.Fullname,
 		&employee.Balance,
 	)
 	if err != nil {

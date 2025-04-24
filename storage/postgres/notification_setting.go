@@ -39,7 +39,7 @@ func (repo *notificationSettingRepo) NotificationSetting(entity models.SetNotifi
 func (repo *notificationSettingRepo) UsersListForNotificationSettings(companyID string) []models.UsersListForNotificationSettings {
 	var users []models.UsersListForNotificationSettings
 
-	rows, err := repo.db.Query(`select firstname || ' ' || lastname as fullname, u.id from users u
+	rows, err := repo.db.Query(`select fullname, u.id from users u
 												inner join user_permissions up on up.user_id = u.id
 												where up.company_id = $1`, companyID)
 
@@ -68,7 +68,7 @@ func (repo *notificationSettingRepo) GetUsersByStatus(entity models.GetUsersBySt
 		return usersByStatus, err
 	}
 
-	rows, err := repo.db.Query(`SELECT u.firstname || ' ' || lastname as fullname, id
+	rows, err := repo.db.Query(`SELECT u.fullname, id
 								FROM users u
 								JOIN (
 									SELECT DISTINCT unnest(ns.user_ids) AS user_id

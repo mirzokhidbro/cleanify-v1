@@ -6,9 +6,8 @@ import (
 )
 
 type CreateUserModel struct {
-	Firstname string `json:"firstname" binding:"required" minLength:"2" maxLength:"255" example:"John"`
-	Lastname  string `json:"lastname" binding:"required" minLength:"2" maxLength:"255" example:"Doe"`
-	Phone     string `json:"phone" binding:"required" example:"991234567"`
+	Fullname string `json:"fullname" binding:"required" minLength:"2" maxLength:"255" example:"John Doe"`
+	Phone    string `json:"phone" binding:"required" example:"991234567"`
 	// Password  string `json:"password" binding:"required"`
 	CompanyID string `json:"company_id" binding:"required"`
 	// PermissionIDs        []string `json:"permission_ids" binding:"required"`
@@ -27,8 +26,7 @@ type AuthUserModel struct {
 
 type User struct {
 	ID                      string                    `json:"id"`
-	Firstname               string                    `json:"firstname"`
-	Lastname                string                    `json:"lastname"`
+	Fullname                string                    `json:"fullname"`
 	Phone                   string                    `json:"phone"`
 	CompanyID               *string                   `json:"company_id"`
 	UserPermissionByCompany []UserPermissionByCompany `json:"user_permissions_by_company"`
@@ -36,7 +34,7 @@ type User struct {
 
 type GetCouriesResponse struct {
 	ID       string `json:"id"`
-	Fullname string `json:"phone"`
+	Fullname string `json:"fullname"`
 }
 
 type GetCouriesListRequest struct {
@@ -54,8 +52,7 @@ type UserPermissionByCompany struct {
 type UpdateUserRequest struct {
 	ID string `json:"id" binding:"required"`
 	// CompanyID   string `json:"company_id" binding:"required"`
-	Firstname   string `json:"firstname"`
-	Lastname    string `json:"lastname"`
+	Fullname    string `json:"fullname"`
 	Permissions []struct {
 		CompanyID     string   `json:"company_id"`
 		PermissionIDs []string `json:"permission_ids"`

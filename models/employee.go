@@ -7,15 +7,13 @@ import (
 type Employee struct {
 	CompanyID string `json:"company_id"`
 	Phone     string `json:"phone"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	Fullname  string `json:"fullname"`
 }
 
 type CreateEmployeeRequest struct {
 	CompanyID string `json:"company_id" binding:"required"`
 	Phone     string `json:"phone" binding:"required"`
-	Firstname string `json:"firstname" binding:"required"`
-	Lastname  string `json:"lastname" binding:"required"`
+	Fullname  string `json:"fullname" binding:"required"`
 }
 
 type ShowEmployeeRequest struct {
@@ -26,8 +24,7 @@ type ShowEmployeeRequest struct {
 type GetEmployeeList struct {
 	CompanyID    string     `json:"company_id"`
 	Phone        string     `json:"phone"`
-	Firstname    string     `json:"firstname"`
-	Lastname     string     `json:"lastname"`
+	Fullname     string     `json:"fullname"`
 	ID           int        `json:"id"`
 	WorkSchedule int        `json:"work_schedule"`
 	Date         *time.Time `json:"date"`
@@ -42,8 +39,7 @@ type ShowEmployeeResponse struct {
 	ID          int                    `json:"id"`
 	CompanyID   string                 `json:"company_id"`
 	Phone       string                 `json:"phone"`
-	Firstname   string                 `json:"firstname"`
-	Lastname    string                 `json:"lastname"`
+	Fullname    string                 `json:"fullname"`
 	Balance     float64                `json:"balance"`
 	Transaction []EmployeeTransactions `json:"transactions"`
 	Attendance  []EmployeeAttendance   `json:"employee_attendance"`

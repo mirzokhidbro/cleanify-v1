@@ -329,7 +329,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		if err := rows.Scan(&item.ID, &item.OrderID, &item.Type, &item.Price, &item.Width, &item.Height, &item.OrderItemStatus, &item.IsCountable, &item.Description, &item.OrderItemTypeID); err != nil {
 			return order, err
 		}
-		data, err := stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'order_items' and historyable_id = $1 order by created_at desc`, item.ID)
+		data, err := stg.db.Query(`select sch.status, u.fullname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'order_items' and historyable_id = $1 order by created_at desc`, item.ID)
 		if err != nil {
 			return order, err
 		}
@@ -337,7 +337,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 		for data.Next() {
 			var history models.StatusChangeHistory
-			if err := data.Scan(&history.Status, &history.Firstname, &history.Lastname, &history.CreatedAt); err != nil {
+			if err := data.Scan(&history.Status, &history.Fullname, &history.CreatedAt); err != nil {
 				return order, err
 			}
 			item.StatusChangeHistory = append(item.StatusChangeHistory, history)
@@ -345,7 +345,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 		order.OrderItems = append(order.OrderItems, item)
 	}
 
-	rows, err = stg.db.Query(`select sch.status, u.firstname, u.lastname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'orders' and historyable_id = $1 order by created_at asc`, ID)
+	rows, err = stg.db.Query(`select sch.status, u.fullname, sch.created_at from status_change_histories sch inner join users u on u.id = sch.user_id where historyable_type = 'orders' and historyable_id = $1 order by created_at asc`, ID)
 	if err != nil {
 		return order, err
 	}
@@ -353,13 +353,13 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	for rows.Next() {
 		var history models.StatusChangeHistory
-		if err := rows.Scan(&history.Status, &history.Firstname, &history.Lastname, &history.CreatedAt); err != nil {
+		if err := rows.Scan(&history.Status, &history.Fullname, &history.CreatedAt); err != nil {
 			return order, err
 		}
 		order.StatusChangeHistory = append(order.StatusChangeHistory, history)
 	}
 
-	transactions, err := stg.db.Query(`select u.firstname || ' ' || u.lastname as fullname, t.payment_type, t.amount, t.created_at from transactions t
+	transactions, err := stg.db.Query(`select u.fullname, t.payment_type, t.amount, t.created_at from transactions t
 									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id::text
 									where payment_purpose_id = (select id from payment_purposes where name = 'from_order')
 									and payer_type = 'orders' and payer_id::int = $1`, order.ID)
@@ -384,7 +384,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 			c.type,
 			c.message,
 			c.voice_url,
-			COALESCE(u.firstname || ' ' || u.lastname, '') as full_name,
+			COALESCE(u.fullname, '') as full_name,
 			c.created_at
 		FROM comments c
 		LEFT JOIN users u ON u.id = c.user_id

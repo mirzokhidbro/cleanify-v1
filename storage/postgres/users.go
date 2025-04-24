@@ -28,20 +28,17 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
 		phone,
-		firstname,
-		lastname,
+		fullname,
 		company_id
 	) VALUES (
 		$1,
 		$2,
 		$3, 
-		$4,
-		$5
+		$4
 	)`,
 		id,
 		entity.Phone,
-		entity.Firstname,
-		entity.Lastname,
+		entity.Fullname,
 		// password,
 		entity.CompanyID,
 	)
@@ -115,10 +112,9 @@ func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg userRepo) GetById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.firstname, u.lastname, u.phone, c.id from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.fullname, u.phone, c.id from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
 		&user.ID,
-		&user.Firstname,
-		&user.Lastname,
+		&user.Fullname,
 		&user.Phone,
 		&user.CompanyID,
 	)
@@ -162,8 +158,7 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 	rows, err := stg.db.Query(`SELECT 
 								u.id, 
-								u.firstname, 
-								u.lastname, 
+								u.fullname, 
 								u.phone,
 								c.id
 								FROM users u 
@@ -180,8 +175,7 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 		var user models.User
 		err = rows.Scan(
 			&user.ID,
-			&user.Firstname,
-			&user.Lastname,
+			&user.Fullname,
 			&user.Phone,
 			&user.CompanyID)
 		if err != nil {
@@ -241,20 +235,16 @@ func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, er
 func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "users" SET `
 
-	if entity.Firstname != "" {
-		query += `firstname = :firstname,`
-	}
-	if entity.Lastname != "" {
-		query += `lastname = :lastname,`
+	if entity.Fullname != "" {
+		query += `fullname = :fullname,`
 	}
 
 	query += `updated_at = now()
 			  WHERE id = :id `
 
 	params := map[string]interface{}{
-		"id":        entity.ID,
-		"firstname": entity.Firstname,
-		"lastname":  entity.Lastname,
+		"id":       entity.ID,
+		"fullname": entity.Fullname,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -324,7 +314,7 @@ func (stg *userRepo) GetCouriesList(companyID string) ([]models.GetCouriesRespon
 	var result []models.GetCouriesResponse
 
 	rows, err := stg.db.Query(`
-		SELECT u.id, firstname || ' ' || lastname as fullname 
+		SELECT u.id, fullname 
 		FROM user_permissions up
 		INNER JOIN users u ON up.user_id = u.id
 		WHERE up.company_id = $1 AND up.is_courier = true`, companyID)

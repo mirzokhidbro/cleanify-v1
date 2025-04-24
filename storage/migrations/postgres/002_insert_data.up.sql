@@ -52,6 +52,7 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c44', 'setting_edit_order_status',                'company',     'Buyurtma statuslarini taxrirlash', '[Sozlama] Buyurtma Statuslari');
 
 
+INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c46', 'get_transactions',                'company',     'Tranzaksiyalar ro''yxatini olish', 'Tranzaksiyalar');
 
 INSERT INTO "order_statuses"("company_id", "name", "number", "slug", "description") 
 VALUES 
