@@ -19,6 +19,8 @@ type UpdateOrderStatusRequest struct {
 
 type GetOrderStatusListRequest struct {
 	CompanyID string `json:"company_id" form:"company_id" binding:"required"`
+	SortBy    string `json:"sort_by" form:"sort_by" enums:"number,order"`
+	SortOrder string `json:"sort_order" form:"sort_order" enums:"asc,desc"`
 }
 
 type OrderStatusOrder struct {

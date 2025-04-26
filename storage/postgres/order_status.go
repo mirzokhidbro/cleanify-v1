@@ -16,14 +16,27 @@ func NewOrderStatusRepo(db *sqlx.DB) repo.OrderStatusI {
 	return &orderStatusRepo{db: db}
 }
 
-func (stg *orderStatusRepo) GetList(companyID string) (res []models.OrderStatus, err error) {
+func (stg *orderStatusRepo) GetList(companyID string, sortBy string, sortOrder string) (res []models.OrderStatus, err error) {
 	var orderStatuses []models.OrderStatus
 	var arr []interface{}
 	params := make(map[string]interface{})
 
 	query := "select id, number, name, coalesce(color, ''), description, slug, \"order\" from order_statuses"
 	filter := " WHERE true"
-	order := " ORDER BY \"order\""
+	order := " ORDER BY "
+
+	if sortBy != "" && (sortBy == "number" || sortBy == "order") {
+		if sortBy == "order" {
+			sortBy = "\"order\""
+		}
+		if sortOrder != "" && (sortOrder == "asc" || sortOrder == "desc") {
+			order += sortBy + " " + sortOrder
+		} else {
+			order += sortBy + " asc"
+		}
+	} else {
+		order += "\"order\" asc"
+	}
 
 	params["company_id"] = companyID
 	filter += " AND (company_id = :company_id)"

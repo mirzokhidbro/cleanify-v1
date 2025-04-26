@@ -21,7 +21,17 @@ func (h *Handler) GetOrderStatusesList(c *gin.Context) {
 		return
 	}
 
-	statuses, err := h.Stg.OrderStatus().GetList(body.CompanyID)
+	// Validate sort parameters
+	if body.SortBy != "" && body.SortBy != "number" && body.SortBy != "order" {
+		h.handleResponse(c, http.BadRequest, "sort_by must be either 'number' or 'order'")
+		return
+	}
+	if body.SortOrder != "" && body.SortOrder != "asc" && body.SortOrder != "desc" {
+		h.handleResponse(c, http.BadRequest, "sort_order must be either 'asc' or 'desc'")
+		return
+	}
+
+	statuses, err := h.Stg.OrderStatus().GetList(body.CompanyID, body.SortBy, body.SortOrder)
 
 	if err != nil {
 		h.handleResponse(c, http.OK, err.Error())
