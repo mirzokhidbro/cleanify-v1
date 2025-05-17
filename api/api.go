@@ -23,9 +23,9 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 		{
 			authRouter := baseRouter.Group("/auth")
 			// authRouter.POST("/login", h.AuthUser)
-			authRouter.POST("/me", h.CurrentUser)
+			authRouter.Use(middleware.UserActiveMiddleware(h.Stg)).POST("/me", h.CurrentUser)
 			authRouter.POST("/refresh-token", h.RefreshToken)
-			authRouter.Use(middleware.AuthMiddleware()).POST("/change-password", h.ChangePassword)
+			authRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/change-password", h.ChangePassword)
 		}
 
 		notificationRouter := baseRouter.Group("/notifications")
@@ -34,7 +34,7 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 
 			// Web Push endpoints
 			webpushRouter := notificationRouter.Group("/webpush")
-			webpushRouter.Use(middleware.AuthMiddleware())
+			webpushRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg))
 			{
 				webpushRouter.POST("/subscribe", h.SavePushSubscription)
 				// webpushRouter.GET("/subscription", h.GetPushSubscription)
@@ -43,100 +43,100 @@ func SetUpRouter(h handlers.Handler, cfg config.Config) (r *gin.Engine) {
 				// webpushRouter.POST("/send", h.SendPushNotification)
 			}
 
-			notificationRouter.Use(middleware.AuthMiddleware()).GET("list", h.GetMyNotifications)
-			notificationRouter.Use(middleware.AuthMiddleware()).GET("/unread-notifications-count", h.UnreadNotificationsCount)
+			notificationRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("list", h.GetMyNotifications)
+			notificationRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/unread-notifications-count", h.UnreadNotificationsCount)
 		}
 
 		usersRouter := baseRouter.Group("/users")
-		usersRouter.Use(middleware.AuthMiddleware()).POST("", h.Create)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("", h.GetList)
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.Edit)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("/:user-id", h.GetById)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("/couriers", h.GetCouriesList)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.Create)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetList)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/edit", h.Edit)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/:user-id", h.GetById)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/couriers", h.GetCouriesList)
 
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees", h.CreateEmployee)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees", h.GetEmployeeList)
-		usersRouter.Use(middleware.AuthMiddleware()).GET("/employees/show", h.ShowEmployeeDetailedData)
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/add-transaction", h.AddTransaction)
-		usersRouter.Use(middleware.AuthMiddleware()).POST("/employees/attendance", h.Attendance)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/employees", h.CreateEmployee)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/employees", h.GetEmployeeList)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/employees/show", h.ShowEmployeeDetailedData)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/employees/add-transaction", h.AddTransaction)
+		usersRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/employees/attendance", h.Attendance)
 	}
 
 	baseRouter.Static("/uploads", "./uploads")
 
 	{
 		companyRouter := baseRouter.Group("/company")
-		companyRouter.POST("", h.CreateCompanyModel)
+		companyRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.CreateCompanyModel)
 	}
 
 	{
 		orderRouter := baseRouter.Group("orders")
-		orderRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrdersList)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("/:order-id", h.GetOrderByPrimaryKey)
-		orderRouter.Use(middleware.AuthMiddleware()).POST("/edit", h.UpdateOrderModel)
-		orderRouter.Use(middleware.AuthMiddleware()).POST("/set-price", h.SetOrderPrice)
-		orderRouter.Use(middleware.AuthMiddleware()).POST("add-payment", h.AddOrderPayment)
-		orderRouter.Use(middleware.AuthMiddleware()).GET("get-transactions-by-order", h.GetTransactionByOrder)
-		orderRouter.Use(middleware.AuthMiddleware()).DELETE("", h.DeleteOrder)
-		orderRouter.Use(middleware.AuthMiddleware()).POST("/comment", h.AddOrderComment)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.CreateOrderModel)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetOrdersList)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/:order-id", h.GetOrderByPrimaryKey)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/edit", h.UpdateOrderModel)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/set-price", h.SetOrderPrice)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("add-payment", h.AddOrderPayment)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("get-transactions-by-order", h.GetTransactionByOrder)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).DELETE("", h.DeleteOrder)
+		orderRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/comment", h.AddOrderComment)
 	}
 
 	{
 		notificationSettingRouter := baseRouter.Group("notification-setting")
-		notificationSettingRouter.Use(middleware.AuthMiddleware()).POST("", h.SetNotificationSetting)
-		notificationSettingRouter.Use(middleware.AuthMiddleware()).GET("", h.UsersListForNotificationSettings)
-		notificationSettingRouter.Use(middleware.AuthMiddleware()).GET("get-users-by-status", h.GetUsersByStatus)
+		notificationSettingRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.SetNotificationSetting)
+		notificationSettingRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.UsersListForNotificationSettings)
+		notificationSettingRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("get-users-by-status", h.GetUsersByStatus)
 	}
 
 	{
 		orderStatuses := baseRouter.Group("order-statuses")
-		orderStatuses.Use(middleware.AuthMiddleware()).GET("", h.GetOrderStatusesList) //
-		orderStatuses.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderStatusModel)
-		orderStatuses.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetOrderStatusById)
-		orderStatuses.Use(middleware.AuthMiddleware()).PUT("/reorder", h.ReorderOrderStatus)
+		orderStatuses.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetOrderStatusesList) //
+		orderStatuses.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).PUT("", h.UpdateOrderStatusModel)
+		orderStatuses.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/get-by-primary-key/:id", h.GetOrderStatusById)
+		orderStatuses.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).PUT("/reorder", h.ReorderOrderStatus)
 	}
 
 	{
 		orderItemRouter := baseRouter.Group("order-items")
-		orderItemRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemModel)
-		orderItemRouter.Use(middleware.AuthMiddleware()).POST("edit", h.UpdateOrderItemModel)
-		orderItemRouter.Use(middleware.AuthMiddleware()).DELETE("/:id", h.DeleteOrderItemByID)
-		orderItemRouter.Use(middleware.AuthMiddleware()).POST("/edit-status", h.UpdateOrderItemStatus)
+		orderItemRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.CreateOrderItemModel)
+		orderItemRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("edit", h.UpdateOrderItemModel)
+		orderItemRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).DELETE("/:id", h.DeleteOrderItemByID)
+		orderItemRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/edit-status", h.UpdateOrderItemStatus)
 	}
 
 	{
 		orderItemTypeRouter := baseRouter.Group("order-item-type")
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateOrderItemTypeModel)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("", h.GetOrderItemTypesByCompany) //
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateOrderItemType)
-		orderItemTypeRouter.Use(middleware.AuthMiddleware()).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.CreateOrderItemTypeModel)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetOrderItemTypesByCompany) //
+		orderItemTypeRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).PUT("", h.UpdateOrderItemType)
+		orderItemTypeRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("get-by-primary-key/:id", h.GetOrderItemTypeByID)
 	}
 
 	{
 		statistics := baseRouter.Group("statistics")
-		statistics.Use(middleware.AuthMiddleware()).GET("work-volume", h.GetWorkVolumeList) //
-		statistics.Use(middleware.AuthMiddleware()).GET("get-service-statistics-payment", h.GetServicePaymentStatistics)
+		statistics.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("work-volume", h.GetWorkVolumeList) //
+		statistics.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("get-service-statistics-payment", h.GetServicePaymentStatistics)
 	}
 	{
 		statistics := baseRouter.Group("permissions")
-		statistics.Use(middleware.AuthMiddleware()).GET("", h.GetPermissionList)
+		statistics.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetPermissionList)
 	}
 
 	{
 		clientRouter := baseRouter.Group("/client")
-		clientRouter.Use(middleware.AuthMiddleware()).POST("", h.CreateClientModel) //
-		clientRouter.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
-		clientRouter.Use(middleware.AuthMiddleware()).GET("", h.GetClientsList) //
-		clientRouter.Use(middleware.AuthMiddleware()).GET("/set-location/:client-id", h.SetLocation)
-		clientRouter.Use(middleware.AuthMiddleware()).PUT("", h.UpdateClient) //
+		clientRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("", h.CreateClientModel) //
+		clientRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/get-by-primary-key/:client-id", h.GetClientByPrimaryKey)
+		clientRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetClientsList) //
+		clientRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/set-location/:client-id", h.SetLocation)
+		clientRouter.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).PUT("", h.UpdateClient) //
 	}
 
 	{
 		telegramGroup := baseRouter.Group("/telegram-group")
-		telegramGroup.Use(middleware.AuthMiddleware()).POST("/verification", h.VerificationGroup) //
-		telegramGroup.Use(middleware.AuthMiddleware()).GET("", h.GetTelegramGroupList)            //
-		telegramGroup.Use(middleware.AuthMiddleware()).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
-		telegramGroup.Use(middleware.AuthMiddleware()).PUT("/:id", h.UpdateTelegramGroup)
+		telegramGroup.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).POST("/verification", h.VerificationGroup) //
+		telegramGroup.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("", h.GetTelegramGroupList)            //
+		telegramGroup.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).GET("/get-by-primary-key/:id", h.GetTelegramGroupByPrimaryKey)
+		telegramGroup.Use(middleware.AuthMiddleware(), middleware.UserActiveMiddleware(h.Stg)).PUT("/:id", h.UpdateTelegramGroup)
 	}
 
 	return
