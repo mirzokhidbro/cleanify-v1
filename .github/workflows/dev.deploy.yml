@@ -1,34 +1,34 @@
-name: Build and Deploy
+# name: Build and Deploy
 
-on:
-  push:
-    branches:
-      - dev
+# on:
+#   push:
+#     branches:
+#       - dev
 
-jobs:
-  build:
-    runs-on: cleanify_dev_runner
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   build:
+#     runs-on: cleanify_dev_runner
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
+#       - name: Set up Go
+#         uses: actions/setup-go@v4
+#         with:
+#           go-version: '1.21'
 
-      - name: Remove old project files and folders
-        run: find /home/cleanify_dev/www/backend -type f ! -name '.env' -delete
+#       - name: Remove old project files and folders
+#         run: find /home/cleanify_dev/www/backend -type f ! -name '.env' -delete
 
-      - name: Copy project
-        run: cp -r /home/cleanify_dev/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_dev/www/backend
+#       - name: Copy project
+#         run: cp -r /home/cleanify_dev/actions-runner/_work/bw-erp/bw-erp/* /home/cleanify_dev/www/backend
 
-      - name: Build Go application
-        run: |
-          cd /home/cleanify_dev/www/backend
-          go build -o main ./cmd/main.go
+#       - name: Build Go application
+#         run: |
+#           cd /home/cleanify_dev/www/backend
+#           go build -o main ./cmd/main.go
 
-      - name: Deploy
-        run: |
-          echo "${{ secrets.CLEANIFY_DEV_PASSWORD }}" | sudo -S systemctl restart cleanify_dev.service
+#       - name: Deploy
+#         run: |
+#           echo "${{ secrets.CLEANIFY_DEV_PASSWORD }}" | sudo -S systemctl restart cleanify_dev.service
         

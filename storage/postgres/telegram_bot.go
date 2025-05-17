@@ -111,10 +111,9 @@ func (stg *telegramBotRepo) GetCompanyIDByBot(botID int64) (models.CompanyTelegr
 
 func (stg *telegramBotRepo) GetCompanyById(id string) (models.Company, error) {
 	var company models.Company
-	err := stg.db.QueryRow(`select id, name, owner_id from companies where id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select id, name from companies where id = $1`, id).Scan(
 		&company.ID,
 		&company.Name,
-		&company.OwnerId,
 	)
 	if err != nil {
 		return company, err

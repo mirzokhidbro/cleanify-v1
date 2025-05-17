@@ -58,7 +58,7 @@ func InterfaceSliceToString(slice []interface{}) []string {
 	return result
 }
 
-func IntSliceToInterface(slice []int8) []interface{} {
+func IntSliceToInterface(slice []int) []interface{} {
 	result := make([]interface{}, len(slice))
 	for i, v := range slice {
 		result[i] = v
@@ -66,14 +66,33 @@ func IntSliceToInterface(slice []int8) []interface{} {
 	return result
 }
 
-func InterfaceSliceToInt(slice []interface{}) []int8 {
-	result := make([]int8, len(slice))
+func Int8SliceToInterface(slice []int8) []interface{} {
+	result := make([]interface{}, len(slice))
 	for i, v := range slice {
-		num, ok := v.(int8)
-		if !ok {
+		result[i] = v
+	}
+	return result
+}
+
+func InterfaceSliceToInt(slice []interface{}) []int {
+	result := make([]int, len(slice))
+	for i, v := range slice {
+		switch val := v.(type) {
+		case int:
+			result[i] = val
+		case float64:
+			result[i] = int(val)
+		case string:
+			// Try to parse string to int if needed
+			var num int
+			_, err := fmt.Sscanf(val, "%d", &num)
+			if err != nil {
+				return nil
+			}
+			result[i] = num
+		default:
 			return nil
 		}
-		result[i] = num
 	}
 	return result
 }

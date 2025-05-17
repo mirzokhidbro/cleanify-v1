@@ -6,6 +6,7 @@ import (
 	"bw-erp/pkg/utils"
 	"bw-erp/storage/repo"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -20,26 +21,22 @@ func NewUserRepo(db *sqlx.DB) repo.UserI {
 }
 
 func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
-	// if entity.ConfirmationPassword != entity.Password {
-	// 	return errors.New("confirmation password is not the same with password")
-	// }
-	// password, _ := utils.HashPassword(entity.Password)
-
 	_, err := stg.db.Exec(`INSERT INTO users(
 		id,
 		phone,
 		fullname,
-		company_id
+		company_id,
+		is_active
 	) VALUES (
 		$1,
 		$2,
 		$3, 
-		$4
+		$4,
+		true
 	)`,
 		id,
 		entity.Phone,
 		entity.Fullname,
-		// password,
 		entity.CompanyID,
 	)
 
@@ -47,52 +44,65 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 		return err
 	}
 
-	for _, permission := range entity.Permissions {
-		var UserPermissionByCompany models.UserPermissionByCompany
-		stg.db.QueryRow(`select company_id from user_permissions where company_id = $1 and user_id = $2`, permission.CompanyID, id).Scan(
-			&UserPermissionByCompany.CompanyID,
-		)
+	// Add permissions if provided
+	if len(entity.Permissions) > 0 {
+		for _, permission := range entity.Permissions {
+			// Check if user already has permissions for this company
+			var userCompanyID string
+			stg.db.QueryRow(`SELECT company_id FROM user_companies WHERE company_id = $1 AND user_id = $2`,
+				permission.CompanyID, id).Scan(&userCompanyID)
 
-		PermissionIDs := utils.SetArray(utils.StringSliceToInterface(permission.PermissionIDs))
+			PermissionIDs := utils.SetArray(utils.IntSliceToInterface(permission.PermissionIDs))
 
-		if len(UserPermissionByCompany.CompanyID) > 0 {
-			query := `UPDATE "user_permissions" SET permission_ids = :permission_ids, updated_at = now() where company_id = :company_id and user_id = :user_id`
+			if len(userCompanyID) > 0 {
+				// Update existing permissions
+				query := `UPDATE "user_companies" SET 
+					permission_ids = :permission_ids, 
+					is_courier = :is_courier, 
+					updated_at = now() 
+				WHERE company_id = :company_id AND user_id = :user_id`
 
-			permissionEditParams := map[string]interface{}{
-				"permission_ids": PermissionIDs,
-				"company_id":     permission.CompanyID,
-				"user_id":        id,
-			}
+				permissionEditParams := map[string]interface{}{
+					"permission_ids": PermissionIDs,
+					"is_courier":     permission.IsCourier,
+					"company_id":     permission.CompanyID,
+					"user_id":        id,
+				}
 
-			query, arr := helper.ReplaceQueryParams(query, permissionEditParams)
+				query, arr := helper.ReplaceQueryParams(query, permissionEditParams)
 
-			_, err := stg.db.Exec(query, arr...)
+				_, err := stg.db.Exec(query, arr...)
 
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := stg.db.Exec(`INSERT INTO user_permissions(
-				permission_ids,
-				company_id,
-				user_id
-			) VALUES (
-				$1,
-				$2,
-				$3
-			)`,
-				PermissionIDs,
-				permission.CompanyID,
-				id,
-			)
+				if err != nil {
+					return err
+				}
+			} else {
+				// Insert new permissions
+				_, err := stg.db.Exec(`INSERT INTO user_companies(
+					permission_ids,
+					company_id,
+					user_id,
+					is_courier
+				) VALUES (
+					$1,
+					$2,
+					$3,
+					$4
+				)`,
+					PermissionIDs,
+					permission.CompanyID,
+					id,
+					permission.IsCourier,
+				)
 
-			if err != nil {
-				return err
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
 
-	return err
+	return nil
 }
 
 func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
@@ -112,19 +122,25 @@ func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 
 func (stg userRepo) GetById(id string) (models.User, error) {
 	var user models.User
-	err := stg.db.QueryRow(`select u.id, u.fullname, u.phone, c.id from users u left join companies c on c.id = u.company_id where u.id = $1`, id).Scan(
+	err := stg.db.QueryRow(`select u.id, u.fullname, u.phone, c.id, u.is_active from users u left join companies c on c.id::text = u.company_id::text where u.id = $1`, id).Scan(
 		&user.ID,
 		&user.Fullname,
 		&user.Phone,
 		&user.CompanyID,
+		&user.IsActive,
 	)
 	if err != nil {
 		return user, err
 	}
 
-	rows, err := stg.db.Query(`select c.id, c.name, up.permission_ids, up.is_courier from user_permissions up 
-									inner join companies c on c.id = up.company_id 
-									where up.user_id = $1 order by c.name desc`, user.ID)
+	allPermissions, err := stg.GetAllPermissions()
+	if err != nil {
+		return user, err
+	}
+
+	rows, err := stg.db.Query(`select c.id, c.name, uc.permission_ids, uc.is_courier from user_companies uc 
+								inner join companies c on c.id::text = uc.company_id::text 
+								where uc.user_id = $1 order by c.name desc`, user.ID)
 	if err != nil {
 		return user, err
 	}
@@ -132,21 +148,23 @@ func (stg userRepo) GetById(id string) (models.User, error) {
 
 	for rows.Next() {
 		var permissions models.UserPermissionByCompany
-		if err := rows.Scan(&permissions.CompanyID, &permissions.CompanyName, &permissions.Can, &permissions.IsCourier); err != nil {
+		var permissionIDsStr string
+		if err := rows.Scan(&permissions.CompanyID, &permissions.CompanyName, &permissionIDsStr, &permissions.IsCourier); err != nil {
 			return user, err
 		}
 
-		if permissions.Can != "" {
-			Permissions := utils.GetArray(permissions.Can)
+		if permissionIDsStr != "" {
+			Permissions := utils.GetArray(permissionIDsStr)
 			Permission := ""
-			for _, permissionID := range Permissions {
-				permission, err := stg.GetPermissionByPrimaryKey(permissionID.(string))
-				if err == nil {
-					Permission += "|" + permission.Slug
+			permissions.PermissionIDs = utils.InterfaceSliceToInt(Permissions)
+
+			for _, permID := range permissions.PermissionIDs {
+				permIDStr := fmt.Sprintf("%d", permID)
+				if perm, ok := allPermissions[permIDStr]; ok {
+					Permission += "|" + perm.Slug
 				}
 			}
 			permissions.Can = strings.TrimPrefix(Permission, "|")
-			permissions.PermissionIDs = utils.InterfaceSliceToString(Permissions)
 		}
 
 		user.UserPermissionByCompany = append(user.UserPermissionByCompany, permissions)
@@ -160,10 +178,11 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 								u.id, 
 								u.fullname, 
 								u.phone,
-								c.id
+								c.id,
+								u.is_active
 								FROM users u 
-								LEFT JOIN companies c ON c.id = u.company_id 
-								WHERE c.id is not null and c.id = $1`, companyID)
+								LEFT JOIN companies c ON c.id::text = u.company_id::text 
+								WHERE c.id is not null and c.id::text = $1`, companyID)
 
 	if err != nil {
 		return nil, err
@@ -177,7 +196,8 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 			&user.ID,
 			&user.Fullname,
 			&user.Phone,
-			&user.CompanyID)
+			&user.CompanyID,
+			&user.IsActive)
 		if err != nil {
 			return nil, err
 		}
@@ -218,9 +238,6 @@ func (stg userRepo) ChangePassword(userID string, entity models.ChangePasswordRe
 
 func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, error) {
 	var permission models.Permission
-	if !utils.IsValidUUID(ID) {
-		return permission, errors.New("permission id si noto'g'ri")
-	}
 	err := stg.db.QueryRow(`select id, slug, name from permissions where id = $1`, ID).Scan(
 		&permission.ID,
 		&permission.Slug,
@@ -232,11 +249,43 @@ func (stg *userRepo) GetPermissionByPrimaryKey(ID string) (models.Permission, er
 	return permission, nil
 }
 
+func (stg *userRepo) GetAllPermissions() (map[string]models.Permission, error) {
+	permissions := make(map[string]models.Permission)
+
+	rows, err := stg.db.Query(`select id, slug, name from permissions`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var permission models.Permission
+		if err := rows.Scan(&permission.ID, &permission.Slug, &permission.Name); err != nil {
+			return nil, err
+		}
+		permissions[permission.ID] = permission
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return permissions, nil
+}
+
 func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "users" SET `
 
 	if entity.Fullname != "" {
 		query += `fullname = :fullname,`
+	}
+
+	if entity.Phone != "" {
+		query += `phone = :phone,`
+	}
+
+	if entity.IsActive != nil {
+		query += `is_active = :is_active,`
 	}
 
 	query += `updated_at = now()
@@ -245,6 +294,8 @@ func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, 
 	params := map[string]interface{}{
 		"id":       entity.ID,
 		"fullname": entity.Fullname,
+		"phone":    entity.Phone,
+		"is_active": entity.IsActive,
 	}
 
 	query, arr := helper.ReplaceQueryParams(query, params)
@@ -260,49 +311,56 @@ func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, 
 		return 0, err
 	}
 
-	// [TODO: refactoring]
+	if len(entity.Permissions) > 0 {
+		for _, permission := range entity.Permissions {
+			var userCompanyID string
+			stg.db.QueryRow(`SELECT company_id FROM user_companies WHERE company_id = $1 AND user_id = $2`,
+				permission.CompanyID, entity.ID).Scan(&userCompanyID)
 
-	for _, permission := range entity.Permissions {
-		var UserPermissionByCompany models.UserPermissionByCompany
-		stg.db.QueryRow(`select company_id from user_permissions where company_id = $1 and user_id = $2`, permission.CompanyID, entity.ID).Scan(
-			&UserPermissionByCompany.CompanyID,
-		)
+			PermissionIDs := utils.SetArray(utils.IntSliceToInterface(permission.PermissionIDs))
 
-		PermissionIDs := utils.SetArray(utils.StringSliceToInterface(permission.PermissionIDs))
+			if len(userCompanyID) > 0 {
+				query = `UPDATE "user_companies" SET 
+					permission_ids = :permission_ids, 
+					is_courier = :is_courier, 
+					updated_at = now() 
+				WHERE company_id = :company_id AND user_id = :user_id`
 
-		if len(UserPermissionByCompany.CompanyID) > 0 {
-			query = `UPDATE "user_permissions" SET permission_ids = :permission_ids, updated_at = now() where company_id = :company_id and user_id = :user_id`
+				permissionEditParams := map[string]interface{}{
+					"permission_ids": PermissionIDs,
+					"is_courier":     permission.IsCourier,
+					"company_id":     permission.CompanyID,
+					"user_id":        entity.ID,
+				}
 
-			permissionEditParams := map[string]interface{}{
-				"permission_ids": PermissionIDs,
-				"company_id":     permission.CompanyID,
-				"user_id":        entity.ID,
-			}
+				query, arr := helper.ReplaceQueryParams(query, permissionEditParams)
 
-			query, arr := helper.ReplaceQueryParams(query, permissionEditParams)
+				_, err := stg.db.Exec(query, arr...)
 
-			_, err := stg.db.Exec(query, arr...)
+				if err != nil {
+					return 0, err
+				}
+			} else {
+				_, err := stg.db.Exec(`INSERT INTO user_companies(
+					permission_ids,
+					company_id,
+					user_id,
+					is_courier
+				) VALUES (
+					$1,
+					$2,
+					$3,
+					$4
+				)`,
+					PermissionIDs,
+					permission.CompanyID,
+					entity.ID,
+					permission.IsCourier,
+				)
 
-			if err != nil {
-				return 0, err
-			}
-		} else {
-			_, err := stg.db.Exec(`INSERT INTO user_permissions(
-				permission_ids,
-				company_id,
-				user_id
-			) VALUES (
-				$1,
-				$2,
-				$3
-			)`,
-				PermissionIDs,
-				permission.CompanyID,
-				entity.ID,
-			)
-
-			if err != nil {
-				return 0, err
+				if err != nil {
+					return 0, err
+				}
 			}
 		}
 	}
@@ -315,9 +373,9 @@ func (stg *userRepo) GetCouriesList(companyID string) ([]models.GetCouriesRespon
 
 	rows, err := stg.db.Query(`
 		SELECT u.id, fullname 
-		FROM user_permissions up
-		INNER JOIN users u ON up.user_id = u.id
-		WHERE up.company_id = $1 AND up.is_courier = true`, companyID)
+		FROM user_companies uc
+		INNER JOIN users u ON uc.user_id = u.id
+		WHERE uc.company_id = $1 AND uc.is_courier = true`, companyID)
 
 	if err != nil {
 		return nil, err

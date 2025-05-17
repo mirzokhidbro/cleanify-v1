@@ -6,7 +6,6 @@ type CreateCompanyModel struct {
 }
 
 type Company struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	OwnerId string `json:"owner_id"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }

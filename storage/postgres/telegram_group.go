@@ -151,7 +151,7 @@ func (stg *telegramGroupRepo) GetByPrimaryKey(id int) (models.TelegramGroupGetBy
 func (stg *telegramGroupRepo) Update(ID int, entity models.TelegramGroupEditRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "telegram_groups" SET with_location = :with_location, notification_statuses = :notification_statuses WHERE	id = :id`
 
-	notification_statuses := utils.SetArray(utils.IntSliceToInterface(entity.NotificationStatuses))
+	notification_statuses := utils.SetArray(utils.Int8SliceToInterface(entity.NotificationStatuses))
 
 	params := map[string]interface{}{
 		"id":                    ID,

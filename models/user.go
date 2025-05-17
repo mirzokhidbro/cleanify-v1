@@ -8,13 +8,11 @@ import (
 type CreateUserModel struct {
 	Fullname string `json:"fullname" binding:"required" minLength:"2" maxLength:"255" example:"John Doe"`
 	Phone    string `json:"phone" binding:"required" example:"991234567"`
-	// Password  string `json:"password" binding:"required"`
 	CompanyID string `json:"company_id" binding:"required"`
-	// PermissionIDs        []string `json:"permission_ids" binding:"required"`
-	// ConfirmationPassword string `json:"confirmation_password" binding:"required"`
 	Permissions []struct {
-		CompanyID     string   `json:"company_id"`
-		PermissionIDs []string `json:"permission_ids"`
+		CompanyID     string   `json:"company_id" binding:"required"`
+		PermissionIDs []int    `json:"permission_ids"`
+		IsCourier     bool     `json:"is_courier" default:"false"`
 	} `json:"permissions"`
 }
 
@@ -29,6 +27,7 @@ type User struct {
 	Fullname                string                    `json:"fullname"`
 	Phone                   string                    `json:"phone"`
 	CompanyID               *string                   `json:"company_id"`
+	IsActive                bool                      `json:"is_active"`
 	UserPermissionByCompany []UserPermissionByCompany `json:"user_permissions_by_company"`
 }
 
@@ -44,18 +43,20 @@ type GetCouriesListRequest struct {
 type UserPermissionByCompany struct {
 	CompanyID     string   `json:"company_id"`
 	CompanyName   string   `json:"company_name"`
-	PermissionIDs []string `json:"permission_ids"`
+	PermissionIDs []int    `json:"permission_ids"`
 	Can           string   `json:"can"`
 	IsCourier     bool     `json:"is_courier"`
 }
 
 type UpdateUserRequest struct {
 	ID string `json:"id" binding:"required"`
-	// CompanyID   string `json:"company_id" binding:"required"`
 	Fullname    string `json:"fullname"`
+	Phone       string `json:"phone"`
+	IsActive    *bool  `json:"is_active"`
 	Permissions []struct {
-		CompanyID     string   `json:"company_id"`
-		PermissionIDs []string `json:"permission_ids"`
+		CompanyID     string   `json:"company_id" binding:"required"`
+		PermissionIDs []int    `json:"permission_ids"`
+		IsCourier     bool     `json:"is_courier" default:"false"`
 	} `json:"permissions"`
 }
 
