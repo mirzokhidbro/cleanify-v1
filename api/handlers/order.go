@@ -71,7 +71,7 @@ func (h *Handler) CreateOrderModel(c *gin.Context) {
 			return
 		}
 	} else {
-		client, _ := h.Stg.Client().GetByPhoneNumber(body.Phone)
+		client, _ := h.Stg.Client().GetByPhoneNumber(body.Phone, body.CompanyID)
 
 		if client.ID == 0 {
 			clientID, err := h.Stg.Client().Create(models.CreateClientModel{
