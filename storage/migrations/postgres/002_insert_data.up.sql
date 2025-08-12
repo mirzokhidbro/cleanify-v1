@@ -31,6 +31,7 @@ INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb3
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c27', 'get_order_item_type',   'company',     'Mahsulot turlarini ko''rish', 'order_item_type');
 
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c28', 'get_work_volume_by_day', 'company',     'Kunlik ish hajmi statistikasini ko''rish', 'statistics');
+INSERT INTO "permissions"( "slug", "scope", "name", "group") VALUES ( 'get_financial_metrics', 'company',     'Moliyaviy ko''rsatkichlar', 'Statistikalar');
 
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c29', 'get_clients_list',        'company',     'Klientlar ro''yxatini ko''rish', 'clients');
 INSERT INTO "permissions"("id", "slug", "scope", "name", "group") VALUES ('9cbb32da-e473-4312-8413-95524ec08c30', 'show_client',        'company',     'Klient ma''lumotini batafsil ko''rish', 'clients');

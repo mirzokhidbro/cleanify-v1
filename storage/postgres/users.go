@@ -292,9 +292,9 @@ func (stg *userRepo) Edit(entity models.UpdateUserRequest) (rowsAffected int64, 
 			  WHERE id = :id `
 
 	params := map[string]interface{}{
-		"id":       entity.ID,
-		"fullname": entity.Fullname,
-		"phone":    entity.Phone,
+		"id":        entity.ID,
+		"fullname":  entity.Fullname,
+		"phone":     entity.Phone,
 		"is_active": entity.IsActive,
 	}
 
@@ -374,8 +374,8 @@ func (stg *userRepo) GetCouriesList(companyID string) ([]models.GetCouriesRespon
 	rows, err := stg.db.Query(`
 		SELECT u.id, fullname 
 		FROM user_companies uc
-		INNER JOIN users u ON uc.user_id = u.id
-		WHERE uc.company_id = $1 AND uc.is_courier = true`, companyID)
+		INNER JOIN users u ON uc.user_id::text = u.id::text
+		WHERE uc.company_id::text = $1 AND uc.is_courier = true`, companyID)
 
 	if err != nil {
 		return nil, err
