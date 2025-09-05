@@ -98,8 +98,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 
 	filter := " WHERE true"
 	group := " group by o.id, o.status, o.address, o.created_at, o.phone, o.courier_id, os.order"
-	order := " ORDER BY os.order"
-	arrangement := " ASC"
+	order := " ORDER BY os.order ASC, o.created_at desc"
 	offset := " OFFSET 0"
 	limit := " LIMIT 20"
 
@@ -159,7 +158,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		return res, err
 	}
 
-	q := query + filter + group + order + arrangement + offset + limit
+	q := query + filter + group + order + offset + limit
 
 	q, arr = helper.ReplaceQueryParams(q, params)
 	rows, err := stg.db.Query(q, arr...)

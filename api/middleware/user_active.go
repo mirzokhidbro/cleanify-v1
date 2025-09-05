@@ -37,6 +37,14 @@ func UserActiveMiddleware(stg storage.StorageI) gin.HandlerFunc {
 			return
 		}
 
+		if !user.IsActive {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusServiceUnavailable,
+				"message": "user has been deactivated",
+			})
+			return
+		}
+
 		c.Set("user", user)
 		c.Next()
 	}
