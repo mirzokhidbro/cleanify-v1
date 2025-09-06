@@ -50,7 +50,7 @@ func (stg *companyRepo) GetById(id string) (models.Company, error) {
 	return company, nil
 }
 
-func (stg *companyRepo) GetByOwnerId(ownerId string) ([]models.Company, error) {
+func (stg *companyRepo) GetByOwnerId(ownerId int64) ([]models.Company, error) {
 	rows, err := stg.db.Query(`select id, name, owner_id from companies where owner_id = $1`, ownerId)
 	if err != nil {
 		return nil, err

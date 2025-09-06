@@ -229,7 +229,7 @@ func (stg notificationRepo) GetNotificationsByID(entity models.GetNotificationsB
 	return notifications, nil
 }
 
-func (stg notificationRepo) GetUnreadNotificationsCount(userID string) (int, error) {
+func (stg notificationRepo) GetUnreadNotificationsCount(userID int64) (int, error) {
 	var count int
 	err := stg.db.QueryRow(`
 		SELECT COUNT(*) 

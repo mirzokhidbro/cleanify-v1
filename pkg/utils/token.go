@@ -4,6 +4,7 @@ import (
 	"bw-erp/models"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,14 +30,14 @@ func GenerateToken(user_id string, phone string) (string, string, error) {
 func createToken(user_id string, phone string, lifespan int) (string, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
-		"iss": "bw-erp",                    // issuer
-		"iat": now.Unix(),                  // issued at
-		"exp": now.Add(time.Hour * time.Duration(lifespan)).Unix(), // expiration
-		"nbf": now.Unix(),                  // not before
-		"sub": user_id,                     // subject (user ID)
-		"jti": uuid.New().String(),         // JWT ID
-		"prv": []string{"*"},               // Laravel JWT specific
-		"phone": phone,                     // custom claim
+		"iss":   "bw-erp",                                            // issuer
+		"iat":   now.Unix(),                                          // issued at
+		"exp":   now.Add(time.Hour * time.Duration(lifespan)).Unix(), // expiration
+		"nbf":   now.Unix(),                                          // not before
+		"sub":   user_id,                                             // subject (user ID)
+		"jti":   uuid.New().String(),                                 // JWT ID
+		"prv":   []string{"*"},                                       // Laravel JWT specific
+		"phone": phone,                                               // custom claim
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -84,7 +85,14 @@ func ExtractTokenID(c *gin.Context) (models.JWTData, error) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		jwtdata.Phone, _ = claims["phone"].(string)
-		jwtdata.UserID, _ = claims["sub"].(string)  // user_id endi 'sub' claim'da
+		user_id, _ := claims["sub"].(string)
+
+		userId, err := strconv.Atoi(user_id)
+		if err != nil {
+			return jwtdata, err
+		}
+
+		jwtdata.UserID = int64(userId)
 		return jwtdata, nil
 	}
 

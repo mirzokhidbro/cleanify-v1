@@ -3,7 +3,7 @@ package handlers
 import (
 	"bw-erp/api/http"
 	"bw-erp/models"
-	"bw-erp/pkg/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -50,10 +50,10 @@ func (h *Handler) Edit(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidUUID(body.ID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is the invalid uuid")
-		return
-	}
+	// if !utils.IsValidUUID(body.ID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "user id is the invalid uuid")
+	// 	return
+	// }
 
 	_, err := h.Stg.User().Edit(body)
 
@@ -68,12 +68,18 @@ func (h *Handler) Edit(c *gin.Context) {
 func (h *Handler) GetById(c *gin.Context) {
 	userID := c.Param("user-id")
 
-	if !utils.IsValidUUID(userID) {
-		h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
-		return
+	// if !utils.IsValidUUID(userID) {
+	// 	h.handleResponse(c, http.InvalidArgument, "user id is an invalid uuid")
+	// 	return
+	// }
+
+	user_id, err := strconv.Atoi(userID)
+
+	if err != nil {
+		h.handleResponse(c, http.BadRequest, err.Error())
 	}
 
-	user, err := h.Stg.User().GetById(userID)
+	user, err := h.Stg.User().GetById(int64(user_id))
 
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())

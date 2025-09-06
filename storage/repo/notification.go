@@ -7,5 +7,5 @@ type NotificationI interface {
 	GetMyNotifications(entity models.GetMyNotificationsRequest) ([]models.GetMyNotificationsResponse, error)
 	GetMyLatestNotifications(entity models.GetMyNotificationsRequest) (models.GetMyNotificationsResponse, error)
 	GetNotificationsByID(entity models.GetNotificationsByIDRequest) ([]models.GetMyNotificationsResponse, error)
-	GetUnreadNotificationsCount(userID string) (int, error)
+	GetUnreadNotificationsCount(userID int64) (int, error)
 }

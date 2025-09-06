@@ -16,7 +16,7 @@ func NewOrderItemRepo(db *sqlx.DB) repo.OrderItemI {
 	return &orderItemRepo{db: db}
 }
 
-func (stg orderItemRepo) Create(userID string, entity models.CreateOrderItemModel) error {
+func (stg orderItemRepo) Create(userID int64, entity models.CreateOrderItemModel) error {
 	var id int
 
 	if entity.IsCountable {
@@ -139,7 +139,7 @@ func (stg *orderItemRepo) DeleteByID(ID int) error {
 	return nil
 }
 
-func (stg *orderItemRepo) UpdateStatus(userID string, entity models.UpdateOrderItemStatusRequest) (rowsAffected int64, err error) {
+func (stg *orderItemRepo) UpdateStatus(userID int64, entity models.UpdateOrderItemStatusRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "order_items" SET `
 
 	query += `status = :status WHERE id = :id`

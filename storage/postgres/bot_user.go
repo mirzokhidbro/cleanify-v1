@@ -131,7 +131,7 @@ func (stg *botUserRepo) GetByChatID(ChatID int64, BotID int64) (models.BotUser, 
 	return botUser, nil
 }
 
-func (stg *botUserRepo) GetByUserID(UserID string) (models.BotUser, error) {
+func (stg *botUserRepo) GetByUserID(UserID int64) (models.BotUser, error) {
 	var botUser models.BotUser
 	err := stg.db.QueryRow(`select tb.bot_id, user_id, status, page, dialog_step, chat_id, tb.bot_token from bot_users bu inner join telegram_bots tb on tb.bot_id = bu.bot_id where user_id = $1`, UserID).Scan(
 		&botUser.BotID,
