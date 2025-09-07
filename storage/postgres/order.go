@@ -377,8 +377,7 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 
 	transactions, err := stg.db.Query(`select u.fullname, t.payment_type, t.amount, t.created_at from transactions t
 									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id
-									where payment_purpose_id = (select id from payment_purposes where name = 'from_order')
-									and payer_type = 'orders' and payer_id = $1`, order.ID)
+									where payer_type = 'orders' and payer_id = $1`, order.ID)
 	if err != nil {
 		return order, err
 	}
@@ -692,7 +691,7 @@ func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
 func (stg *orderRepo) AddPayment(userID int64, entity models.AddOrderPaymentRequest) error {
 	var paymentPurposeId int
 
-	err := stg.db.QueryRow(`select id from payment_purposes where name = 'from_order'`).Scan(
+	err := stg.db.QueryRow(`select id from payment_purposes where slug = 'orders' and company_id = $1`, entity.CompanyID).Scan(
 		&paymentPurposeId,
 	)
 
