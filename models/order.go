@@ -36,13 +36,14 @@ type CreateOrderModel struct {
 }
 
 type OrderList struct {
-	ID        int       `json:"id"`
-	Phone     string    `json:"phone"`
-	Address   *string   `json:"address"`
-	CourierID *string   `json:"courier_id"`
-	Status    int16     `json:"status"`
-	Price     float64   `json:"price"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int       `json:"id"`
+	OrderNumber *int      `json:"order_number"`
+	Phone       string    `json:"phone"`
+	Address     *string   `json:"address"`
+	CourierID   *string   `json:"courier_id"`
+	Status      int16     `json:"status"`
+	Price       float64   `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type OrderListResponse struct {
