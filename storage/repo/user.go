@@ -3,7 +3,7 @@ package repo
 import "bw-erp/models"
 
 type UserI interface {
-	Create(id string, entity models.CreateUserModel) error
+	Create(entity models.CreateUserModel) error
 	GetByPhone(phone string) (models.AuthUserModel, error)
 	GetById(id int64) (models.User, error)
 	GetList(companyID string) ([]models.User, error)

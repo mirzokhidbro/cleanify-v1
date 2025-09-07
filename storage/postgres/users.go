@@ -20,9 +20,9 @@ func NewUserRepo(db *sqlx.DB) repo.UserI {
 	return &userRepo{db: db}
 }
 
-func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
-	_, err := stg.db.Exec(`INSERT INTO users(
-		id,
+func (stg userRepo) Create(entity models.CreateUserModel) error {
+	var id string
+	err := stg.db.QueryRow(`INSERT INTO users(
 		phone,
 		fullname,
 		company_id,
@@ -30,15 +30,13 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 	) VALUES (
 		$1,
 		$2,
-		$3, 
-		$4,
+		$3,
 		true
-	)`,
-		id,
+	) RETURNING id`,
 		entity.Phone,
 		entity.Fullname,
 		entity.CompanyID,
-	)
+	).Scan(&id)
 
 	if err != nil {
 		return err

@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func (h *Handler) Create(c *gin.Context) {
@@ -16,15 +15,15 @@ func (h *Handler) Create(c *gin.Context) {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
-	id := uuid.New()
+	// id := uuid.New()
 
-	err := h.Stg.User().Create(id.String(), body)
+	err := h.Stg.User().Create(body)
 	if err != nil {
 		h.handleResponse(c, http.BadRequest, err.Error())
 		return
 	}
 
-	h.handleResponse(c, http.OK, id)
+	h.handleResponse(c, http.OK, "OK")
 }
 
 func (h *Handler) GetList(c *gin.Context) {
