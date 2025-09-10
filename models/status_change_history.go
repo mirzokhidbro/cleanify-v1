@@ -11,7 +11,7 @@ type StatusChangeHistory struct {
 type CreateStatusChangeHistoryModel struct {
 	HistoryableType string
 	HistoryableID   int
-	UserID          string
+	UserID          int64
 	CompanyID       string
 	Status          int8
 }

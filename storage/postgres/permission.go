@@ -30,7 +30,8 @@ func (stg *permissionRepo) GetList(Scope string) ([]models.Permission, error) {
 				"group"
 			 FROM "permissions"`
 
-	filter := " WHERE true"
+	filter := " WHERE true "
+	// and \"group\" not in ('Leadlar', 'Lead statuslari', 'Xodimlar')
 
 	if Scope != "super-admin" {
 		params["scope"] = "company"

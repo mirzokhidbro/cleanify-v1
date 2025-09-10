@@ -36,13 +36,14 @@ type CreateOrderModel struct {
 }
 
 type OrderList struct {
-	ID        int       `json:"id"`
-	Phone     string    `json:"phone"`
-	Address   *string   `json:"address"`
-	CourierID *string   `json:"courier_id"`
-	Status    int16     `json:"status"`
-	Price     float64   `json:"price"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int       `json:"id"`
+	OrderNumber *int      `json:"order_number"`
+	Phone       string    `json:"phone"`
+	Address     *string   `json:"address"`
+	CourierID   *string   `json:"courier_id"`
+	Status      int16     `json:"status"`
+	Price       float64   `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type OrderListResponse struct {
@@ -75,7 +76,7 @@ type CreateOrderComment struct {
 	Type     string `json:"type" form:"type" binding:"required,oneof=text voice"`
 	Message  string `json:"message" form:"message"`
 	VoiceURL string `json:"voice_url,omitempty"`
-	UserID   string `json:"-"`
+	UserID   int64  `json:"-"`
 }
 
 type OrderTransaction struct {
@@ -90,7 +91,7 @@ type Order struct {
 	CompanyID             string                `json:"company_id,omitempty"`
 	Uuid                  string                `json:"uuid,omitempty"`
 	ClientID              int                   `json:"client_id,omitempty"`
-	CourierID             *string               `json:"courier_id,omitempty"`
+	CourierID             *int64                `json:"courier_id,omitempty"`
 	PhoneNumber           string                `json:"phone_number,omitempty"`
 	AdditionalPhoneNumber string                `json:"additional_phone_number,omitempty"`
 	WorkNumber            string                `json:"work_number,omitempty"`
@@ -132,7 +133,7 @@ type UpdateOrderRequest struct {
 	ID              int           `json:"id" binding:"required"`
 	CompanyID       string        `json:"company_id"`
 	Address         string        `json:"address"`
-	CourierID       string        `json:"courier_id"`
+	CourierID       int64         `json:"courier_id"`
 	Slug            string        `json:"slug"`
 	Status          int8          `json:"status"`
 	PaymentStatus   PaymentStatus `json:"payment_status"`

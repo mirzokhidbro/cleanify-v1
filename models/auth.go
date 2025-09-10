@@ -8,7 +8,7 @@ type ChangePasswordRequest struct {
 
 type JWTData struct {
 	Phone  string
-	UserID string
+	UserID int64
 }
 
 type AuthorizationResponse struct {

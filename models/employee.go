@@ -57,7 +57,7 @@ type EmployeeTransactionRequest struct {
 	ReceivedMoney float64 `json:"received_money"`
 	EmployeeID    int     `json:"employee_id" binding:"required"`
 	CompanyID     string  `json:"company_id" binding:"required"`
-	UserID        string
+	UserID        int64
 }
 
 type AttendanceEmployeeRequest struct {

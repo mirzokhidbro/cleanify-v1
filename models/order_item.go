@@ -11,7 +11,7 @@ const (
 type CreateOrderItemModel struct {
 	OrderID         int     `json:"order_id" binding:"required"`
 	OrderItemTypeID string  `json:"order_item_type_id" binding:"required"`
-	Price           float32 `json:"price" binding:"required"`
+	Price           float32 `json:"price"`
 	Width           float32 `json:"width"`
 	Height          float32 `json:"height"`
 	OrderItemStatus int8    `json:"status"`

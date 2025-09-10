@@ -20,9 +20,9 @@ func NewUserRepo(db *sqlx.DB) repo.UserI {
 	return &userRepo{db: db}
 }
 
-func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
-	_, err := stg.db.Exec(`INSERT INTO users(
-		id,
+func (stg userRepo) Create(entity models.CreateUserModel) error {
+	var id string
+	err := stg.db.QueryRow(`INSERT INTO users(
 		phone,
 		fullname,
 		company_id,
@@ -30,15 +30,13 @@ func (stg userRepo) Create(id string, entity models.CreateUserModel) error {
 	) VALUES (
 		$1,
 		$2,
-		$3, 
-		$4,
+		$3,
 		true
-	)`,
-		id,
+	) RETURNING id`,
 		entity.Phone,
 		entity.Fullname,
 		entity.CompanyID,
-	)
+	).Scan(&id)
 
 	if err != nil {
 		return err
@@ -120,7 +118,7 @@ func (stg userRepo) GetByPhone(phone string) (models.AuthUserModel, error) {
 	return user, nil
 }
 
-func (stg userRepo) GetById(id string) (models.User, error) {
+func (stg userRepo) GetById(id int64) (models.User, error) {
 	var user models.User
 	err := stg.db.QueryRow(`select u.id, u.fullname, u.phone, c.id, u.is_active from users u left join companies c on c.id::text = u.company_id::text where u.id = $1`, id).Scan(
 		&user.ID,
@@ -211,7 +209,7 @@ func (stg userRepo) GetList(companyID string) ([]models.User, error) {
 	return users, nil
 }
 
-func (stg userRepo) ChangePassword(userID string, entity models.ChangePasswordRequest) error {
+func (stg userRepo) ChangePassword(userID int64, entity models.ChangePasswordRequest) error {
 	if entity.NewPassword != entity.NewPasswordConfirmation {
 		return errors.New("confirmation password is not the same with password")
 	}

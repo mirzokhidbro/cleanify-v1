@@ -17,8 +17,7 @@ func NewOrderRepo(db *sqlx.DB) repo.OrderI {
 	return &orderRepo{db: db}
 }
 
-func (stg *orderRepo) Create(userID string, entity models.CreateOrderModel) (id int, err error) {
-
+func (stg *orderRepo) Create(userID int64, entity models.CreateOrderModel) (id int, err error) {
 	var status int8
 
 	if entity.Status == 0 {
@@ -27,7 +26,28 @@ func (stg *orderRepo) Create(userID string, entity models.CreateOrderModel) (id 
 		status = entity.Status
 	}
 
-	err = stg.db.QueryRow(`INSERT INTO orders(
+	tx, err := stg.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	var orderNumber int
+	err = tx.QueryRow(`
+		SELECT COALESCE(MAX(order_number), 0) + 1 
+		FROM orders 
+		WHERE company_id = $1`, entity.CompanyID).Scan(&orderNumber)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.QueryRow(`INSERT INTO orders(
 		company_id,
 		phone,
 		count,
@@ -35,16 +55,10 @@ func (stg *orderRepo) Create(userID string, entity models.CreateOrderModel) (id 
 		description,
 		address,
 		status,
-		client_id
+		client_id,
+		order_number
 	) VALUES (
-		$1,
-		$2,
-		$3,
-		$4,
-		$5,
-		$6,
-		$7,
-		$8
+		$1, $2, $3, $4, $5, $6, $7, $8, $9
 	) RETURNING id`,
 		entity.CompanyID,
 		entity.Phone,
@@ -54,28 +68,29 @@ func (stg *orderRepo) Create(userID string, entity models.CreateOrderModel) (id 
 		entity.Address,
 		status,
 		entity.ClientID,
+		orderNumber,
 	).Scan(&id)
 
 	if err != nil {
 		return 0, err
 	}
 
-	stg.db.QueryRow(`INSERT INTO status_change_histories(
+	// Insert status change history
+	_, err = tx.Exec(`INSERT INTO status_change_histories(
 		historyable_id,
 		historyable_type,
 		user_id,
 		status
-	) VALUES (
-		$1,
-		$2,
-		$3,
-		$4
-	) RETURNING id`,
+	) VALUES ($1, $2, $3, $4)`,
 		id,
 		"orders",
 		userID,
 		status,
-	).Scan()
+	)
+
+	if err != nil {
+		return 0, err
+	}
 
 	return id, nil
 }
@@ -90,6 +105,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		o.address,
 		o.created_at,
 		o.phone,
+		o.order_number,
 		COALESCE(o.courier_id, null) as courier_id, 
 		ROUND(CAST(COALESCE(sum(oi.price*oi.width*oi.height), 0) AS NUMERIC), 2) as price
 		FROM "orders" as o 
@@ -176,6 +192,7 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 			&order.Address,
 			&order.CreatedAt,
 			&order.Phone,
+			&order.OrderNumber,
 			&order.CourierID,
 			&order.Price,
 		)
@@ -359,9 +376,8 @@ func (stg *orderRepo) GetDetailedByPrimaryKey(ID int) (models.OrderShowResponse,
 	}
 
 	transactions, err := stg.db.Query(`select u.fullname, t.payment_type, t.amount, t.created_at from transactions t
-									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id::text
-									where payment_purpose_id = (select id from payment_purposes where name = 'from_order')
-									and payer_type = 'orders' and payer_id::int = $1`, order.ID)
+									inner join users u on t.receiver_type = 'users' and t.receiver_id = u.id
+									where payer_type = 'orders' and payer_id = $1`, order.ID)
 	if err != nil {
 		return order, err
 	}
@@ -499,7 +515,7 @@ func (stg *orderRepo) GetByUuid(uuid string) (models.OrderReceipt, error) {
 	return order, nil
 }
 
-func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
+func (stg *orderRepo) Update(userID int64, entity *models.UpdateOrderRequest) (rowsAffected int64, err error) {
 	query := `UPDATE "orders" SET `
 
 	if entity.Slug != "" {
@@ -542,7 +558,7 @@ func (stg *orderRepo) Update(userID string, entity *models.UpdateOrderRequest) (
 		query += `payment_status = :payment_status,`
 	}
 
-	if entity.CourierID != "" && entity.CourierID != "null" {
+	if entity.CourierID != 0 {
 		query += `courier_id = :courier_id,`
 	} else {
 		query += `courier_id = NULL,`
@@ -672,10 +688,10 @@ func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
 	return nil
 }
 
-func (stg *orderRepo) AddPayment(userID string, entity models.AddOrderPaymentRequest) error {
+func (stg *orderRepo) AddPayment(userID int64, entity models.AddOrderPaymentRequest) error {
 	var paymentPurposeId int
 
-	err := stg.db.QueryRow(`select id from payment_purposes where name = 'from_order'`).Scan(
+	err := stg.db.QueryRow(`select id from payment_purposes where slug = 'orders' and company_id = $1`, entity.CompanyID).Scan(
 		&paymentPurposeId,
 	)
 

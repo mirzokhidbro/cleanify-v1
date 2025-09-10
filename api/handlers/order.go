@@ -342,7 +342,7 @@ func (h *Handler) UpdateOrderModel(c *gin.Context) {
 
 	isCourierChanged := false
 	if oldCourierID == nil {
-		isCourierChanged = body.CourierID != ""
+		isCourierChanged = body.CourierID != 0
 	} else {
 		isCourierChanged = body.CourierID != *oldCourierID
 	}
