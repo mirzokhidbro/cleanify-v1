@@ -121,14 +121,9 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	params["company_id"] = companyID
 	filter += " and (o.company_id = :company_id)"
 
-	if len(queryParam.ID) > 3 {
-		params["phone"] = queryParam.ID
-		filter += " AND (o.phone LIKE ('%' || :phone || '%'))"
-	}
-
-	if len(queryParam.Address) > 3 {
-		params["address"] = queryParam.Address
-		filter += " AND (o.address ILIKE ('%' || :address || '%'))"
+	if len(queryParam.Search) > 3 {
+		params["search"] = queryParam.Search
+		filter += "AND (o.phone ILIKE ('%' || :search || '%') OR o.address ILIKE ('%' || :search || '%'))"
 	}
 
 	if queryParam.Status != 0 {
