@@ -126,6 +126,11 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 		filter += " AND (o.phone LIKE ('%' || :phone || '%'))"
 	}
 
+	if len(queryParam.Address) > 3 {
+		params["address"] = queryParam.Address
+		filter += " AND (o.address ILIKE ('%' || :address || '%'))"
+	}
+
 	if queryParam.Status != 0 {
 		params["status"] = queryParam.Status
 		filter += " AND (o.status = :status)"

@@ -57,6 +57,7 @@ type OrdersListRequest struct {
 	Status        int           `json:"status" form:"status"`
 	PaymentStatus PaymentStatus `json:"payment_status" form:"payment_status"`
 	Phone         string        `json:"phone" form:"phone"`
+	Address       string        `json:"address" form:"address"`
 	ID            string        `json:"id" form:"id"`
 	DateFrom      time.Time     `json:"date_from" form:"date_from"`
 	DateTo        time.Time     `json:"date_to" form:"date_to"`
