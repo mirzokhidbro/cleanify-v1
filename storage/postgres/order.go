@@ -38,11 +38,15 @@ func (stg *orderRepo) Create(userID int64, entity models.CreateOrderModel) (id i
 		err = tx.Commit()
 	}()
 
-	var orderNumber int
+	var orderNumber string
 	err = tx.QueryRow(`
-		SELECT COALESCE(MAX(order_number), 0) + 1 
-		FROM orders 
-		WHERE company_id = $1`, entity.CompanyID).Scan(&orderNumber)
+	  SELECT 'a-' || (
+		COALESCE(
+		  (SELECT MAX((substring(order_number from '\d+$'))::bigint)
+		   FROM orders
+		   WHERE company_id = $1), 0
+		) + 1
+	  )`, entity.CompanyID).Scan(&orderNumber)
 	if err != nil {
 		return 0, err
 	}
@@ -121,9 +125,9 @@ func (stg *orderRepo) GetList(companyID string, queryParam models.OrdersListRequ
 	params["company_id"] = companyID
 	filter += " and (o.company_id = :company_id)"
 
-	if len(queryParam.Search) > 3 {
+	if len(queryParam.Search) >= 3 {
 		params["search"] = queryParam.Search
-		filter += "AND (o.phone ILIKE ('%' || :search || '%') OR o.address ILIKE ('%' || :search || '%'))"
+		filter += "AND (o.order_number ILIKE ('%' || :search || '%') OR o.phone ILIKE ('%' || :search || '%') OR o.address ILIKE ('%' || :search || '%'))"
 	}
 
 	if queryParam.Status != 0 {
@@ -691,7 +695,29 @@ func (stg *orderRepo) SetOrderPrice(entity models.SetOrderPriceRequest) error {
 func (stg *orderRepo) AddPayment(userID int64, entity models.AddOrderPaymentRequest) error {
 	var paymentPurposeId int
 
-	err := stg.db.QueryRow(`select id from payment_purposes where slug = 'orders' and company_id = $1`, entity.CompanyID).Scan(
+	// Prevent duplicate payment within 1 minute by the same user for the same order and amount
+	var exists bool
+	err := stg.db.QueryRow(`
+        SELECT EXISTS(
+            SELECT 1
+            FROM transactions
+            WHERE company_id = $1
+              AND payer_type = 'orders'
+              AND payer_id::int = $2
+              AND receiver_type = 'users'
+              AND receiver_id = $3
+              AND amount = $4
+              AND created_at >= now() - interval '1 minute'
+        )`, entity.CompanyID, entity.OrderID, userID, entity.Amount).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if exists {
+		// Considered success: duplicate within 1 minute is ignored
+		return nil
+	}
+
+	err = stg.db.QueryRow(`select id from payment_purposes where slug = 'orders' and company_id = $1`, entity.CompanyID).Scan(
 		&paymentPurposeId,
 	)
 
